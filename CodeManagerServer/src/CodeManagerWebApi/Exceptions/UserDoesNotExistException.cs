@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Net;
+using Microsoft.AspNetCore.Http;
 
 namespace CodeManagerWebApi.Exceptions
 {
-    public class UserDoesNotExistException : Exception
+    public class UserDoesNotExistException : BadHttpRequestException
     {
-        public UserDoesNotExistException() : base("User does not exist.") {}
+        public UserDoesNotExistException() : base("The specified user does not exist.", (int)HttpStatusCode.NotFound) {}
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Threading.Tasks;
 using CodeManagerWebApi.DataTransfer;
 using CodeManagerWebApi.Entities;
@@ -29,8 +30,19 @@ namespace CodeManagerWebApi.Controllers
         public async Task<IActionResult> Create([FromBody] TeamDto teamDto)
         {
             var user = HttpContext.Items["user"] as User;
-            await _teamService.CreateTeam(teamDto, user);
-            return StatusCode(201);
+            await _teamService.CreateTeamAsync(teamDto, user);
+            _logger.LogInformation($"Team `{teamDto.Name}` created @ {DateTime.Now}");
+            
+            return StatusCode((int)HttpStatusCode.Created);
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> Delete([FromQuery] long id)
+        {
+            await _teamService.DeleteTeamAsync(id);
+            _logger.LogInformation($"Team with id `{id}` deleted @ {DateTime.Now}");
+            
+            return StatusCode((int)HttpStatusCode.NoContent);
         }
     }
 }

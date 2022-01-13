@@ -27,7 +27,7 @@ namespace CodeManagerWebApi.Controllers
         public async Task<IActionResult> Register([FromBody] UserDto userDto)
         {
             await _userService.CreateUser(userDto);
-            _logger.LogInformation($"User `{userDto.Username}` created");
+            _logger.LogInformation($"User `{userDto.Username}` created @ {DateTime.Now}");
 
             return StatusCode(201);
         }

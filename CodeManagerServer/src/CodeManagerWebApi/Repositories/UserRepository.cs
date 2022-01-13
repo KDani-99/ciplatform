@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CodeManagerWebApi.Repositories
 {
-    public class UserRepository : BaseRepository<User, long>, IUserRepository
+    public class UserRepository : BaseRepository<User>, IUserRepository
     {
         public UserRepository(CodeManagerDbContext dbContext) : base(dbContext)
         {
@@ -35,9 +35,9 @@ namespace CodeManagerWebApi.Repositories
             return DbContext.Users.Where(expression).ToListAsync();
         }
 
-        public override Task<bool> ExistsAsync(long id)
+        public override Task<bool> ExistsAsync(Expression<Func<User, bool>> expression)
         {
-            return DbContext.Users.AnyAsync(user => user.Id == id);
+            return DbContext.Users.AnyAsync(expression);
         }
 
         public override async Task CreateAsync(User entity)
@@ -49,6 +49,14 @@ namespace CodeManagerWebApi.Repositories
         public override async Task UpdateAsync(User entity)
         {
             DbContext.Users.Update(entity);
+            await DbContext.SaveChangesAsync();
+        }
+
+        public override async Task DeleteAsync(long id)
+        {
+            var entity = await DbContext.Users.Where(user => user.Id == id).FirstOrDefaultAsync();
+            DbContext.Users.Remove(entity);
+            
             await DbContext.SaveChangesAsync();
         }
     }

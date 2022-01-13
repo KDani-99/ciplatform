@@ -6,11 +6,10 @@ using System.Threading.Tasks;
 using CodeManagerWebApi.Database;
 using CodeManagerWebApi.Entities;
 using Microsoft.EntityFrameworkCore;
-using MongoDB.Driver;
 
 namespace CodeManagerWebApi.Repositories
 {
-    public class TeamRepository : BaseRepository<Team, long>, ITeamRepository
+    public class TeamRepository : BaseRepository<Team>, ITeamRepository
     {
         public TeamRepository(CodeManagerDbContext dbContext) : base(dbContext)
         {
@@ -21,7 +20,7 @@ namespace CodeManagerWebApi.Repositories
         public override Task<List<Team>> GetAsync(Expression<Func<Team, bool>> expression) =>
             DbContext.Teams.Where(expression).ToListAsync();
 
-        public override Task<bool> ExistsAsync(long id) => DbContext.Teams.AnyAsync(user => user.Id == id);
+        public override Task<bool> ExistsAsync(Expression<Func<Team, bool>> expression) => DbContext.Teams.AnyAsync(expression);
 
         public override async Task CreateAsync(Team entity)
         {
@@ -32,6 +31,14 @@ namespace CodeManagerWebApi.Repositories
         public override async Task UpdateAsync(Team entity)
         {
             DbContext.Teams.Update(entity);
+            await DbContext.SaveChangesAsync();
+        }
+
+        public override async Task DeleteAsync(long id)
+        {
+            var entity = await DbContext.Teams.Where(team => team.Id == id).FirstOrDefaultAsync();
+            DbContext.Teams.Remove(entity);
+            
             await DbContext.SaveChangesAsync();
         }
     }

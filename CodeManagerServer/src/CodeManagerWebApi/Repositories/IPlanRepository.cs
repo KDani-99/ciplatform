@@ -2,7 +2,8 @@
 
 namespace CodeManagerWebApi.Repositories
 {
-    public interface ITeamRepository : IRepository<Team>
+    public interface IPlanRepository : IRepository<Plan>
     {
+        
     }
 }

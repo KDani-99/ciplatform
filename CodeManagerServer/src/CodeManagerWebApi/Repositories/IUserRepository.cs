@@ -3,7 +3,7 @@ using CodeManagerWebApi.Entities;
 
 namespace CodeManagerWebApi.Repositories
 {
-    public interface IUserRepository : IRepository<User, long>
+    public interface IUserRepository : IRepository<User>
     {
         public Task<User> GetByUsernameAsync(string username);
 

@@ -2,6 +2,6 @@
 {
     public class UserConfiguration
     {
-        public int MaxTeamPerUser { get; set; }
+        public string DefaultPlan { get; set; }
     }
 }

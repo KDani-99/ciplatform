@@ -9,6 +9,6 @@ namespace CodeManagerWebApi.Entities
         public string Name { get; set; }
         public List<TeamMember> Members { get; set; }
         public string Image { get; set; }
-        public IEnumerable<string> ProjectIds { get; set; }
+        public List<Project> Projects { get; set; }
     }
 }

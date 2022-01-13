@@ -1,9 +1,14 @@
-﻿using MassTransit;
+﻿using System.Threading.Tasks;
+using CodeManagerAgentManager.Commands;
+using MassTransit;
 
 namespace CodeManagerAgentManager.Consumers
 {
-    public class CommandConsumer
+    public class StartJobCommandConsumer : IConsumer<StartJobCommand>
     {
-        
+        public Task Consume(ConsumeContext<StartJobCommand> context)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

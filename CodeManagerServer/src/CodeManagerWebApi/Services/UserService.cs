@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Authentication;
 using System.Threading.Tasks;
 using CodeManagerWebApi.DataTransfer;
@@ -19,15 +20,18 @@ namespace CodeManagerWebApi.Services
         private readonly ICredentialManagerService _credentialManagerService;
         private readonly ITokenService<JwtSecurityToken> _tokenService;
         private readonly IUserRepository _userRepository;
+        private readonly IPlanRepository _planRepository;
         private readonly UserConfiguration _userConfiguration;
 
         public UserService(
             IUserRepository userRepository,
+            IPlanRepository planRepository,
             ITokenService<JwtSecurityToken> tokenService,
             ICredentialManagerService credentialManagerService,
             IOptions<UserConfiguration> userConfiguration)
         {
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+            _planRepository = planRepository ?? throw new ArgumentNullException(nameof(planRepository));
             _tokenService = tokenService ?? throw new ArgumentNullException(nameof(tokenService));
             _credentialManagerService = credentialManagerService ??
                                         throw new ArgumentNullException(nameof(credentialManagerService));
@@ -42,6 +46,8 @@ namespace CodeManagerWebApi.Services
             if (await _userRepository.GetByEmailAsync(userDto.Email) is not null)
                 throw new EmailAlreadyInUseException();
 
+            var defaultPlan = (await _planRepository.GetAsync(plan => plan.Name == _userConfiguration.DefaultPlan)).FirstOrDefault();
+
             var user = new User
             {
                 Username = userDto.Username,
@@ -51,7 +57,8 @@ namespace CodeManagerWebApi.Services
                 Password = _credentialManagerService.CreateHashedPassword(userDto.Password),
                 Roles = new [] {Roles.User},
                 IsActive = false,
-                RegistrationTimestamp = DateTime.Now
+                RegistrationTimestamp = DateTime.Now,
+                Plan = defaultPlan
             };
             
             await _userRepository.CreateAsync(user);
@@ -64,7 +71,7 @@ namespace CodeManagerWebApi.Services
 
         public Task<bool> ExistsAsync(long id)
         {
-            return _userRepository.ExistsAsync(id);
+            return _userRepository.ExistsAsync(user => user.Id == id);
         }
 
         public async Task<AuthTokenDto> LoginAsync(LoginDto loginDto, HttpContext httpContext)
@@ -99,6 +106,16 @@ namespace CodeManagerWebApi.Services
                 AccessToken = accessToken.ToBase64String(),
                 RefreshToken = refreshToken.ToBase64String()
             };
+        }
+
+        public async Task DeleteUserAsync(long id)
+        {
+            if (!await _userRepository.ExistsAsync(user => user.Id == id))
+            {
+                throw new UserDoesNotExistException();
+            }
+            
+            await _userRepository.DeleteAsync(id);
         }
     }
 }

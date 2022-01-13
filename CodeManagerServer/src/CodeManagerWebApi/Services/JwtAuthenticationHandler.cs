@@ -44,7 +44,9 @@ namespace CodeManagerWebApi.Services
 
                 Context.Items.Add("user", user);
 
-                claimsPrincipal.Identities.First().AddClaims(user.Roles.Select(role => new Claim(ClaimTypes.Role, role.GetDisplayName())));
+                var x = user.Roles.Select(role => new Claim(ClaimTypes.Role, role.GetDisplayName()));
+
+                claimsPrincipal.Identities.First().AddClaims(x);
                 
                 var ticket = new AuthenticationTicket(claimsPrincipal, Scheme.Name);
                 return AuthenticateResult.Success(ticket);

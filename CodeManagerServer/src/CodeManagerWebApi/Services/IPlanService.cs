@@ -4,9 +4,9 @@ using CodeManagerWebApi.Entities;
 
 namespace CodeManagerWebApi.Services
 {
-    public interface ITeamService
+    public interface IPlanService
     {
-        public Task CreateTeamAsync(TeamDto teamDto, User user);
-        public Task DeleteTeamAsync(long id);
+        public Task CreatePlanAsync(PlanDto planDto);
+        public Task DeletePlanAsync(long id);
     }
 }

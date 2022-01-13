@@ -4,8 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using CodeManagerWebApi.DataTransfer;
 using CodeManagerWebApi.Entities;
+using CodeManagerWebApi.Exceptions;
 using CodeManagerWebApi.Repositories;
-using MongoDB.Driver;
 
 namespace CodeManagerWebApi.Services
 {
@@ -18,24 +18,25 @@ namespace CodeManagerWebApi.Services
             _teamRepository = teamRepository ?? throw new ArgumentNullException(nameof(teamRepository));
         }
 
-        public async Task CreateTeam(TeamDto teamDto, User user)
+        public async Task CreateTeamAsync(TeamDto teamDto, User user)
         {
-            // find teams where owner id == user.id
-
             if (!user.Roles.Contains(Roles.Admin))
             {
                 if (user.Teams.Count >= user.Plan.MaxCreatedTeamsPerUser)
                 {
-                    // throw
-                    return;
+                    throw new UserReachedMaxCreatedTeamsException();
                 }
                             
                 if (user.Teams.Count >= user.Plan.MaxJoinedTeamsPerUser)
                 {
-                    // throw
+                    throw new UserReachedMaxJoinedTeamsException();
                 }
             }
 
+            if (await _teamRepository.ExistsAsync(teamEntity => teamEntity.Name == teamDto.Name))
+            {
+                throw new TeamAlreadyExistsException();
+            }
             
             var team = new Team
             {
@@ -44,7 +45,7 @@ namespace CodeManagerWebApi.Services
                 Owner = user,
                 Members = new List<TeamMember>
                 {
-                    new TeamMember
+                    new()
                     {
                         User = user,
                         Permission = Permissions.Admin
@@ -53,6 +54,16 @@ namespace CodeManagerWebApi.Services
             };
 
             await _teamRepository.CreateAsync(team);
+        }
+
+        public async Task DeleteTeamAsync(long id)
+        {
+            if (await _teamRepository.ExistsAsync(team => team.Id == id))
+            {
+                throw new TeamDoesNotExistException();
+            }
+
+            await _teamRepository.DeleteAsync(id);
         }
     }
 }

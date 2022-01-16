@@ -10,10 +10,15 @@
         <PackageReference Include="Docker.DotNet" Version="3.125.5" />
         <PackageReference Include="MassTransit" Version="7.3.1-develop.340" />
         <PackageReference Include="MassTransit.RabbitMQ" Version="7.3.1-develop.340" />
+        <PackageReference Include="Microsoft.AspNet.SignalR.Core" Version="2.4.2" />
+        <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
+        <PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.1.0" />
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\..\CodeManagerShared\CodeManagerShared.csproj" />
+      <ProjectReference Include="..\CodeManager.Core\CodeManager.Core.csproj" />
+      <ProjectReference Include="..\CodeManager.Data\CodeManager.Data.csproj" />
     </ItemGroup>
 </Project>

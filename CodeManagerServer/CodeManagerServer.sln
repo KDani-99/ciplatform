@@ -8,6 +8,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeManagerAgent", "src\Cod
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeManagerAgentManager", "src\CodeManagerAgentManager\CodeManagerAgentManager.csproj", "{F6649007-2488-4347-9B77-BC93C1411D3C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeManager.Data", "src\CodeManager.Data\CodeManager.Data.csproj", "{2FDAEE08-6369-48C6-9B6D-9F01A375178C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeManager.Core", "src\CodeManager.Core\CodeManager.Core.csproj", "{6DD2B021-C927-47AC-BDF2-3FBFD53F9661}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +34,13 @@ Global
 		{F6649007-2488-4347-9B77-BC93C1411D3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F6649007-2488-4347-9B77-BC93C1411D3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F6649007-2488-4347-9B77-BC93C1411D3C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2FDAEE08-6369-48C6-9B6D-9F01A375178C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2FDAEE08-6369-48C6-9B6D-9F01A375178C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2FDAEE08-6369-48C6-9B6D-9F01A375178C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2FDAEE08-6369-48C6-9B6D-9F01A375178C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6DD2B021-C927-47AC-BDF2-3FBFD53F9661}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6DD2B021-C927-47AC-BDF2-3FBFD53F9661}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6DD2B021-C927-47AC-BDF2-3FBFD53F9661}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6DD2B021-C927-47AC-BDF2-3FBFD53F9661}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

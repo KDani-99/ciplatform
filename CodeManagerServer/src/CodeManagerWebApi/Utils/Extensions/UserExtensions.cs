@@ -1,4 +1,5 @@
-﻿using CodeManagerWebApi.DataTransfer;
+﻿using CodeManager.Data.Entities;
+using CodeManagerWebApi.DataTransfer;
 using CodeManagerWebApi.Entities;
 
 namespace CodeManagerWebApi.Utils.Extensions

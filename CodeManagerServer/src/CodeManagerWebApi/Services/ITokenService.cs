@@ -1,5 +1,6 @@
 ﻿using System.Security.Claims;
 using System.Threading.Tasks;
+using CodeManager.Data.Entities;
 using CodeManagerWebApi.DataTransfer;
 using CodeManagerWebApi.Entities;
 

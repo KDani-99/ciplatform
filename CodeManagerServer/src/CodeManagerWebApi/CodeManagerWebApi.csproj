@@ -27,11 +27,14 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="Entities\CI" />
       <Folder Include="Extensions" />
+      <Folder Include="Repositories" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\..\CodeManagerShared\CodeManagerShared.csproj" />
+      <ProjectReference Include="..\CodeManager.Data\CodeManager.Data.csproj" />
     </ItemGroup>
 
 </Project>

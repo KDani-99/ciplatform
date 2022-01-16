@@ -1,8 +1,9 @@
 ﻿using System.Threading.Tasks;
+using CodeManager.Data.Entities;
 using CodeManagerWebApi.DataTransfer;
 using CodeManagerWebApi.Entities;
 
-namespace CodeManager.Data.Services
+namespace CodeManagerWebApi.Services
 {
     public interface ITeamService
     {

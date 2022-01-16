@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Threading.Tasks;
+using CodeManager.Data.Entities;
+using CodeManager.Data.Repositories;
 using CodeManagerWebApi.DataTransfer;
 using CodeManagerWebApi.Entities;
 using CodeManagerWebApi.Exceptions;
-using CodeManagerWebApi.Repositories;
 
 namespace CodeManagerWebApi.Services
 {

@@ -8,10 +8,10 @@ using System.Threading.Tasks;
 using CodeManager.Data.Configuration;
 using CodeManager.Data.Configuration.StartJob;
 using CodeManager.Data.Entities.CI;
+using CodeManager.Data.Events;
 using CodeManagerAgent.Exceptions;
 using CodeManagerAgentManager.Commands;
 using CodeManagerShared.Configuration;
-using CodeManagerShared.Entities;
 using CodeManagerShared.Events;
 using Microsoft.Extensions.Options;
 using YamlDotNet.Serialization;
@@ -20,24 +20,19 @@ using Docker.DotNet;
 using Docker.DotNet.Models;
 using MassTransit;
 using Microsoft.Extensions.Logging;
-using JobConfiguration = CodeManagerAgent.Configuration.JobConfiguration;
 
 namespace CodeManagerAgent.Services
 {
-    public class JobHandlerService : IJobHandlerService
+    public sealed class DockerJobHandlerService : JobHandlerService<DockerJobHandlerService>
     {
         private readonly IDockerClient _dockerClient;
-        private readonly IPublishEndpoint _publishEndpoint;
-
         private string _containerId;
         
         // unit of work
-        public JobHandlerService(IDockerClient dockerClient, IPublishEndpoint publishEndpoint, IOptions<JobConfiguration> jobConfiguration)
+        public DockerJobHandlerService(string token, JobConfiguration jobConfiguration, Uri responseAddress, IDockerClient dockerClient, ILogger<DockerJobHandlerService> logger, IBusControl bus, IAgentService agentService)
+            : base(token, jobConfiguration, responseAddress, logger, bus, agentService)
         {
-            // TODO: read config file from mount
-            // TODO: or start is remotely as a process and read logs? => could directly stream docker container logs
             _dockerClient = dockerClient ?? throw new ArgumentNullException(nameof(dockerClient));
-            _publishEndpoint = publishEndpoint ?? throw new ArgumentException(nameof(publishEndpoint));
         }
 
         private Job ParseFileConfiguration()
@@ -51,12 +46,12 @@ namespace CodeManagerAgent.Services
             return deserializer.Deserialize<Job>(new StreamReader(_jobConfiguration.ConfigPath));
         }
 
-        public async Task StartAsync(StartJobConfiguration startJobConfiguration, Uri responseAddress)
+        public override async Task StartAsync(JobConfiguration jobConfiguration, Uri responseAddress)
         {
-            // Non zero exit code indicates failure @ the given job
-            var jobConfig = ParseFileConfiguration();
-
-            var (from, tag) = jobConfig.Image.Split(":") switch { var result => (result[0], result[1]) };
+            JobConfiguration = jobConfiguration;
+            SendEndpoint = await BusControl.GetSendEndpoint(responseAddress);
+            
+            var (from, tag) = jobConfiguration.Image.Split(":") switch { var result => (result[0], result[1]) };
             
             await _dockerClient.Images.CreateImageAsync(
                 new ImagesCreateParameters
@@ -64,14 +59,14 @@ namespace CodeManagerAgent.Services
                     FromImage = from,
                     Tag = tag,
                 },
-                _jobConfiguration.AuthConfig,
+                jobConfiguration.AuthConfig,
                 new Progress<JSONMessage>());
 
             var container = await _dockerClient.Containers.CreateContainerAsync(new CreateContainerParameters
             {
-                Image = jobConfig.Image,
-                Name = _jobConfiguration.AgentId,
-                Env = jobConfig.Environment,
+                Image = jobConfiguration.Image,
+                Name = jobConfiguration.AgentId, // TODO: decode jwt and get id
+                Env = jobConfiguration.Environment,
             });
 
             _containerId = container.ID;
@@ -79,56 +74,19 @@ namespace CodeManagerAgent.Services
             if (!await _dockerClient.Containers.StartContainerAsync(_containerId, new ContainerStartParameters()))
             {
                 // TODO: throw exception or send message
-                await _publishEndpoint.Publish(new StepResultEvent
+                await AgentService.SendAsync(new StepResultEvent
                 {
                     AgentId = _jobConfiguration.AgentId,
                     State = States.Failed,
                     StepIndex = -1 // start container step
-                });
+                }, SendEndpoint);
                 return;
             }
 
-            await ExecuteJobAsync(jobConfig);
+            await ExecuteJobAsync();
         }
 
-        private async Task ExecuteJobAsync(Job job)
-        {
-            // TODO: signal job start
-            var step = -1; // indicated unknown
-            try
-            {
-                for (step = 0; step < job.Steps.Count; step++)
-                {
-                    await _publishEndpoint.Publish(new StepResultEvent
-                    {
-                        AgentId = _jobConfiguration.AgentId,
-                        State = States.Running,
-                        StepIndex = step
-                    });
-                    
-                    await ExecuteStepsAsync(job.Steps[step], step);
-                    
-                    await _publishEndpoint.Publish(new StepResultEvent
-                    {
-                        AgentId = _jobConfiguration.AgentId,
-                        State = States.Successful,
-                        StepIndex = step
-                    });
-                }
-            }
-            catch
-            {
-                await _publishEndpoint.Publish(new StepResultEvent
-                {
-                    AgentId = _jobConfiguration.AgentId,
-                    State = States.Failed,
-                    StepIndex = step
-                });
-                // rest will be marked as skipped
-            }
-        }
-
-        private async Task ExecuteStepsAsync(Step step, int index)
+       /* private async Task ExecuteStepsAsync(StepConfiguration step, int index)
         {
             // TODO: log name
             var (bin, rest) = step.Cmd.Split(" ") switch { var result =>
@@ -155,26 +113,26 @@ namespace CodeManagerAgent.Services
                 await WriteAndFlushAsync(outputStream, $"\nExit code: {exitCode}", index);
                 throw new StepFailedException();
             }
-        }
-        
-        /*private async Task ProcessOutputStreamAsync(MultiplexedStream stream, Stream outputStream)
-        {
-            const int chunkSize = 1024;
-            var buffer = new byte[chunkSize];
-            
-            MultiplexedStream.ReadResult result;
-            // TODO: directory will be created by the manager, eg -> /
-            // d/ -> /output/artifacts /output/logs
-            
-            await using var outputStreamWriter = new StreamWriter(outputStream);
-
-            while (!(result = await stream.ReadOutputAsync(buffer, 0, buffer.Length, default)).EOF)
-            {
-                await outputStreamWriter.WriteAsync(Encoding.UTF8.GetString(new ArraySegment<byte>(buffer, 0, result.Count)));
-                await outputStreamWriter.FlushAsync();
-            }
         }*/
-        private async Task ProcessOutputStreamAsync(MultiplexedStream stream, StreamWriter outputStreamWriter, int index)
+
+       protected override async Task<long> ExecuteCommandAsync(int stepIndex, string executable, string args, StreamWriter outputStream)
+       {
+           var execCreateResponse =
+               await _dockerClient.Exec.ExecCreateContainerAsync(_containerId, new ContainerExecCreateParameters
+               {
+                   Cmd = new List<string>() {executable, args},
+                   AttachStdout = true,
+                   AttachStderr = true
+               });
+            
+            
+           var stream = await _dockerClient.Exec.StartAndAttachContainerExecAsync(execCreateResponse.ID, true);
+           await ProcessOutputStreamAsync(stepIndex, stream, outputStream);
+
+           return (await _dockerClient.Exec.InspectContainerExecAsync(execCreateResponse.ID)).ExitCode;
+       }
+
+       private async Task ProcessOutputStreamAsync(int stepIndex, MultiplexedStream stream, StreamWriter outputStreamWriter)
         {
             const int chunkSize = 4096; // 4 KB
             var buffer = new byte[chunkSize];
@@ -191,31 +149,17 @@ namespace CodeManagerAgent.Services
                     log.Insert(0, "Error: ");
                 }
                 
-                await WriteAndFlushAsync(outputStreamWriter, log.ToString(), index);
-                // TODO: connect to socketio server from here and send log directly?
+                await WriteAndFlushAsync(outputStreamWriter, log.ToString(), stepIndex);
             }
         }
 
-        private async Task WriteAndFlushAsync(StreamWriter outputStreamWriter, string data, int index)
-        {
-            await outputStreamWriter.WriteAsync(data);
-            await outputStreamWriter.FlushAsync();
-            
-            await _publishEndpoint.Publish(new StepLogEvent
-            {
-                Message = data,
-                AgentId = _jobConfiguration.AgentId,
-                StepIndex = index
-            });
-        }
-
-        public void Dispose()
+       public override void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
-        
-        protected virtual void Dispose(bool disposing)
+
+        private void Dispose(bool disposing)
         {
             if (disposing)
             {
@@ -224,7 +168,7 @@ namespace CodeManagerAgent.Services
             _dockerClient?.Dispose();
         }
 
-        public virtual async ValueTask DisposeAsync()
+        public override async ValueTask DisposeAsync()
         {
             if (_dockerClient is not null)
             {

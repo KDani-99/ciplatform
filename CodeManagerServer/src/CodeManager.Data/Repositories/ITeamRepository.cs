@@ -1,7 +1,6 @@
 ﻿using CodeManager.Data.Entities;
-using CodeManagerWebApi.Entities;
 
-namespace CodeManagerWebApi.Repositories
+namespace CodeManager.Data.Repositories
 {
     public interface ITeamRepository : IRepository<Team>
     {

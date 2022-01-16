@@ -2,7 +2,7 @@
 
 namespace CodeManager.Data.Configuration
 {
-    public class Run
+    public class RunConfiguration
     {
         public enum Triggers
         {

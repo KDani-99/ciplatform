@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using CodeManagerWebApi.Database;
-using CodeManagerWebApi.Entities;
+using CodeManager.Data.Database;
+using CodeManager.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace CodeManagerWebApi.Repositories
+namespace CodeManager.Data.Repositories
 {
     public class PlanRepository : BaseRepository<Plan> ,IPlanRepository
     {

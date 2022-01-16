@@ -1,8 +1,7 @@
 ﻿using System.Threading.Tasks;
 using CodeManager.Data.Entities;
-using CodeManagerWebApi.Entities;
 
-namespace CodeManagerWebApi.Repositories
+namespace CodeManager.Data.Repositories
 {
     public interface IUserRepository : IRepository<User>
     {

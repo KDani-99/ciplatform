@@ -3,9 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using CodeManagerWebApi.Entities;
 
-namespace CodeManagerWebApi.Repositories
+namespace CodeManager.Data.Repositories
 {
     public interface IRepository<T>
         where T : class

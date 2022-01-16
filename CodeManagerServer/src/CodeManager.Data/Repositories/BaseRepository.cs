@@ -4,11 +4,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using CodeManager.Data.Database;
 using CodeManager.Data.Entities;
-using CodeManagerWebApi.Database;
-using CodeManagerWebApi.Entities;
 
-namespace CodeManagerWebApi.Repositories
+namespace CodeManager.Data.Repositories
 {
     public abstract class BaseRepository<T> : IRepository<T>
         where T : Entity

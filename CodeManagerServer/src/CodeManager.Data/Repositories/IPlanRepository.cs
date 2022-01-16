@@ -1,4 +1,5 @@
-﻿using CodeManagerWebApi.Entities;
+﻿using CodeManager.Data.Entities;
+using CodeManagerWebApi.Entities;
 
 namespace CodeManagerWebApi.Repositories
 {

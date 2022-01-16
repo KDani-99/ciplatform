@@ -4,6 +4,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Authentication;
 using System.Threading.Tasks;
+using CodeManager.Data.Entities;
 using CodeManagerWebApi.DataTransfer;
 using CodeManagerWebApi.Entities;
 using CodeManagerWebApi.Entities.Configuration;

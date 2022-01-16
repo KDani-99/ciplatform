@@ -1,4 +1,4 @@
-﻿namespace CodeManagerShared.Configuration
+﻿namespace CodeManager.Data.Configuration
 {
     public class Step
     {

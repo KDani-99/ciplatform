@@ -1,8 +1,6 @@
 ﻿using System.Threading.Tasks;
-using CodeManagerWebApi.DataTransfer;
-using CodeManagerWebApi.Entities;
 
-namespace CodeManagerWebApi.Services
+namespace CodeManager.Data.Services
 {
     public interface IPlanService
     {

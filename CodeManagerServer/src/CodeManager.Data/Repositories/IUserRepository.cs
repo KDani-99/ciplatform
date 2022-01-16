@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using CodeManager.Data.Entities;
 using CodeManagerWebApi.Entities;
 
 namespace CodeManagerWebApi.Repositories

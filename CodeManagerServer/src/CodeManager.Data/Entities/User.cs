@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace CodeManagerWebApi.Entities
+namespace CodeManager.Data.Models
 {
     public class User : Entity
     {

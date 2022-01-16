@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using CodeManagerShared.Configuration;
 
-namespace CodeManagerShared.Entities
+namespace CodeManager.Data.Configuration
 {
     public class Run
     {
@@ -13,6 +12,6 @@ namespace CodeManagerShared.Entities
         
         public string Name { get; set; }
         public Dictionary<Triggers, List<string>> Trigger { get; set; } // trigger: push: [<branch>, <branch1>]
-        public Dictionary<string, Job> Jobs { get; set; } // parallel execution?
+        public Dictionary<string, JobConfiguration> Jobs { get; set; } // parallel execution?
     }
 }

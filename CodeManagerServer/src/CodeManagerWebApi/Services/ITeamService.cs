@@ -2,7 +2,7 @@
 using CodeManagerWebApi.DataTransfer;
 using CodeManagerWebApi.Entities;
 
-namespace CodeManagerWebApi.Services
+namespace CodeManager.Data.Services
 {
     public interface ITeamService
     {

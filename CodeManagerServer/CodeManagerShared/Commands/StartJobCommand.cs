@@ -1,7 +1,8 @@
-﻿namespace CodeManagerAgentManager.Commands
+﻿using Docker.DotNet.Models;
+
+namespace CodeManagerAgentManager.Commands
 {
     public class StartJobCommand : Command
     {
-        
     }
 }

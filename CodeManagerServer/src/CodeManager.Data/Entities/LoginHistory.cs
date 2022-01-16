@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CodeManagerWebApi.Entities
+namespace CodeManager.Data.Entities
 {
     public class LoginHistory : Entity
     {

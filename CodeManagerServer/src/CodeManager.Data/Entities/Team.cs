@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 
-namespace CodeManagerWebApi.Entities
+namespace CodeManager.Data.Entities
 {
     public class Team : Entity
     {

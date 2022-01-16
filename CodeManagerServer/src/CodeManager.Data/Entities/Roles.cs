@@ -1,4 +1,4 @@
-﻿namespace CodeManagerWebApi.Entities
+﻿namespace CodeManager.Data.Entities
 {
     public enum Roles
     {

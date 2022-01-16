@@ -1,4 +1,4 @@
-﻿namespace CodeManager.Data.Models
+﻿namespace CodeManager.Data.Entities
 {
     public enum Permissions
     {

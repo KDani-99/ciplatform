@@ -30,10 +30,12 @@ namespace CodeManager.Data.Repositories
             return DbContext.Runs.AnyAsync(expression);
         }
 
-        public override async Task CreateAsync(Run entity)
+        public override async Task<long> CreateAsync(Run entity)
         {
             await DbContext.Runs.AddAsync(entity);
             await DbContext.SaveChangesAsync();
+
+            return entity.Id;
         }
 
         public override async Task UpdateAsync(Run entity)

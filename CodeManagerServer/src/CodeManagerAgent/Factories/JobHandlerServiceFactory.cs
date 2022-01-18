@@ -1,22 +1,24 @@
 ﻿using System;
 using CodeManager.Data.Configuration;
+using CodeManagerAgent.Configuration;
 using CodeManagerAgent.Services;
 using MassTransit;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace CodeManagerAgent.Factories
 {
     public abstract class JobHandlerServiceFactory : IJobHandlerServiceFactory
     {
-        protected readonly ILoggerFactory LoggerFactory;
         protected readonly IAgentService AgentService;
         protected readonly IBusControl BusControl;
+        protected readonly IOptions<AgentConfiguration> AgentConfiguration;
         
-        protected JobHandlerServiceFactory(ILoggerFactory loggerFactory, IAgentService agentService, IBusControl busControl)
+        protected JobHandlerServiceFactory(IAgentService agentService, IBusControl busControl, IOptions<AgentConfiguration> agentConfiguration)
         {
-            LoggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
             AgentService = agentService ?? throw new ArgumentNullException(nameof(agentService));
             BusControl = busControl ?? throw new ArgumentNullException(nameof(busControl));
+            AgentConfiguration = agentConfiguration ?? throw new ArgumentNullException(nameof(agentConfiguration));
         }
         
         public abstract IJobHandlerService Create(string token, JobConfiguration jobConfiguration, Uri responseAddress);

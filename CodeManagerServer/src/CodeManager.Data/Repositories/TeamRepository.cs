@@ -22,10 +22,12 @@ namespace CodeManager.Data.Repositories
 
         public override Task<bool> ExistsAsync(Expression<Func<Team, bool>> expression) => DbContext.Teams.AnyAsync(expression);
 
-        public override async Task CreateAsync(Team entity)
+        public override async Task<long> CreateAsync(Team entity)
         {
             await DbContext.Teams.AddAsync(entity);
             await DbContext.SaveChangesAsync();
+
+            return entity.Id;
         }
 
         public override async Task UpdateAsync(Team entity)

@@ -6,6 +6,7 @@
         Successful,
         Failed,
         Skipped,
+        Queued,
         Running
     }
 }

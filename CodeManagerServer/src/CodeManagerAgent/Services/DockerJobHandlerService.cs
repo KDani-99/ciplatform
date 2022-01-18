@@ -9,6 +9,7 @@ using CodeManager.Data.Configuration;
 using CodeManager.Data.Configuration.StartJob;
 using CodeManager.Data.Entities.CI;
 using CodeManager.Data.Events;
+using CodeManagerAgent.Configuration;
 using CodeManagerAgent.Exceptions;
 using CodeManagerAgentManager.Commands;
 using CodeManagerShared.Configuration;
@@ -23,19 +24,19 @@ using Microsoft.Extensions.Logging;
 
 namespace CodeManagerAgent.Services
 {
-    public sealed class DockerJobHandlerService : JobHandlerService<DockerJobHandlerService>
+    public sealed class DockerJobHandlerService : JobHandlerService
     {
         private readonly IDockerClient _dockerClient;
         private string _containerId;
         
         // unit of work
-        public DockerJobHandlerService(string token, JobConfiguration jobConfiguration, Uri responseAddress, IDockerClient dockerClient, ILogger<DockerJobHandlerService> logger, IBusControl bus, IAgentService agentService)
-            : base(token, jobConfiguration, responseAddress, logger, bus, agentService)
+        public DockerJobHandlerService(string token, JobConfiguration jobConfiguration, Uri responseAddress, IOptions<AgentConfiguration> agentConfiguration, IDockerClient dockerClient, IBusControl bus, IAgentService agentService)
+            : base(token, jobConfiguration, responseAddress, agentConfiguration, bus, agentService)
         {
             _dockerClient = dockerClient ?? throw new ArgumentNullException(nameof(dockerClient));
         }
 
-        private Job ParseFileConfiguration()
+        /*private Job ParseFileConfiguration()
         {
             // TODO: place it in webapi
             
@@ -44,14 +45,11 @@ namespace CodeManagerAgent.Services
                 .Build();
             
             return deserializer.Deserialize<Job>(new StreamReader(_jobConfiguration.ConfigPath));
-        }
+        }*/
 
-        public override async Task StartAsync(JobConfiguration jobConfiguration, Uri responseAddress)
+        public override async Task StartAsync()
         {
-            JobConfiguration = jobConfiguration;
-            SendEndpoint = await BusControl.GetSendEndpoint(responseAddress);
-            
-            var (from, tag) = jobConfiguration.Image.Split(":") switch { var result => (result[0], result[1]) };
+            var (from, tag) = JobConfiguration.Image.Split(":") switch { var result => (result[0], result[1]) };
             
             await _dockerClient.Images.CreateImageAsync(
                 new ImagesCreateParameters
@@ -59,14 +57,14 @@ namespace CodeManagerAgent.Services
                     FromImage = from,
                     Tag = tag,
                 },
-                jobConfiguration.AuthConfig,
+                JobConfiguration.AuthConfig,
                 new Progress<JSONMessage>());
 
             var container = await _dockerClient.Containers.CreateContainerAsync(new CreateContainerParameters
             {
-                Image = jobConfiguration.Image,
-                Name = jobConfiguration.AgentId, // TODO: decode jwt and get id
-                Env = jobConfiguration.Environment,
+                Image = JobConfiguration.Image,
+                //Name = JobConfiguration.AgentId, // TODO: decode jwt and get id
+                Env = JobConfiguration.Environment,
             });
 
             _containerId = container.ID;
@@ -74,12 +72,11 @@ namespace CodeManagerAgent.Services
             if (!await _dockerClient.Containers.StartContainerAsync(_containerId, new ContainerStartParameters()))
             {
                 // TODO: throw exception or send message
-                await AgentService.SendAsync(new StepResultEvent
+                await SendEventAsync(new StepResultEvent
                 {
-                    AgentId = _jobConfiguration.AgentId,
                     State = States.Failed,
                     StepIndex = -1 // start container step
-                }, SendEndpoint);
+                });
                 return;
             }
 

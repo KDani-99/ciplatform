@@ -1,38 +1,69 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using CodeManager.Data.Configuration;
 using CodeManager.Data.Configuration.StartJob;
+using CodeManager.Data.Events;
+using CodeManagerAgent.Configuration;
+using CodeManagerAgent.Extensions;
 using Docker.DotNet;
 using MassTransit;
 using MassTransit.JobService.Components;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace CodeManagerAgent.Services
 {
-    public class LinuxJobHandlerService : JobHandlerService<LinuxJobHandlerService>
+    public class LinuxJobHandlerService : JobHandlerService
     {
         // unit of work
-        public LinuxJobHandlerService(string token, JobConfiguration jobConfiguration, Uri responseAddress, ILogger<LinuxJobHandlerService> logger, IBusControl bus, IAgentService agentService)
-            : base(token, jobConfiguration, responseAddress, logger, bus, agentService)
+        public LinuxJobHandlerService(string token, JobConfiguration jobConfiguration, Uri responseAddress, IOptions<AgentConfiguration> agentConfiguration,  IBusControl bus, IAgentService agentService)
+            : base(token, jobConfiguration, responseAddress, agentConfiguration, bus, agentService)
         {
         }
 
-        public ValueTask DisposeAsync()
+        public override ValueTask DisposeAsync()
         {
-            throw new NotImplementedException();
+            // not required
+            return ValueTask.CompletedTask;
         }
 
-        public void Dispose()
+        public override void Dispose()
         {
-            throw new NotImplementedException();
+            // not required
         }
 
-        public async Task StartAsync(JobConfiguration startJobContextConfiguration, Uri responseAddress)
+        protected override async Task<long> ExecuteCommandAsync(int stepIndex, string executable, string args, StreamWriter outputStream)
         {
-            _jobConfiguration = startJobContextConfiguration;
-            _sendEndpoint = await _bus.GetSendEndpoint(responseAddress);
+            using var process = new Process();
+            process.ConfigureCliProcess(executable, args, JobConfiguration.Environment); // or /bin/bash -c "<cmd>"
+
+            process.OutputDataReceived += async (_, eventArgs) =>
+              await ProcessOnOutputDataReceivedAsync(stepIndex, eventArgs, outputStream);
+            process.ErrorDataReceived += async (_, eventArgs) => await ProcessOnErrorDataReceivedAsync(stepIndex, eventArgs, outputStream);
+
+            process.Start();
             
-            await 
+            process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
+
+            await process.WaitForExitAsync();
+
+            return process.ExitCode;
+        }
+
+        private async Task ProcessOnErrorDataReceivedAsync(int stepIndex, DataReceivedEventArgs eventArgs, StreamWriter outputStream)
+        {
+            await WriteAndFlushAsync(outputStream, $"Error: {eventArgs.Data}", stepIndex);
+        }
+
+        private async Task ProcessOnOutputDataReceivedAsync(int stepIndex, DataReceivedEventArgs eventArgs, StreamWriter outputStream)
+        {
+            await WriteAndFlushAsync(outputStream, eventArgs.Data, stepIndex);
         }
     }
 }

@@ -22,10 +22,11 @@ namespace CodeManager.Data.Repositories
 
         public override Task<bool> ExistsAsync(Expression<Func<Plan, bool>> expression) => DbContext.Plans.AnyAsync(expression);
 
-        public override async Task CreateAsync(Plan entity)
+        public override async Task<long> CreateAsync(Plan entity)
         {
             await DbContext.Plans.AddAsync(entity);
             await DbContext.SaveChangesAsync();
+            return entity.Id;
         }
 
         public override async Task UpdateAsync(Plan entity)

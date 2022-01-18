@@ -1,21 +1,24 @@
 ﻿using System;
 using System.Threading.Tasks;
-using CodeManager.Data.Messaging;
+using CodeManager.Data.Agent;
+using CodeManager.Data.Agent.Requests;
+using CodeManager.Data.Agent.Responses;
 using CodeManagerAgent.Services;
 using MassTransit;
 
 namespace CodeManagerAgent.Consumers
 {
-    public class QueryAgentCommandConsumer : IConsumer<QueryAgentCommand>
+    public class AgentRequestRequestConsumer : IConsumer<AgentRequestRequest>
     {
         private readonly IAgentService _agentService;
-
-        public QueryAgentCommandConsumer(IAgentService agentService)
+        private readonly IBusControl _busControl;
+        
+        public AgentRequestRequestConsumer(IAgentService agentService, IBusControl busControl)
         {
             _agentService = agentService ?? throw new ArgumentNullException(nameof(agentService));
+            _busControl = busControl ?? throw new ArgumentNullException(nameof(busControl));
         }
-        
-        public Task Consume(ConsumeContext<QueryAgentCommand> context)
+        public async Task Consume(ConsumeContext<AgentRequestRequest> context)
         {
             if (_agentService.AgentState == AgentState.Available)
             {

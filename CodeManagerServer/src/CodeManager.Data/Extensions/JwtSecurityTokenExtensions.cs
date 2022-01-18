@@ -1,8 +1,8 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 
-namespace CodeManagerWebApi.Utils.Extensions
+namespace CodeManager.Data.Extensions
 {
-    public static class JwtTokenExtensions
+    public static class JwtSecurityTokenExtensions
     {
         public static string ToBase64String(this JwtSecurityToken securityToken)
         {

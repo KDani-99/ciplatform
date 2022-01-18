@@ -1,6 +1,6 @@
 ﻿namespace CodeManagerAgent.Consumers
 {
-    public class StopAgentJobConsumer
+    public class StopAgentJobCommandConsumer
     {
         
     }

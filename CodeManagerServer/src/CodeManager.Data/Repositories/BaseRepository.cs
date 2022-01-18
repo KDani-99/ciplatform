@@ -25,7 +25,7 @@ namespace CodeManager.Data.Repositories
 
        public abstract Task<bool> ExistsAsync(Expression<Func<T, bool>> expression);
 
-       public abstract Task CreateAsync(T entity);
+       public abstract Task<long> CreateAsync(T entity);
 
        public abstract Task UpdateAsync(T entity);
        public abstract Task DeleteAsync(long id);

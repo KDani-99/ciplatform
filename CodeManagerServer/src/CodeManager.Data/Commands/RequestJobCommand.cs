@@ -2,6 +2,6 @@
 {
     public class RequestRunCommand
     {
-        
+        public string Token { get; init; }
     }
 }

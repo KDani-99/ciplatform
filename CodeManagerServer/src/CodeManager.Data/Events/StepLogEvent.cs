@@ -4,6 +4,7 @@
     {
         public string Token { get; set; }
         public string Log { get; set; }
+        public long Line { get; set; }
         public int StepIndex { get; set; }
     }
 }

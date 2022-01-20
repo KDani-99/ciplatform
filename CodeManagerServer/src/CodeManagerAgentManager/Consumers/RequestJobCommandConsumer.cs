@@ -15,12 +15,12 @@ using Microsoft.Extensions.Logging;
 
 namespace CodeManagerAgentManager.Consumers
 {
-    public class RequestRunCommandConsumer : IConsumer<RequestJobCommand>
+    public class RequestJobCommandConsumer : IConsumer<RequestJobCommand>
     {
         private readonly IRunRepository _runRepository;
         private readonly ITokenService<JwtSecurityToken> _tokenService;
         private readonly ILogger<StepResultEventConsumer> _logger;
-        public RequestRunCommandConsumer(IRunRepository runRepository, ITokenService<JwtSecurityToken> tokenService, ILogger<StepResultEventConsumer> logger)
+        public RequestJobCommandConsumer(IRunRepository runRepository, ITokenService<JwtSecurityToken> tokenService, ILogger<StepResultEventConsumer> logger)
         {
             _runRepository = runRepository ?? throw new ArgumentNullException(nameof(runRepository));
             _tokenService = tokenService ?? throw new ArgumentNullException(nameof(tokenService));
@@ -65,7 +65,7 @@ namespace CodeManagerAgentManager.Consumers
 
                 var jobToken = await _tokenService.CreateJobTokenAsync(runId, jobId);
 
-                await context.RespondAsync(new RequestJobCommandResponse
+                await context.RespondAsync(new AcceptedRequestJobCommandResponse
                 {
                     Token = jobToken.ToBase64String()
                 });

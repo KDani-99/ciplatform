@@ -122,7 +122,7 @@ namespace CodeManagerAgent.Services
                    AttachStderr = true
                });
             
-            
+
            var stream = await _dockerClient.Exec.StartAndAttachContainerExecAsync(execCreateResponse.ID, true);
            await ProcessOutputStreamAsync(stepIndex, stream, outputStream);
 

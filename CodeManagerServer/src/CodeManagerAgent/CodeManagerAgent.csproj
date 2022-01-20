@@ -19,4 +19,8 @@
       <ProjectReference Include="..\..\CodeManagerShared\CodeManagerShared.csproj" />
       <ProjectReference Include="..\CodeManager.Data\CodeManager.Data.csproj" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Hubs" />
+    </ItemGroup>
 </Project>

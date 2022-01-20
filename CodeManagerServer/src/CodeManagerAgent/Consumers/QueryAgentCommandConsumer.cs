@@ -8,6 +8,7 @@ namespace CodeManagerAgent.Consumers
 {
     public class QueryAgentCommandConsumer : IConsumer<QueryAgentCommand>
     {
+        // TODO: remove this class
         private readonly IAgentService _agentService;
 
         public QueryAgentCommandConsumer(IAgentService agentService)

@@ -44,9 +44,7 @@ namespace CodeManagerAgentManager.Consumers
                 var runCtx = (await _runRepository.GetAsync(run => run.Id == runId)).First();*/
 
                 var sendEndpoint = await _busControl.GetSendEndpoint(new Uri(sendEndpointAddress)); // get web api requester address
-                await sendEndpoint.Send<>()
-                    
-                    --
+                await sendEndpoint.Send<>();
             }
             catch
             {

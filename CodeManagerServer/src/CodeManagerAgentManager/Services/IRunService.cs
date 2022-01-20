@@ -1,13 +1,11 @@
-﻿using System;
-using System.Threading.Tasks;
-using CodeManager.Data.Commands;
-using CodeManager.Data.Configuration;
-using CodeManager.Data.Entities;
+﻿using System.Threading.Tasks;
 
 namespace CodeManagerAgentManager.Services
 {
-    public interface IRunService
+    public interface IRunService<T>
+        where T : new()
+
     {
-        public Task StartAsync(StartRunCommand cmd);
+        public Task<long> QueueAsync(T cmd);
     }
 }

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection.Metadata.Ecma335;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using CodeManager.Data.Configuration;
 using CodeManager.Data.Configuration.StartJob;
@@ -30,8 +31,8 @@ namespace CodeManagerAgent.Services
         private string _containerId;
         
         // unit of work
-        public DockerJobHandlerService(string token, JobConfiguration jobConfiguration, Uri responseAddress, IOptions<AgentConfiguration> agentConfiguration, IDockerClient dockerClient, IBusControl bus, IAgentService agentService)
-            : base(token, jobConfiguration, responseAddress, agentConfiguration, bus, agentService)
+        public DockerJobHandlerService(string token, JobConfiguration jobConfiguration, IOptions<AgentConfiguration> agentConfiguration, IDockerClient dockerClient, IBusControl bus, IAgentService agentService, CancellationToken cancellationToken)
+            : base(token, jobConfiguration, agentConfiguration, bus, agentService, cancellationToken)
         {
             _dockerClient = dockerClient ?? throw new ArgumentNullException(nameof(dockerClient));
         }
@@ -135,8 +136,6 @@ namespace CodeManagerAgent.Services
             var buffer = new byte[chunkSize];
             
             MultiplexedStream.ReadResult result;
-            // TODO: directory will be created by the manager, eg -> /
-            // d/ -> /output/artifacts /output/logs
 
             while (!(result = await stream.ReadOutputAsync(buffer, 0, buffer.Length, default)).EOF)
             {
@@ -147,6 +146,8 @@ namespace CodeManagerAgent.Services
                 }
                 
                 await WriteAndFlushAsync(outputStreamWriter, log.ToString(), stepIndex);
+                
+                CancellationToken.ThrowIfCancellationRequested();;
             }
         }
 

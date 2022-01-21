@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using CodeManager.Data.Configuration;
 using CodeManager.Data.Configuration.StartJob;
@@ -16,8 +17,8 @@ namespace CodeManagerAgent.Services
     public class WindowsJobHandlerService : JobHandlerService
     {
         // unit of work
-        public WindowsJobHandlerService(string token, JobConfiguration jobConfiguration, Uri responseAddress, IOptions<AgentConfiguration> agentConfiguration, IBusControl bus, IAgentService agentService)
-            : base(token, jobConfiguration, responseAddress, agentConfiguration, bus, agentService)
+        public WindowsJobHandlerService(string token, JobConfiguration jobConfiguration, IOptions<AgentConfiguration> agentConfiguration, IBusControl bus, IAgentService agentService, CancellationToken cancellationToken)
+            : base(token, jobConfiguration, agentConfiguration, bus, agentService, cancellationToken)
         {
         }
 

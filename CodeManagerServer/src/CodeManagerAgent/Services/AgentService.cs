@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 using CodeManager.Data.Agent;
 using CodeManager.Data.Events;
 using MassTransit;
@@ -9,6 +10,7 @@ namespace CodeManagerAgent.Services
     {
         //Singleton
         public AgentState AgentState { get; set; }
+        public CancellationTokenSource CancellationTokenSource { get; set; }
         public string Token { get; set; }
         
         public Task SendAsync<T>(T message, ISendEndpoint sendEndpoint)

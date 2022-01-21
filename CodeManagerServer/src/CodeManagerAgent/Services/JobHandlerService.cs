@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using CodeManager.Data.Configuration;
 using CodeManager.Data.Events;
@@ -28,13 +29,14 @@ namespace CodeManagerAgent.Services
         protected readonly IAgentService AgentService;
 
         protected readonly JobConfiguration JobConfiguration;
-        protected readonly ISendEndpoint SendEndpoint;
+       // protected readonly ISendEndpoint SendEndpoint;
         protected readonly string RunId;
         protected readonly string JobId;
+        protected readonly CancellationToken CancellationToken;
 
         private readonly string _token;
 
-        protected JobHandlerService(string token, JobConfiguration jobConfiguration, Uri responseAddress, IOptions<AgentConfiguration> agentConfiguration, IBusControl busControl, IAgentService agentService)
+        protected JobHandlerService(string token, JobConfiguration jobConfiguration , IOptions<AgentConfiguration> agentConfiguration, IBusControl busControl, IAgentService agentService, CancellationToken cancellationToken)
         {
             // TODO: read config file from mount
             // TODO: or start is remotely as a process and read logs? => could directly stream docker container logs
@@ -43,7 +45,8 @@ namespace CodeManagerAgent.Services
             BusControl = busControl ?? throw new ArgumentNullException(nameof(busControl));
             AgentService = agentService ?? throw new ArgumentNullException(nameof(agentService));
             JobConfiguration = jobConfiguration ?? throw new ArgumentNullException(nameof(jobConfiguration));
-            SendEndpoint = busControl.GetSendEndpoint(responseAddress).Result;
+            CancellationToken = cancellationToken;
+           // SendEndpoint = busControl.GetSendEndpoint(responseAddress).Result;
 
             var decodedToken = _token.DecodeJwtToken();
             RunId = decodedToken.Claims.FirstOrDefault(claim => claim.Type == CustomJwtRegisteredClaimNames.RunId)?.Value;
@@ -66,20 +69,30 @@ namespace CodeManagerAgent.Services
             {
                 for (step = 0; step < JobConfiguration.Steps.Count; step++)
                 {
+                    CancellationToken.ThrowIfCancellationRequested();
+
                     await SendEventAsync(new StepResultEvent
                     {
                         State = States.Running,
                         StepIndex = step
                     });
-                    
+
                     await ExecuteStepAsync(JobConfiguration.Steps[step], step);
-                    
+
                     await SendEventAsync(new StepResultEvent
                     {
                         State = States.Successful,
                         StepIndex = step
                     });
                 }
+            }
+            catch (OperationCanceledException)
+            {
+                await SendEventAsync(new StepResultEvent
+                {
+                    State = States.Cancelled,
+                    StepIndex = step
+                });
             }
             catch
             {
@@ -92,7 +105,7 @@ namespace CodeManagerAgent.Services
             }
         }
 
-        protected virtual async Task ExecuteStepAsync(StepConfiguration step, int stepIndex)
+        private async Task ExecuteStepAsync(StepConfiguration step, int stepIndex)
         {
             // TODO: log name
             var (executable, args) = step.Cmd.Split(" ") switch { var result =>
@@ -116,7 +129,7 @@ namespace CodeManagerAgent.Services
         {
             await outputStreamWriter.WriteAsync(data);
             await outputStreamWriter.FlushAsync();
-            
+  
             await SendEventAsync(new StepLogEvent
             {
                 Log = data,
@@ -130,7 +143,7 @@ namespace CodeManagerAgent.Services
             {
                 secureMessage.Token = _token;
             }
-            return SendEndpoint.Send(@event);
+            return BusControl.Publish(@event);
         }
 
         private string GetLogFilePath(int stepIndex)

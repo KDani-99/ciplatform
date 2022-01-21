@@ -5,6 +5,7 @@
         NotRun,
         Successful,
         Failed,
+        Cancelled,
         Skipped,
         Queued,
         Running

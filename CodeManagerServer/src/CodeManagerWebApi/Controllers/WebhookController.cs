@@ -17,8 +17,9 @@ namespace CodeManagerWebApi.Controllers
         }
 
         [GitHubWebHook]
-        public async Task<IActionResult> ReceiveWebhook()
+        public Task<IActionResult> ReceiveWebhook()
         {
+            return Task.FromResult(null as IActionResult);
         }
 
         public bool IsApplicable(string receiverName)

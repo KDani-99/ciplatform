@@ -47,17 +47,21 @@ namespace CodeManagerAgentManager.Consumers
                 {
                     step.FinishedDateTime = DateTime.Now;
                 }
-                
-                if (step.State == States.Failed)
-                {
-                    job.State = States.Failed;
-                }
 
-                if (step.State == States.Successful && context.Message.StepIndex == job.Steps.Count - 1)
+                job.State = step.State switch
                 {
-                    job.State = States.Successful;
-                }
+                    States.Failed => States.Failed,
+                    States.Successful when context.Message.StepIndex == job.Steps.Count - 1 => States.Successful,
+                    _ => job.State
+                };
                 
+                /*run.State = step.State switch
+                {
+                    States.Failed => States.Failed,
+                    States.Successful when context.Message.StepIndex == job.Steps.Count - 1 => States.Successful,
+                    _ => run.State
+                };*/
+
                 await _runRepository.UpdateAsync(run);
                 // TODO: broadcast it to the client
                 

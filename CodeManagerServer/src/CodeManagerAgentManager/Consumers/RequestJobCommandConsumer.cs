@@ -73,6 +73,7 @@ namespace CodeManagerAgentManager.Consumers
             }
             catch (Exception exception)
             {
+                await context.RespondAsync(new RejectedRequestJobCommandResponse());
                 _logger.LogError($"Failed to consume `{nameof(RequestJobCommand)}`. Error: {exception.StackTrace}");
             }
         }

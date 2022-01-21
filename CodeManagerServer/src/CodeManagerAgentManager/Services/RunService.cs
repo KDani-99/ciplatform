@@ -24,8 +24,6 @@ namespace CodeManagerAgentManager.Services
         // Single unit of work, run and dispose
         private readonly IBusControl _busControl;
         private readonly ILogger<RunService> _logger;
-        private readonly IPublishEndpoint _publishEndpoint;
-        private readonly IRequestClient<AgentRequestRequest> _requestClient; // OBSERVER PATTERN -> not needed?
         private readonly IRunRepository _runRepository;
         private readonly ITokenService<JwtSecurityToken> _tokenService;
 
@@ -52,7 +50,7 @@ namespace CodeManagerAgentManager.Services
                         job.Id); // this token will allow services to accept jobs
 
                 var cancellationToken = CancellationToken.None; // TODO: add token
-                await _publishEndpoint.Publish(new QueueJobEvent
+                await _busControl.Publish(new QueueJobEvent
                 {
                     Token = jobRequestToken.ToBase64String()
                 }, cancellationToken);

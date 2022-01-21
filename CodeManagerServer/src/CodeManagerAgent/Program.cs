@@ -5,8 +5,10 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using CodeManager.Data.Configuration;
 using CodeManagerAgent.Configuration;
+using CodeManagerAgent.Extensions;
 using CodeManagerAgent.Factories;
 using CodeManagerAgent.Services;
+using Docker.DotNet;
 using GreenPipes.Agents;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,7 +27,7 @@ namespace CodeManagerAgent
             Host.CreateDefaultBuilder(args)
                 .ConfigureServices((hostContext, services) =>
                 {
-                    var agentConfiguration = hostContext.Configuration.GetValue<AgentConfiguration>("AgentConfiguration");
+                    var agentConfiguration = hostContext.Configuration.GetSection("AgentConfiguration").Get<AgentConfiguration>();
                     VerifyContext(agentConfiguration);
 
                     switch (agentConfiguration.Context)
@@ -43,10 +45,11 @@ namespace CodeManagerAgent
                             throw new ArgumentOutOfRangeException(
                                 "The agent context must be one of the following types: 'Linux', 'Windows', 'Docker'");
                     }
-                    
-                    services.AddHostedService<Worker>();
+
                     services.AddSingleton<IAgentService, AgentService>();
-                    //services.AddScoped<IJobHandlerServiceFactory, JobHandlerServiceFactory>();
+                    services.AddScoped<IDockerClient>((_) => new DockerClientConfiguration().CreateClient());
+                    services.AddRabbitMq(hostContext.Configuration);
+                  //  services.AddHostedService<Worker>();
                 });
 
         private static void VerifyContext(AgentConfiguration agentConfiguration)

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using CodeManager.Data.Configuration;
 using CodeManagerAgent.Configuration;
 using CodeManagerAgent.Services;
@@ -15,10 +16,10 @@ namespace CodeManagerAgent.Factories
         {
         }
         
-        public override IJobHandlerService Create(string token, JobConfiguration jobConfiguration, Uri responseAddress)
+        public override IJobHandlerService Create(string token, JobConfiguration jobConfiguration, CancellationToken cancellationToken)
         {
-            return new LinuxJobHandlerService(token, jobConfiguration, responseAddress, AgentConfiguration, BusControl,
-                AgentService);
+            return new LinuxJobHandlerService(token, jobConfiguration, AgentConfiguration, BusControl,
+                AgentService, cancellationToken);
         }
     }
 }

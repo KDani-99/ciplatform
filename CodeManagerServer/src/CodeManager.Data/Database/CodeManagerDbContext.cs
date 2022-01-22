@@ -1,4 +1,5 @@
-﻿using CodeManager.Data.Entities;
+﻿using CodeManager.Data.Configuration;
+using CodeManager.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Configuration;
@@ -36,6 +37,7 @@ namespace CodeManager.Data.Database
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasPostgresEnum<Roles>();
+            modelBuilder.HasPostgresEnum<JobContext>();
             
             modelBuilder.Entity<User>()
                 .HasOne(user => user.Plan);

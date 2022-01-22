@@ -24,15 +24,16 @@ namespace CodeManagerAgentManager.Consumers
             {
                 var runId = await _runService.QueueAsync(context.Message);
 
-                await context.RespondAsync(new QueueRunCommandResponse
+                await context.RespondAsync(new SuccessfulQueueRunCommandResponse
                 {
-                    RunId = runId
+                    RunId = runId,
                 });
             }
             catch (Exception exception)
             {
                 // TODO: send error
-                _logger.LogError($"Failed to consume `{nameof(QueueRunCommand)}`. Error: {exception.StackTrace}");
+                _logger.LogError($"Failed to consume `{nameof(QueueRunCommand)}`. Error: {exception.Message}");
+                await context.RespondAsync(new FailedQueueRunCommandResponse());
             }
         }
     }

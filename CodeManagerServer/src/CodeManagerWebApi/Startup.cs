@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CodeManager.Data.Repositories;
-using CodeManagerAgentManager.Commands;
 using CodeManagerWebApi.Database;
 using CodeManagerWebApi.Entities.Configuration;
+using CodeManagerWebApi.Extensions;
 using CodeManagerWebApi.Services;
 using CodeManagerWebApi.Utils.Extensions;
 using MassTransit;
@@ -19,7 +19,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 
 namespace CodeManagerWebApi
@@ -39,7 +38,7 @@ namespace CodeManagerWebApi
                 .Configure<JwtConfiguration>(_configuration.GetSection("JwtConfiguration"))
                 .Configure<UserConfiguration>(_configuration.GetSection("UserConfiguration"))
                 .Configure<IConfiguration>(_configuration)
-                .AddDbContext<CodeManagerDbContext>(options => options.UseNpgsql(_configuration.GetValue<string>("ConnectionString")))
+                .AddDbContext<CodeManager.Data.Database.CodeManagerDbContext,CodeManagerDbContext>(options => options.UseNpgsql(_configuration.GetValue<string>("ConnectionString")))
                 .AddSingleton<ICredentialManagerService, CredentialManagerService>()
                 .AddSingleton<ITokenService<JwtSecurityToken>, TokenService>()
                 .AddScoped<IUserRepository, UserRepository>()
@@ -49,21 +48,7 @@ namespace CodeManagerWebApi
                 .AddScoped<IPlanRepository, PlanRepository>()
                 .AddScoped<IPlanService, PlanService>()
                 .AddAntiforgery()
-                .AddMassTransit(options =>
-                {
-                    var bus = Bus.Factory.CreateUsingRabbitMq(config =>
-                    {
-                        config.Host("localhost", "/",
-                            h =>
-                            {
-                                h.Username("guest");
-                                h.Password("guest");
-                            });
-                    });
-                    options.AddRequestClient<StartJobCommand>();
-                    
-                    bus.Start();
-                })
+                .AddRabbitMq(_configuration)
                 .AddControllers().Services
                 .AddSwaggerGen(c =>
                 {

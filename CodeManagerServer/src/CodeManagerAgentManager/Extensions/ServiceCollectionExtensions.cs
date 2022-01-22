@@ -1,8 +1,11 @@
 ﻿using System;
 using CodeManager.Data.Configuration;
-using CodeManagerAgentManager.Configuration;
 using CodeManagerAgentManager.Consumers;
 using MassTransit;
+using MassTransit.JobService;
+using MassTransit.JobService.Components.StateMachines;
+using MassTransit.RabbitMqTransport.Topology.Entities;
+using RabbitMQ.Client;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -14,14 +17,16 @@ namespace CodeManagerAgentManager.Extensions
         {
             return services.AddMassTransit(busConfigurator =>
             {
-                var massTransitConfiguration = configuration.GetSection("MassTransitConfiguration").Get<MassTransitConfiguration>();
-                
+                var massTransitConfiguration =
+                    configuration.GetSection("MassTransitConfiguration").Get<MassTransitConfiguration>();
+
                 // TODO: make consumers temporary
 
+                busConfigurator.AddConsumer<QueueRunCommandConsumer>();
                 busConfigurator.AddConsumer<StepLogEventConsumer>();
                 busConfigurator.AddConsumer<StepResultEventConsumer>();
                 busConfigurator.AddConsumer<RequestJobCommandConsumer>();
-                
+
                 busConfigurator.SetKebabCaseEndpointNameFormatter();
 
                 busConfigurator.UsingRabbitMq((context, cfg) =>
@@ -32,15 +37,31 @@ namespace CodeManagerAgentManager.Extensions
                             h.Username(massTransitConfiguration.Username);
                             h.Password(massTransitConfiguration.Password);
                         });
-                    
+
+                    cfg.ReceiveEndpoint(massTransitConfiguration.Queues["QueueRunCommandQueue"], opts =>
+                    {
+                        opts.AutoDelete = true;
+                        opts.ConfigureConsumer<QueueRunCommandConsumer>(context);
+                        //opts.SingleActiveConsumer
+                    });
                     cfg.ReceiveEndpoint(massTransitConfiguration.Queues["StepLogEventQueue"],
-                        opts => { opts.Bind<StepLogEventConsumer>();
+                        opts =>
+                        {
                             opts.AutoDelete = true;
+                            opts.ConfigureConsumer<StepLogEventConsumer>(context);
                         });
                     cfg.ReceiveEndpoint(massTransitConfiguration.Queues["StepResultEventQueue"],
-                        opts => { opts.Bind<StepResultEventConsumer>(); opts.AutoDelete = true; });
+                        opts =>
+                        {
+                            opts.AutoDelete = true;
+                            opts.ConfigureConsumer<StepResultEventConsumer>(context);
+                        });
                     cfg.ReceiveEndpoint(massTransitConfiguration.Queues["RequestJobCommandQueue"],
-                        opts => { opts.Bind<RequestJobCommandConsumer>(); opts.AutoDelete = true; });
+                        opts =>
+                        {
+                            opts.AutoDelete = true;
+                            opts.ConfigureConsumer<RequestJobCommandConsumer>(context);
+                        });
                 });
 
                 services.AddMassTransitHostedService(true);

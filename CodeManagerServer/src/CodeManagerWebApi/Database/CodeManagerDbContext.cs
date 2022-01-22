@@ -13,7 +13,7 @@ namespace CodeManagerWebApi.Database
 {
     public class CodeManagerDbContext : CodeManager.Data.Database.CodeManagerDbContext
     {
-        public CodeManagerDbContext(DbContextOptions<CodeManagerDbContext> dbContextOptions) : base(new DbContextOptions<CodeManager.Data.Database.CodeManagerDbContext>())
+        public CodeManagerDbContext(DbContextOptions<CodeManagerDbContext> dbContextOptions) : base(dbContextOptions)
         {
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)

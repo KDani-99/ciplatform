@@ -11,6 +11,8 @@ namespace CodeManager.Data.Entities.CI
         public List<Step> Steps { get; set; }
         public Run Run { get; set; }
         public States State { get; set; } = States.NotRun;
+        public string JsonContext { get; set; }
+        public JobContext Context { get; set; }
         public DateTime StartDateTime { get; set; }
         public DateTime FinishedDateTime { get; set; }
     }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using CodeManager.Data.Commands;
 using CodeManager.Data.Configuration;
@@ -67,14 +68,15 @@ namespace CodeManagerAgentManager.Consumers
 
                 await context.RespondAsync(new AcceptedRequestJobCommandResponse
                 {
-                    Token = jobToken.ToBase64String()
+                    Token = jobToken.ToBase64String(),
+                    JobConfiguration = JsonSerializer.Deserialize<JobConfiguration>(job.JsonContext)
                 });
 
             }
             catch (Exception exception)
             {
                 await context.RespondAsync(new RejectedRequestJobCommandResponse());
-                _logger.LogError($"Failed to consume `{nameof(RequestJobCommand)}`. Error: {exception.StackTrace}");
+                _logger.LogError($"Failed to consume `{nameof(RequestJobCommand)}`. Error: {exception.Message}");
             }
         }
     }

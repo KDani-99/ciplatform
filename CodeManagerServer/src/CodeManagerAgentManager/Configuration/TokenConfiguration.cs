@@ -2,7 +2,7 @@
 {
     public class TokenConfiguration
     {
-        public int LifeTimeMinutes { get; set; }
+        public int LifeTime { get; set; }
         public string Secret { get; set; }
     }
 }

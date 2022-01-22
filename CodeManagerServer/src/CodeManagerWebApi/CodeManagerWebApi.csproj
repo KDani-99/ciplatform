@@ -7,7 +7,6 @@
     <ItemGroup>
         <PackageReference Include="BCrypt.Net-Next" Version="4.0.2" />
         <PackageReference Include="EmailValidation" Version="1.0.6" />
-        <PackageReference Include="MassTransit.Extensions.DependencyInjection" Version="7.3.1-develop.340" />
         <PackageReference Include="MassTransit.RabbitMQ" Version="7.3.1-develop.340" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.13" />
         <PackageReference Include="Microsoft.AspNetCore.WebHooks.Receivers.GitHub" Version="1.0.0-preview2-final" />
@@ -29,7 +28,6 @@
 
     <ItemGroup>
       <Folder Include="Entities\CI" />
-      <Folder Include="Extensions" />
       <Folder Include="Repositories" />
     </ItemGroup>
 

@@ -1,7 +1,10 @@
-﻿namespace CodeManager.Data.Commands
+﻿using CodeManager.Data.Configuration;
+
+namespace CodeManager.Data.Commands
 {
-    public class QueueRunCommandResponse
+    public class SuccessfulQueueRunCommandResponse
     {
         public long RunId { get; init; }
+        public RunConfiguration RunConfiguration { get; set; }
     }
 }

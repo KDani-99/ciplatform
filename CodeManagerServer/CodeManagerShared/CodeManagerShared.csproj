@@ -8,9 +8,4 @@
       <PackageReference Include="Docker.DotNet" Version="3.125.5" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Database" />
-      <Folder Include="Entities" />
-    </ItemGroup>
-
 </Project>

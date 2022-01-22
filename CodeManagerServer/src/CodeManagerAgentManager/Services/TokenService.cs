@@ -28,7 +28,7 @@ namespace CodeManagerAgentManager.Services
 
         public Task<ClaimsPrincipal> VerifyJobTokenAsync(string token)
         {
-            return VerifyJobTokenAsync(token, _tokenServiceConfiguration.JobTokenConfiguration.Secret);
+            return VerifyTokenAsync(token, _tokenServiceConfiguration.JobTokenConfiguration.Secret);
         }
 
         public Task<JwtSecurityToken> CreateJobRequestTokenAsync(long runId, long jobId)
@@ -38,7 +38,7 @@ namespace CodeManagerAgentManager.Services
 
         public Task<ClaimsPrincipal> VerifyJobRequestTokenAsync(string token)
         {
-            return VerifyJobTokenAsync(token, _tokenServiceConfiguration.JobRequestTokenConfiguration.Secret);
+            return VerifyTokenAsync(token, _tokenServiceConfiguration.JobRequestTokenConfiguration.Secret);
         }
 
         private static Task<JwtSecurityToken> CreateJobTokenAsync(long runId, long jobId,
@@ -53,7 +53,7 @@ namespace CodeManagerAgentManager.Services
             return Task.FromResult(GenerateToken(claims, tokenConfiguration));
         }
 
-        private static Task<ClaimsPrincipal> VerifyJobTokenAsync(string token, string secret)
+        private static Task<ClaimsPrincipal> VerifyTokenAsync(string token, string secret)
         {
             var tokenHandler = new JwtSecurityTokenHandler {MapInboundClaims = false};
             var validationParameters = new TokenValidationParameters
@@ -76,7 +76,7 @@ namespace CodeManagerAgentManager.Services
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.Now.AddMinutes(tokenConfiguration.LifeTimeMinutes),
+                Expires = DateTime.Now.AddSeconds(tokenConfiguration.LifeTime),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(secretBytes),
                     SecurityAlgorithms.HmacSha256Signature)
             };

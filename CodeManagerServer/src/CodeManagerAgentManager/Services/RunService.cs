@@ -14,6 +14,8 @@ using CodeManagerAgentManager.Configuration;
 using MassTransit;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace CodeManagerAgentManager.Services
 {
@@ -43,24 +45,30 @@ namespace CodeManagerAgentManager.Services
         {
             var run = await SaveRunConfiguration(cmd);
 
-            var jobTasks = run.Jobs.Select(job => Task.Run(async () =>
+            foreach (var job in run.Jobs)
             {
                 var jobRequestToken =
                     await _tokenService.CreateJobRequestTokenAsync(run.Id,
                         job.Id); // this token will allow services to accept jobs
 
                 var cancellationToken = CancellationToken.None; // TODO: add token
-                await _busControl.Publish(new QueueJobEvent
+
+                var base64Token = jobRequestToken.ToBase64String();
+
+                IQueueJobEvent queueJobEvent = job.Context switch
                 {
-                    Token = jobRequestToken.ToBase64String()
-                }, cancellationToken);
+                    JobContext.Docker => new QueueDockerJobEvent {Token = base64Token},
+                    JobContext.Linux => new QueueLinuxJobEvent {Token = base64Token},
+                    JobContext.Windows => new QueueWindowsJobEvent {Token = base64Token},
+                    _ => throw new ArgumentOutOfRangeException("The job context must be one of the following types: 'Linux', 'Windows', 'Docker'")
+                };
+                
+                await _busControl.Publish(queueJobEvent, cancellationToken);
                 // TODO: send job queued event back to the client
 
                 job.State = States.Queued;
                 await _runRepository.UpdateAsync(run); // TODO: use job repository?
-            }));
-
-            await Task.WhenAll(jobTasks);
+            }
 
             run.State = States.Queued;
             await _runRepository.UpdateAsync(run);
@@ -77,6 +85,8 @@ namespace CodeManagerAgentManager.Services
             {
                 Jobs = cmd.RunConfiguration.Jobs.Select(job => new Job
                 {
+                    JsonContext = JsonSerializer.Serialize(job),
+                    Context = job.Value.Context,
                     Name = job.Key,
                     Steps = job.Value.Steps.Select(step => new Step
                     {
@@ -86,7 +96,6 @@ namespace CodeManagerAgentManager.Services
                     }).ToList(),
                     State = States.NotRun
                 }).ToList(),
-                ContextFilePath = cmd.ContextFilePath,
                 State = States.NotRun
             };
 

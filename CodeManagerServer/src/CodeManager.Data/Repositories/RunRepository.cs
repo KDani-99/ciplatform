@@ -17,7 +17,10 @@ namespace CodeManager.Data.Repositories
 
         public override Task<Run> GetAsync(long id)
         {
-            return DbContext.Runs.FirstOrDefaultAsync(job => job.Id == id);
+            return DbContext
+                .Runs
+                .Include(x => x.Jobs)
+                .FirstOrDefaultAsync(job => job.Id == id);
         }
 
         public override Task<List<Run>> GetAsync(Expression<Func<Run, bool>> expression)

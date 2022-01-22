@@ -51,7 +51,7 @@ namespace CodeManagerWebApi.Services
                 var ticket = new AuthenticationTicket(claimsPrincipal, Scheme.Name);
                 return AuthenticateResult.Success(ticket);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 _logger.LogInformation($"Invalid authentication attempt.");
                 return AuthenticateResult.Fail("Invalid token.");

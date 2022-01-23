@@ -20,9 +20,9 @@ namespace CodeManagerAgent.Factories
             _dockerClient = dockerClient ?? throw new ArgumentNullException(nameof(dockerClient));
         }
         
-        public override IJobHandlerService Create(string token, JobConfiguration jobConfiguration, CancellationToken cancellationToken)
+        public override IJobHandlerService Create(string repository, string token, JobConfiguration jobConfiguration, CancellationToken cancellationToken)
         {
-            return new DockerJobHandlerService(token, jobConfiguration, AgentConfiguration,_dockerClient, BusControl,
+            return new DockerJobHandlerService(repository, token, jobConfiguration, AgentConfiguration,_dockerClient, BusControl,
                 AgentService, cancellationToken);
         }
     }

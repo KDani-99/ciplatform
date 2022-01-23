@@ -11,7 +11,7 @@ using MassTransit;
 
 namespace CodeManagerAgent.Consumers
 {
-    public abstract class QueueJobEventConsumer : IConsumer<IQueueJobEvent>
+    public abstract class QueueJobEventConsumer
     {
         private readonly IAgentService _agentService;
         private readonly IRequestClient<RequestJobCommand> _requestClient;
@@ -25,7 +25,7 @@ namespace CodeManagerAgent.Consumers
                                         throw new ArgumentNullException(nameof(jobHandlerServiceFactory));
         }
 
-        public virtual async Task Consume(ConsumeContext<IQueueJobEvent> context)
+        protected async Task Consume(IQueueJobEvent queueJobEvent)
         {
             if (_agentService.AgentState == AgentState.Available)
             {
@@ -33,7 +33,7 @@ namespace CodeManagerAgent.Consumers
 
                 var response = await _requestClient.GetResponse<AcceptedRequestJobCommandResponse, RejectedRequestJobCommandResponse>(new RequestJobCommand
                 {
-                    Token = context.Message.Token
+                    Token = queueJobEvent.Token
                 });
 
                 if (response.Is(out Response<AcceptedRequestJobCommandResponse> acceptedRequestJobCommandResponse))
@@ -41,7 +41,7 @@ namespace CodeManagerAgent.Consumers
                     // start working
                     _agentService.CancellationTokenSource = new CancellationTokenSource();
                     
-                    await _jobHandlerServiceFactory.Create(acceptedRequestJobCommandResponse.Message.Token, acceptedRequestJobCommandResponse.Message.JobConfiguration, _agentService.CancellationTokenSource.Token)
+                    await _jobHandlerServiceFactory.Create(acceptedRequestJobCommandResponse.Message.Repository, acceptedRequestJobCommandResponse.Message.Token, acceptedRequestJobCommandResponse.Message.JobConfiguration, _agentService.CancellationTokenSource.Token)
                         .StartAsync();
                 }
                 else if (response.Is(out Response<RejectedRequestJobCommandResponse> rejectedRequestJobCommandResponse))
@@ -49,17 +49,12 @@ namespace CodeManagerAgent.Consumers
                     _agentService.AgentState = AgentState.Available;
                 }
             }
+            else
+            {
+                _agentService.AgentState = AgentState.Available;
+            }
+            // TODO: reset agent state if request times out
             // else busy
-        }
-
-        public Task Consume(ConsumeContext<QueueLinuxJobEvent> context)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task Consume(ConsumeContext<QueueWindowsJobEvent> context)
-        {
-            throw new NotImplementedException();
         }
     }
 }

@@ -4,6 +4,7 @@ using CodeManager.Data.Configuration;
 using CodeManager.Data.Events;
 using CodeManagerAgent.Configuration;
 using CodeManagerAgent.Consumers;
+using GreenPipes;
 using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,7 +25,7 @@ namespace CodeManagerAgent.Extensions
                 switch (agentConfiguration.Context)
                 {
                     case JobContext.Docker:
-                        busConfigurator.AddConsumer<QueueDockerJobEventConsumer>();
+                        busConfigurator.AddConsumer<QueueDockerJobEventConsumer>(x => x.UseConcurrencyLimit(0));
                         break;
                     case JobContext.Linux:
                         busConfigurator.AddConsumer<QueueLinuxJobEventConsumer>();
@@ -53,16 +54,17 @@ namespace CodeManagerAgent.Extensions
                         opts =>
                         {
                             opts.AutoDelete = true;
+                            opts.PrefetchCount = 1;
                             switch (agentConfiguration.Context)
                             {
                                 case JobContext.Docker:
-                                    opts.ConfigureConsumer<QueueDockerJobEventConsumer>(context);
+                                    opts.Consumer<QueueDockerJobEventConsumer>(context);
                                     break;
                                 case JobContext.Linux:
-                                    opts.ConfigureConsumer<QueueLinuxJobEventConsumer>(context);
+                                    opts.Consumer<QueueLinuxJobEventConsumer>(context);
                                     break;
                                 case JobContext.Windows:
-                                    opts.ConfigureConsumer<QueueWindowsJobEventConsumer>(context);
+                                    opts.Consumer<QueueWindowsJobEventConsumer>(context);
                                     break;
                                 default:
                                     throw new ArgumentOutOfRangeException(

@@ -7,6 +7,6 @@ namespace CodeManagerAgent.Factories
 {
     public interface IJobHandlerServiceFactory
     {
-        public IJobHandlerService Create(string token, JobConfiguration jobConfiguration, CancellationToken cancellationToken);
+        public IJobHandlerService Create(string repository, string token, JobConfiguration jobConfiguration, CancellationToken cancellationToken);
     }
 }

@@ -17,7 +17,7 @@ namespace CodeManagerAgent.Consumers
 
         public Task Consume(ConsumeContext<QueueDockerJobEvent> context)
         {
-            return base.Consume(context);
+            return base.Consume(context.Message);
         }
     }
 }

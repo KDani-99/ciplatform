@@ -22,8 +22,8 @@ namespace CodeManagerAgent.Services
     public class LinuxJobHandlerService : JobHandlerService
     {
         // unit of work
-        public LinuxJobHandlerService(string token, JobConfiguration jobConfiguration, IOptions<AgentConfiguration> agentConfiguration,  IBusControl bus, IAgentService agentService, CancellationToken cancellationToken)
-            : base(token, jobConfiguration, agentConfiguration, bus, agentService, cancellationToken)
+        public LinuxJobHandlerService(string repository, string token, JobConfiguration jobConfiguration, IOptions<AgentConfiguration> agentConfiguration,  IBusControl bus, IAgentService agentService, CancellationToken cancellationToken)
+            : base(repository, token, jobConfiguration, agentConfiguration, bus, agentService, cancellationToken)
         {
         }
 
@@ -38,10 +38,10 @@ namespace CodeManagerAgent.Services
             // not required
         }
 
-        protected override async Task<long> ExecuteCommandAsync(int stepIndex, string executable, string args, StreamWriter outputStream)
+        protected override async Task<long> ExecuteCommandAsync(int stepIndex, IList<string> command, StreamWriter outputStream)
         {
             using var process = new Process();
-            process.ConfigureCliProcess(executable, args, JobConfiguration.Environment); // or /bin/bash -c "<cmd>"
+            process.ConfigureCliProcess(command.Take(1).First(), string.Join(" ", command.Skip(1)),JobConfiguration.Environment); // or /bin/bash -c "<cmd>"
 
             process.OutputDataReceived += async (_, eventArgs) =>
               await ProcessOnOutputDataReceivedAsync(stepIndex, eventArgs, outputStream);

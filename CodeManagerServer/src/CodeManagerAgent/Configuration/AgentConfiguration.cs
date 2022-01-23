@@ -7,5 +7,6 @@ namespace CodeManagerAgent.Configuration
     {
         public JobContext Context { get; set; }
         public string LogDirectory { get; set; }
+        public string WorkingDirectory { get; set; }
     }
 }

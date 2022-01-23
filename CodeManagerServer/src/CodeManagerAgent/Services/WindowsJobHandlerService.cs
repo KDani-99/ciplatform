@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CodeManager.Data.Configuration;
@@ -17,8 +20,8 @@ namespace CodeManagerAgent.Services
     public class WindowsJobHandlerService : JobHandlerService
     {
         // unit of work
-        public WindowsJobHandlerService(string token, JobConfiguration jobConfiguration, IOptions<AgentConfiguration> agentConfiguration, IBusControl bus, IAgentService agentService, CancellationToken cancellationToken)
-            : base(token, jobConfiguration, agentConfiguration, bus, agentService, cancellationToken)
+        public WindowsJobHandlerService(string repository, string token, JobConfiguration jobConfiguration, IOptions<AgentConfiguration> agentConfiguration, IBusControl bus, IAgentService agentService, CancellationToken cancellationToken)
+            : base(repository, token, jobConfiguration, agentConfiguration, bus, agentService, cancellationToken)
         {
         }
 
@@ -33,10 +36,11 @@ namespace CodeManagerAgent.Services
             // not required
         }
 
-        protected override async Task<long> ExecuteCommandAsync(int stepIndex, string executable, string args, StreamWriter outputStream)
+        protected override async Task<long> ExecuteCommandAsync(int stepIndex, IList<string> command, StreamWriter outputStream)
         {
             using var process = new Process();
-            process.ConfigureCliProcess("powershell", $"{executable} {args}", JobConfiguration.Environment);
+            process.ConfigureCliProcess(command.Take(1).First(), string.Join(" ", command.Skip(1)),JobConfiguration.Environment); // or /bin/bash -c "<cmd>"
+
 
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();

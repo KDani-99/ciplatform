@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using CodeManager.Data.Agent.Requests;
 using CodeManager.Data.Commands;
 using CodeManager.Data.Configuration;
 using CodeManager.Data.Entities.CI;
@@ -28,11 +28,13 @@ namespace CodeManagerAgentManager.Services
         private readonly ILogger<RunService> _logger;
         private readonly IRunRepository _runRepository;
         private readonly ITokenService<JwtSecurityToken> _tokenService;
+        private readonly JsonSerializerOptions _jsonSerializerOptions;
 
-        public RunService(IRunRepository runRepository, ILogger<RunService> logger,
+        public RunService(JsonSerializerOptions jsonSerializerOptions, IRunRepository runRepository, ILogger<RunService> logger,
             IOptions<AgentManagerConfiguration> agentManagerConfiguration, IBusControl busControl,
             ITokenService<JwtSecurityToken> tokenService)
         {
+            _jsonSerializerOptions = jsonSerializerOptions;
             _runRepository = runRepository ?? throw new ArgumentNullException(nameof(runRepository));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _agentManagerConfiguration = agentManagerConfiguration.Value ??
@@ -55,15 +57,15 @@ namespace CodeManagerAgentManager.Services
 
                 var base64Token = jobRequestToken.ToBase64String();
 
-                IQueueJobEvent queueJobEvent = job.Context switch
+                object queueJobEvent = job.Context switch
                 {
                     JobContext.Docker => new QueueDockerJobEvent {Token = base64Token},
                     JobContext.Linux => new QueueLinuxJobEvent {Token = base64Token},
                     JobContext.Windows => new QueueWindowsJobEvent {Token = base64Token},
                     _ => throw new ArgumentOutOfRangeException("The job context must be one of the following types: 'Linux', 'Windows', 'Docker'")
                 };
-                
-                await _busControl.Publish(queueJobEvent, cancellationToken);
+
+                await _busControl.Publish(queueJobEvent);
                 // TODO: send job queued event back to the client
 
                 job.State = States.Queued;
@@ -83,9 +85,10 @@ namespace CodeManagerAgentManager.Services
         {
             var runConfiguration = new Run
             {
+                Repository = cmd.Repository,
                 Jobs = cmd.RunConfiguration.Jobs.Select(job => new Job
                 {
-                    JsonContext = JsonSerializer.Serialize(job),
+                    JsonContext = JsonSerializer.Serialize(job.Value, _jsonSerializerOptions),
                     Context = job.Value.Context,
                     Name = job.Key,
                     Steps = job.Value.Steps.Select(step => new Step

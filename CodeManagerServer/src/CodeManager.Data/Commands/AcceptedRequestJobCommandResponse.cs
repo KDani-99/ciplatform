@@ -6,5 +6,6 @@ namespace CodeManager.Data.Commands
     {
         public string Token { get; init; }
         public JobConfiguration JobConfiguration { get; init; }
+        public string Repository { get; init; }
     }
 }

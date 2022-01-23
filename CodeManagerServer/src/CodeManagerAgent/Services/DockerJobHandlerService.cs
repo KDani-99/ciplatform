@@ -28,8 +28,8 @@ namespace CodeManagerAgent.Services
         private string _containerId;
         
         // unit of work
-        public DockerJobHandlerService(string token, JobConfiguration jobConfiguration, IOptions<AgentConfiguration> agentConfiguration, IDockerClient dockerClient, IBusControl bus, IAgentService agentService, CancellationToken cancellationToken)
-            : base(token, jobConfiguration, agentConfiguration, bus, agentService, cancellationToken)
+        public DockerJobHandlerService(string repository ,string token, JobConfiguration jobConfiguration, IOptions<AgentConfiguration> agentConfiguration, IDockerClient dockerClient, IBusControl bus, IAgentService agentService, CancellationToken cancellationToken)
+            : base(repository, token, jobConfiguration, agentConfiguration, bus, agentService, cancellationToken)
         {
             _dockerClient = dockerClient ?? throw new ArgumentNullException(nameof(dockerClient));
         }
@@ -58,11 +58,15 @@ namespace CodeManagerAgent.Services
                 JobConfiguration.AuthConfig,
                 new Progress<JSONMessage>());
 
+
             var container = await _dockerClient.Containers.CreateContainerAsync(new CreateContainerParameters
             {
                 Image = JobConfiguration.Image,
                 //Name = JobConfiguration.AgentId, // TODO: decode jwt and get id
                 Env = JobConfiguration.Environment,
+                AttachStdout = true,
+                AttachStderr = true,
+                Tty = true, // keep detached container running
             });
 
             _containerId = container.ID;
@@ -110,12 +114,12 @@ namespace CodeManagerAgent.Services
             }
         }*/
 
-       protected override async Task<long> ExecuteCommandAsync(int stepIndex, string executable, string args, StreamWriter outputStream)
+       protected override async Task<long> ExecuteCommandAsync(int stepIndex, IList<string> command, StreamWriter outputStream)
        {
            var execCreateResponse =
                await _dockerClient.Exec.ExecCreateContainerAsync(_containerId, new ContainerExecCreateParameters
                {
-                   Cmd = new List<string>() {executable, args},
+                   Cmd = command,
                    AttachStdout = true,
                    AttachStderr = true
                });

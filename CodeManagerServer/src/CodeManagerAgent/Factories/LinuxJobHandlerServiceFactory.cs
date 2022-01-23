@@ -16,9 +16,9 @@ namespace CodeManagerAgent.Factories
         {
         }
         
-        public override IJobHandlerService Create(string token, JobConfiguration jobConfiguration, CancellationToken cancellationToken)
+        public override IJobHandlerService Create(string repository, string token, JobConfiguration jobConfiguration, CancellationToken cancellationToken)
         {
-            return new LinuxJobHandlerService(token, jobConfiguration, AgentConfiguration, BusControl,
+            return new LinuxJobHandlerService(repository, token, jobConfiguration, AgentConfiguration, BusControl,
                 AgentService, cancellationToken);
         }
     }

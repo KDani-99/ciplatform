@@ -16,6 +16,7 @@ namespace CodeManager.Data.Database
         static CodeManagerDbContext()
         {
             NpgsqlConnection.GlobalTypeMapper.MapEnum<Roles>();
+            NpgsqlConnection.GlobalTypeMapper.MapEnum<JobContext>();
         }
 
         public CodeManagerDbContext(DbContextOptions<CodeManagerDbContext> dbContextOptions) : base(dbContextOptions)

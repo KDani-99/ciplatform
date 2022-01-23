@@ -22,6 +22,6 @@ namespace CodeManagerAgent.Factories
             AgentConfiguration = agentConfiguration ?? throw new ArgumentNullException(nameof(agentConfiguration));
         }
         
-        public abstract IJobHandlerService Create(string token, JobConfiguration jobConfiguration, CancellationToken cancellationToken);
+        public abstract IJobHandlerService Create(string repository, string token, JobConfiguration jobConfiguration, CancellationToken cancellationToken);
     }
 }

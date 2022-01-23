@@ -2,6 +2,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using CodeManager.Data.Commands;
 using CodeManager.Data.Configuration;
@@ -21,8 +22,11 @@ namespace CodeManagerAgentManager.Consumers
         private readonly IRunRepository _runRepository;
         private readonly ITokenService<JwtSecurityToken> _tokenService;
         private readonly ILogger<StepResultEventConsumer> _logger;
-        public RequestJobCommandConsumer(IRunRepository runRepository, ITokenService<JwtSecurityToken> tokenService, ILogger<StepResultEventConsumer> logger)
+        private readonly JsonSerializerOptions _jsonSerializerOptions;
+        public RequestJobCommandConsumer(JsonSerializerOptions jsonSerializerOptions,IRunRepository runRepository, ITokenService<JwtSecurityToken> tokenService, ILogger<StepResultEventConsumer> logger)
         {
+            _jsonSerializerOptions =
+                jsonSerializerOptions ?? throw new ArgumentNullException(nameof(jsonSerializerOptions));
             _runRepository = runRepository ?? throw new ArgumentNullException(nameof(runRepository));
             _tokenService = tokenService ?? throw new ArgumentNullException(nameof(tokenService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -65,11 +69,12 @@ namespace CodeManagerAgentManager.Consumers
                 await _runRepository.UpdateAsync(run);
 
                 var jobToken = await _tokenService.CreateJobTokenAsync(runId, jobId);
-
+                var x = JsonSerializer.Deserialize<JobConfiguration>(job.JsonContext, _jsonSerializerOptions) ;
                 await context.RespondAsync(new AcceptedRequestJobCommandResponse
                 {
                     Token = jobToken.ToBase64String(),
-                    JobConfiguration = JsonSerializer.Deserialize<JobConfiguration>(job.JsonContext)
+                    JobConfiguration = JsonSerializer.Deserialize<JobConfiguration>(job.JsonContext, _jsonSerializerOptions),
+                    Repository = run.Repository
                 });
 
             }

@@ -41,9 +41,8 @@ namespace CodeManagerWebApi.Controllers
             
             var configuration = deserializer.Deserialize<RunConfiguration>(content);
             
-            var response = await _requestClient.GetResponse<SuccessfulQueueRunCommandResponse, FailedQueueRunCommandResponse>(new QueueRunCommand {RunConfiguration = configuration});   
+            var response = await _requestClient.GetResponse<SuccessfulQueueRunCommandResponse, FailedQueueRunCommandResponse>(new QueueRunCommand {RunConfiguration = configuration, Repository = "https://github.com/KDani-99/doc-assistant"});
 
-            
             return Ok();
         }
 

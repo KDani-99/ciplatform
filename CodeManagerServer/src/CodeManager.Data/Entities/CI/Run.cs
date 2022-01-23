@@ -7,6 +7,7 @@ namespace CodeManager.Data.Entities.CI
 {
     public class Run : Entity
     {
+        public string Repository { get; set; }
         public List<Job> Jobs { get; set; }
         public States State { get; set; } = States.NotRun;
         public DateTime StartedDateTime { get; set; }

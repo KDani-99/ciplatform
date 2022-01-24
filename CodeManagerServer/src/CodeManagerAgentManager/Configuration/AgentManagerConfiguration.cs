@@ -2,6 +2,7 @@
 {
     public class AgentManagerConfiguration
     {
-        public int AgentRequestTimeoutInSeconds { get; set; }
+        public int AgentRequestTimeout { get; set; }
+        public string LogPath { get; set; }
     }
 }

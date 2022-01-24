@@ -133,7 +133,7 @@ namespace CodeManagerAgent.Services
 
        private async Task ProcessOutputStreamAsync(int stepIndex, MultiplexedStream stream, StreamWriter outputStreamWriter)
         {
-            const int chunkSize = 4096; // 4 KB
+            const int chunkSize = 4096; // 4 KiB
             var buffer = new byte[chunkSize];
             
             MultiplexedStream.ReadResult result;

@@ -2,7 +2,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using CodeManager.Data.Agent;
-using CodeManager.Data.Agent.Responses;
 using CodeManager.Data.Commands;
 using CodeManager.Data.Events;
 using CodeManagerAgent.Factories;

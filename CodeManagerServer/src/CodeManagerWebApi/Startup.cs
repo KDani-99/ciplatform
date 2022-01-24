@@ -7,6 +7,7 @@ using CodeManager.Data.Repositories;
 using CodeManagerWebApi.Database;
 using CodeManagerWebApi.Entities.Configuration;
 using CodeManagerWebApi.Extensions;
+using CodeManagerWebApi.Hubs;
 using CodeManagerWebApi.Services;
 using CodeManagerWebApi.Utils.Extensions;
 using MassTransit;
@@ -50,6 +51,7 @@ namespace CodeManagerWebApi
                 .AddAntiforgery()
                 .AddRabbitMq(_configuration)
                 .AddControllers().Services
+                .AddSignalR().Services
                 .AddSwaggerGen(c =>
                 {
                     c.SwaggerDoc("v1", new OpenApiInfo {Title = "CodeManagerWebApi", Version = "v1"});
@@ -78,7 +80,11 @@ namespace CodeManagerWebApi
                 .UseRouting()
                 .UseAuthentication()
                 .UseAuthorization()
-                .UseEndpoints(endpoints => { endpoints.MapControllers(); })
+                .UseEndpoints(endpoints =>
+                {
+                    endpoints.MapControllers();
+                    endpoints.MapHub<RunsHub>("/runs");
+                })
                 .UseHealthChecks("/api/health");
         }
     }

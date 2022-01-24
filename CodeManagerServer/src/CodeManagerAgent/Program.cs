@@ -1,16 +1,21 @@
 using System;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using CodeManager.Data.Configuration;
+using CodeManager.Data.Events;
 using CodeManagerAgent.Configuration;
 using CodeManagerAgent.Extensions;
 using CodeManagerAgent.Factories;
+using CodeManagerAgent.Hubs.Consumers;
 using CodeManagerAgent.Services;
 using Docker.DotNet;
+using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using HubConnection = Microsoft.AspNet.SignalR.Client.HubConnection;
 
 namespace CodeManagerAgent
 {
@@ -49,8 +54,11 @@ namespace CodeManagerAgent
                     services.Configure<AgentConfiguration>(hostContext.Configuration.GetSection("AgentConfiguration"));
                     services.AddSingleton<IAgentService, AgentService>();
                     services.AddScoped<IDockerClient>(_ => new DockerClientConfiguration().CreateClient());
+                    services.AddSignalRClient(hostContext.Configuration);
+                    services.AddTransient<IConsumer<QueueDockerJobEvent>, QueueDockerJobEventConsumer>();
+                    services.AddTransient<IConsumer<QueueLinuxJobEvent>, QueueLinuxJobEventConsumer>();
+                    services.AddTransient<IConsumer<QueueWindowsJobEvent>, QueueWindowsJobEventConsumer>();
                     services.AddRabbitMq(hostContext.Configuration);
-                    //  services.AddHostedService<Worker>();
                 });
         }
 

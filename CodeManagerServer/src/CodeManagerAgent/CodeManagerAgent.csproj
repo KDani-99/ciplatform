@@ -9,6 +9,11 @@
     <ItemGroup>
         <PackageReference Include="Docker.DotNet" Version="3.125.5" />
         <PackageReference Include="MassTransit.RabbitMQ" Version="7.3.1-develop.340" />
+        <PackageReference Include="Microsoft.AspNet.SignalR.Client" Version="2.4.3" />
+        <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
+        <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="6.0.1" />
+        <PackageReference Include="Microsoft.AspNetCore.SignalR.Client.Core" Version="6.0.1" />
+        <PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.1.0" />
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
         <PackageReference Include="Serilog.Extensions.Logging.File" Version="2.0.0" />
         <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.15.0" />
@@ -18,9 +23,5 @@
     <ItemGroup>
       <ProjectReference Include="..\..\CodeManagerShared\CodeManagerShared.csproj" />
       <ProjectReference Include="..\CodeManager.Data\CodeManager.Data.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Hubs" />
     </ItemGroup>
 </Project>

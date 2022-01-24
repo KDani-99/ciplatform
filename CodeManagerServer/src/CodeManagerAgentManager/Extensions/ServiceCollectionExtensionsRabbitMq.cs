@@ -1,6 +1,6 @@
 ﻿using System;
 using CodeManager.Data.Configuration;
-using CodeManagerAgentManager.Consumers;
+using CodeManagerAgentManager.Consumers.RabbitMq;
 using MassTransit;
 using MassTransit.JobService;
 using MassTransit.JobService.Components.StateMachines;
@@ -11,7 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace CodeManagerAgentManager.Extensions
 {
-    public static class ServiceCollectionExtensions
+    public static partial class ServiceCollectionExtensions
     {
         public static IServiceCollection AddRabbitMq(this IServiceCollection services, IConfiguration configuration)
         {

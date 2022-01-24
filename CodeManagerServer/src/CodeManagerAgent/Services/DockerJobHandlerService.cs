@@ -138,8 +138,60 @@ namespace CodeManagerAgent.Services
             
             MultiplexedStream.ReadResult result;
 
+            var log = new StringBuilder();
             while (!(result = await stream.ReadOutputAsync(buffer, 0, buffer.Length, default)).EOF)
             {
+                log.Append(Encoding.UTF8.GetString(new ArraySegment<byte>(buffer, 0, result.Count)));
+                ProcessStringBuilder(log, async (data) =>
+                {
+                    await WriteAndFlushAsync(outputStreamWriter, data, stepIndex);
+                    // TODO: send to signalr stream
+                });
+                /*   if (result.Target == MultiplexedStream.TargetStream.StandardError)
+                   {
+                       log.Insert(0, "Error: ");
+                   }*/
+             // TODO: log stream type
+
+             CancellationToken.ThrowIfCancellationRequested();;
+            }
+            
+            ProcessStringBuilder(log, async (data) =>
+            {
+                await WriteAndFlushAsync(outputStreamWriter, data, stepIndex);
+                // TODO: send to signalr stream
+            });
+            
+            // in case there is something left in the string builder
+            var dataToStream = log.ToString();
+            await WriteAndFlushAsync(outputStreamWriter, dataToStream, stepIndex);
+            // TODO: send to signalr stream
+            // stream rest of the lines
+        }
+       
+       private static void ProcessStringBuilder(StringBuilder sb, Action<string> stream)
+       {
+           for (var i=0; i< sb.Length; i++)
+           {
+               if (sb[i] != '\n') continue;
+               stream(sb.ToString(0, i + 1));
+               sb.Remove(0, i + 1);
+               i -= i + 1;
+           }
+       }
+       
+       /*
+        *       private async Task ProcessOutputStreamAsync(int stepIndex, MultiplexedStream stream, StreamWriter outputStreamWriter)
+        {
+            const int chunkSize = 4096; // 4 KiB
+            var buffer = new byte[chunkSize];
+            
+            MultiplexedStream.ReadResult result;
+
+            var log = new StringBuilder();
+            while (!(result = await stream.ReadOutputAsync(buffer, 0, buffer.Length, default)).EOF)
+            {
+                log.Append()
                 var log = new StringBuilder(Encoding.UTF8.GetString(new ArraySegment<byte>(buffer, 0, result.Count)));
                 if (result.Target == MultiplexedStream.TargetStream.StandardError)
                 {
@@ -151,6 +203,8 @@ namespace CodeManagerAgent.Services
                 CancellationToken.ThrowIfCancellationRequested();;
             }
         }
+        * 
+        */
 
        public override void Dispose()
         {

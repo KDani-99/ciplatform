@@ -25,13 +25,13 @@ namespace CodeManagerAgent.Extensions
                 switch (agentConfiguration.Context)
                 {
                     case JobContext.Docker:
-                        busConfigurator.AddConsumer<QueueDockerJobEventConsumer>(x => x.UseConcurrencyLimit(0));
+                        busConfigurator.AddConsumer<QueueDockerJobEventConsumer>(x => x.UseConcurrencyLimit(1));
                         break;
                     case JobContext.Linux:
-                        busConfigurator.AddConsumer<QueueLinuxJobEventConsumer>();
+                        busConfigurator.AddConsumer<QueueLinuxJobEventConsumer>(x => x.UseConcurrencyLimit(1));
                         break;
                     case JobContext.Windows:
-                        busConfigurator.AddConsumer<QueueWindowsJobEventConsumer>();
+                        busConfigurator.AddConsumer<QueueWindowsJobEventConsumer>(x => x.UseConcurrencyLimit(1));
                         break;
                     default:
                         throw new ArgumentOutOfRangeException(

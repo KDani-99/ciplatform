@@ -40,13 +40,17 @@ namespace CodeManagerAgentManager
                                 new JsonStringEnumConverter()
                             }
                         })
-                        .Configure<TokenServiceConfiguration>(hostContext.Configuration.GetSection("TokenConfiguration"))
-                        .AddDbContext<CodeManagerDbContext>(options => options.UseNpgsql(hostContext.Configuration.GetValue<string>("ConnectionString")))
+                        .Configure<TokenServiceConfiguration>(
+                            hostContext.Configuration.GetSection("TokenConfiguration"))
+                        .AddDbContext<CodeManagerDbContext>(options =>
+                            options.UseNpgsql(hostContext.Configuration.GetValue<string>("ConnectionString")))
                         .AddScoped<IRunRepository, RunRepository>()
                         .AddScoped<IRunService<QueueRunCommand>, RunService>()
                         .AddScoped<ITokenService<JwtSecurityToken>, TokenService>()
                         .AddScoped<IRunRepository, RunRepository>()
-                        .AddRabbitMq(hostContext.Configuration);
+                        .AddScoped<ILogStreamService, LogStreamService>()
+                        .AddRabbitMq(hostContext.Configuration)
+                        .AddSignalRClient(hostContext.Configuration);
                 });
     }
 }

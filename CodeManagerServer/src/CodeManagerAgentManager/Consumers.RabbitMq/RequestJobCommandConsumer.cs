@@ -15,7 +15,7 @@ using CodeManagerAgentManager.Services;
 using MassTransit;
 using Microsoft.Extensions.Logging;
 
-namespace CodeManagerAgentManager.Consumers
+namespace CodeManagerAgentManager.Consumers.RabbitMq
 {
     public class RequestJobCommandConsumer : IConsumer<RequestJobCommand>
     {

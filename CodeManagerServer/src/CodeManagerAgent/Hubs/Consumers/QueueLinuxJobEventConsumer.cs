@@ -9,7 +9,8 @@ namespace CodeManagerAgent.Hubs.Consumers
 {
     public class QueueLinuxJobEventConsumer : QueueJobEventConsumer, IConsumer<QueueLinuxJobEvent>
     {
-        public QueueLinuxJobEventConsumer(IAgentService agentService, IRequestClient<RequestJobCommand> requestClient, IJobHandlerServiceFactory jobHandlerServiceFactory)
+        public QueueLinuxJobEventConsumer(IAgentService agentService, IRequestClient<RequestJobCommand> requestClient,
+            IJobHandlerServiceFactory jobHandlerServiceFactory)
             : base(agentService, requestClient, jobHandlerServiceFactory)
         {
         }

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using CodeManager.Data.Configuration;
@@ -11,49 +10,65 @@ using CodeManager.Data.Extensions;
 using CodeManager.Data.JsonWebTokens;
 using CodeManagerAgent.Configuration;
 using CodeManagerAgent.Exceptions;
-using CodeManagerAgent.Extensions;
-using Docker.DotNet;
-using Docker.DotNet.Models;
 using MassTransit;
+using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.JsonWebTokens;
 
 namespace CodeManagerAgent.Services
 {
     public abstract class JobHandlerService : IJobHandlerService
     {
         private readonly AgentConfiguration _agentConfiguration;
-        
-        protected readonly IBusControl BusControl;
-        protected readonly IAgentService AgentService;
 
-        protected readonly JobConfiguration JobConfiguration;
-       // protected readonly ISendEndpoint SendEndpoint;
-        protected readonly string RunId;
-        protected readonly string JobId;
-        protected readonly CancellationToken CancellationToken;
-
-        private readonly string _token;
+        private readonly HubConnection _hubConnection;
         private readonly string _repository;
 
-        protected JobHandlerService(string repository, string token, JobConfiguration jobConfiguration , IOptions<AgentConfiguration> agentConfiguration, IBusControl busControl, IAgentService agentService, CancellationToken cancellationToken)
+        private readonly string _token;
+        protected readonly IAgentService AgentService;
+        protected readonly IBusControl BusControl;
+        protected readonly CancellationToken CancellationToken;
+
+        protected readonly JobConfiguration JobConfiguration;
+        protected readonly long JobId;
+
+        protected readonly ILogger<JobHandlerService> Logger;
+
+        // protected readonly ISendEndpoint SendEndpoint;
+        protected readonly long RunId;
+
+        protected JobHandlerService(
+            string repository,
+            string token,
+            JobConfiguration jobConfiguration,
+            HubConnection hubConnection,
+            IOptions<AgentConfiguration> agentConfiguration,
+            IBusControl busControl,
+            IAgentService agentService,
+            ILogger<JobHandlerService> logger,
+            CancellationToken cancellationToken)
         {
             // TODO: read config file from mount
             // TODO: or start is remotely as a process and read logs? => could directly stream docker container logs
             _token = token ?? throw new ArgumentNullException(nameof(token));
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
-            _agentConfiguration = agentConfiguration.Value ?? throw new ArgumentNullException(nameof(agentConfiguration));
+            _agentConfiguration =
+                agentConfiguration.Value ?? throw new ArgumentNullException(nameof(agentConfiguration));
+            _hubConnection = hubConnection ?? throw new ArgumentNullException(nameof(hubConnection));
+            Logger = logger ?? throw new ArgumentNullException(nameof(logger));
             BusControl = busControl ?? throw new ArgumentNullException(nameof(busControl));
             AgentService = agentService ?? throw new ArgumentNullException(nameof(agentService));
             JobConfiguration = jobConfiguration ?? throw new ArgumentNullException(nameof(jobConfiguration));
             CancellationToken = cancellationToken;
-           // SendEndpoint = busControl.GetSendEndpoint(responseAddress).Result;
+            // SendEndpoint = busControl.GetSendEndpoint(responseAddress).Result;
 
             var decodedToken = _token.DecodeJwtToken();
-            RunId = decodedToken.Claims.FirstOrDefault(claim => claim.Type == CustomJwtRegisteredClaimNames.RunId)?.Value;
-            JobId = decodedToken.Claims.FirstOrDefault(claim => claim.Type == CustomJwtRegisteredClaimNames.JobId)?.Value;
+            RunId = long.Parse(decodedToken.Claims
+                .FirstOrDefault(claim => claim.Type == CustomJwtRegisteredClaimNames.RunId)?.Value!);
+            JobId = long.Parse(decodedToken.Claims
+                .FirstOrDefault(claim => claim.Type == CustomJwtRegisteredClaimNames.JobId)?.Value!);
         }
+
         public abstract ValueTask DisposeAsync();
 
         public abstract void Dispose();
@@ -61,14 +76,22 @@ namespace CodeManagerAgent.Services
         public virtual async Task StartAsync()
         {
             // Non zero exit code indicates failure @ the given job
+            Logger.LogInformation($"Starting job: {JobId} (Run: {RunId})...");
+
+            var beforeExecutionDateTime = DateTime.Now;
             await ExecuteJobAsync();
+            var afterExecutionDateTime = DateTime.Now;
+
+            var seconds = afterExecutionDateTime - beforeExecutionDateTime;
+            // TODO: send metrics
+            Logger.LogInformation($"Job ran for {seconds.TotalSeconds} second(s).");
         }
 
-        protected virtual async Task ExecuteJobAsync()
+        protected async Task ExecuteJobAsync()
         {
             // TODO: signal job start
             var step = -1; // indicated unknown
-            
+
             try
             {
                 // Add setup step
@@ -77,7 +100,7 @@ namespace CodeManagerAgent.Services
                     Name = "Checkout repository (setup)",
                     Cmd = $"git clone {_repository} {_agentConfiguration.WorkingDirectory}"
                 });
-                
+
                 for (step = 0; step < JobConfiguration.Steps.Count; step++)
                 {
                     CancellationToken.ThrowIfCancellationRequested();
@@ -97,17 +120,27 @@ namespace CodeManagerAgent.Services
                     });
                 }
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException exception)
             {
+                Logger.LogError("Job was cancelled remotely.");
                 await SendEventAsync(new StepResultEvent
                 {
                     State = States.Cancelled,
                     StepIndex = step
                 });
             }
+            catch (StepFailedException exception)
+            {
+                Logger.LogError($"Step {exception.Name} failed. Exit code was {exception.ExitCode}.");
+                await SendEventAsync(new StepResultEvent
+                {
+                    State = States.Failed,
+                    StepIndex = step
+                });
+            }
             catch (Exception exception)
             {
-                // TODO: log exception
+                Logger.LogError($"An unexpected error has occured. Error: {exception.Message}");
                 await SendEventAsync(new StepResultEvent
                 {
                     State = States.Failed,
@@ -115,56 +148,28 @@ namespace CodeManagerAgent.Services
                 });
                 // rest will be marked as skipped
             }
-        }
-
-        private async Task ExecuteStepAsync(StepConfiguration step, int stepIndex)
-        {
-            // TODO: log name
-            /*var (executable, args) = step.Cmd.Split(" ") switch { var result =>
-                (result[0], string.Join(" ", new ArraySegment<string>(result, 1, result.Length - 1))) };*/
-            
-
-            var logPath = GetLogFilePath(stepIndex);
-            Directory.CreateDirectory(Path.GetDirectoryName(logPath)!);
-            
-            await using var outputStream = new StreamWriter(File.Open(logPath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read));
-
-            var exitCode = await ExecuteCommandAsync(stepIndex, step.Cmd.Split(" "), outputStream);
-            if (exitCode != 0)
+            finally
             {
-                // LOG exit code
-                await WriteAndFlushAsync(outputStream, $"\nExit code: {exitCode}", stepIndex);
-                throw new StepFailedException();
+                Logger.LogInformation($"Finished job: {JobId} (Run: {RunId}).");
             }
         }
 
-        protected abstract Task<long> ExecuteCommandAsync(int stepIndex, IList<string> command,
-            StreamWriter outputStream);
+        protected abstract Task ExecuteStepAsync(StepConfiguration step, int stepIndex);
 
-        protected async Task WriteAndFlushAsync(StreamWriter outputStreamWriter, string data, int stepIndex)
+        protected async Task StreamLogAsync(int stepIndex, Func<IAsyncEnumerable<string>> stream)
         {
-            await outputStreamWriter.WriteAsync(data);
-            await outputStreamWriter.FlushAsync();
-  
-            await SendEventAsync(new StepLogEvent
-            {
-                Log = data,
-                StepIndex = stepIndex
-            });
+            await _hubConnection.SendAsync("UploadLogStream", stream(), RunId, JobId, stepIndex);
         }
 
         protected Task SendEventAsync<TEvent>(TEvent @event)
         {
-            if (@event is ISecureMessage secureMessage)
-            {
-                secureMessage.Token = _token;
-            }
+            if (@event is ISecureMessage secureMessage) secureMessage.Token = _token;
             return BusControl.Publish(@event);
         }
 
         private string GetLogFilePath(int stepIndex)
         {
-            return Path.Join(_agentConfiguration.LogDirectory, JobId, $"step-{stepIndex}.log");
+            return Path.Join(_agentConfiguration.LogDirectory, JobId.ToString(), $"step-{stepIndex}.log");
         }
     }
 }

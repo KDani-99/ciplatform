@@ -4,5 +4,7 @@ namespace CodeManagerAgent.Exceptions
 {
     public class StepFailedException : Exception
     {
+        public string Name { get; set; }
+        public long ExitCode { get; set; }
     }
 }

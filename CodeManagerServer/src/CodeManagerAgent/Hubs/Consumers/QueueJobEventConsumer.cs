@@ -13,10 +13,11 @@ namespace CodeManagerAgent.Hubs.Consumers
     public abstract class QueueJobEventConsumer
     {
         private readonly IAgentService _agentService;
-        private readonly IRequestClient<RequestJobCommand> _requestClient;
         private readonly IJobHandlerServiceFactory _jobHandlerServiceFactory;
-        
-        protected QueueJobEventConsumer(IAgentService agentService, IRequestClient<RequestJobCommand> requestClient, IJobHandlerServiceFactory jobHandlerServiceFactory)
+        private readonly IRequestClient<RequestJobCommand> _requestClient;
+
+        protected QueueJobEventConsumer(IAgentService agentService, IRequestClient<RequestJobCommand> requestClient,
+            IJobHandlerServiceFactory jobHandlerServiceFactory)
         {
             _agentService = agentService ?? throw new ArgumentNullException(nameof(agentService));
             _requestClient = requestClient ?? throw new ArgumentNullException(nameof(requestClient));
@@ -30,17 +31,23 @@ namespace CodeManagerAgent.Hubs.Consumers
             {
                 _agentService.AgentState = AgentState.Working;
 
-                var response = await _requestClient.GetResponse<AcceptedRequestJobCommandResponse, RejectedRequestJobCommandResponse>(new RequestJobCommand
-                {
-                    Token = queueJobEvent.Token
-                });
+                var response =
+                    await _requestClient
+                        .GetResponse<AcceptedRequestJobCommandResponse, RejectedRequestJobCommandResponse>(
+                            new RequestJobCommand
+                            {
+                                Token = queueJobEvent.Token
+                            });
 
                 if (response.Is(out Response<AcceptedRequestJobCommandResponse> acceptedRequestJobCommandResponse))
                 {
                     // start working
                     _agentService.CancellationTokenSource = new CancellationTokenSource();
-                    
-                    await _jobHandlerServiceFactory.Create(acceptedRequestJobCommandResponse.Message.Repository, acceptedRequestJobCommandResponse.Message.Token, acceptedRequestJobCommandResponse.Message.JobConfiguration, _agentService.CancellationTokenSource.Token)
+
+                    await _jobHandlerServiceFactory.Create(acceptedRequestJobCommandResponse.Message.Repository,
+                            acceptedRequestJobCommandResponse.Message.Token,
+                            acceptedRequestJobCommandResponse.Message.JobConfiguration,
+                            _agentService.CancellationTokenSource.Token)
                         .StartAsync();
                 }
                 else if (response.Is(out Response<RejectedRequestJobCommandResponse> rejectedRequestJobCommandResponse))

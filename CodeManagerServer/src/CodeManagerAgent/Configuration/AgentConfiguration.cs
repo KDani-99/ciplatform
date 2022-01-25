@@ -1,5 +1,4 @@
-﻿
-using CodeManager.Data.Configuration;
+﻿using CodeManager.Data.Configuration;
 
 namespace CodeManagerAgent.Configuration
 {

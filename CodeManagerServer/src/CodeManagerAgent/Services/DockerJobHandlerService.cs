@@ -1,24 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using CodeManager.Data.Configuration;
-using CodeManager.Data.Configuration.StartJob;
-using CodeManager.Data.Entities.CI;
 using CodeManager.Data.Events;
 using CodeManagerAgent.Configuration;
 using CodeManagerAgent.Exceptions;
-using Microsoft.Extensions.Options;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
 using Docker.DotNet;
 using Docker.DotNet.Models;
 using MassTransit;
+using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace CodeManagerAgent.Services
 {
@@ -26,34 +20,37 @@ namespace CodeManagerAgent.Services
     {
         private readonly IDockerClient _dockerClient;
         private string _containerId;
-        
+
         // unit of work
-        public DockerJobHandlerService(string repository ,string token, JobConfiguration jobConfiguration, IOptions<AgentConfiguration> agentConfiguration, IDockerClient dockerClient, IBusControl bus, IAgentService agentService, CancellationToken cancellationToken)
-            : base(repository, token, jobConfiguration, agentConfiguration, bus, agentService, cancellationToken)
+        public DockerJobHandlerService(
+            string repository,
+            string token,
+            JobConfiguration jobConfiguration,
+            HubConnection hubConnection,
+            IOptions<AgentConfiguration> agentConfiguration,
+            IDockerClient dockerClient,
+            IBusControl bus,
+            IAgentService agentService,
+            ILogger<JobHandlerService> logger,
+            CancellationToken cancellationToken) :
+            base(repository, token, jobConfiguration, hubConnection, agentConfiguration, bus, agentService, logger,
+                cancellationToken)
         {
             _dockerClient = dockerClient ?? throw new ArgumentNullException(nameof(dockerClient));
         }
 
-        /*private Job ParseFileConfiguration()
-        {
-            // TODO: place it in webapi
-            
-            var deserializer = new DeserializerBuilder()
-                .WithNamingConvention(LowerCaseNamingConvention.Instance)
-                .Build();
-            
-            return deserializer.Deserialize<Job>(new StreamReader(_jobConfiguration.ConfigPath));
-        }*/
-
         public override async Task StartAsync()
         {
-            var (from, tag) = JobConfiguration.Image.Split(":") switch { var result => (result[0], result[1]) };
-            
+            var beforeExecutionDateTime = DateTime.Now;
+            Logger.LogInformation($"Starting {nameof(JobContext.Docker)} job: {JobId} (Run: {RunId})...");
+
+            var (from, tag) = JobConfiguration.Image.Split(":") switch {var result => (result[0], result[1])};
+
             await _dockerClient.Images.CreateImageAsync(
                 new ImagesCreateParameters
                 {
                     FromImage = from,
-                    Tag = tag,
+                    Tag = tag
                 },
                 JobConfiguration.AuthConfig,
                 new Progress<JSONMessage>());
@@ -66,14 +63,14 @@ namespace CodeManagerAgent.Services
                 Env = JobConfiguration.Environment,
                 AttachStdout = true,
                 AttachStderr = true,
-                Tty = true, // keep detached container running
+                Tty = true // keep detached container running
             });
 
             _containerId = container.ID;
 
             if (!await _dockerClient.Containers.StartContainerAsync(_containerId, new ContainerStartParameters()))
             {
-                // TODO: throw exception or send message
+                Logger.LogError($"Failed to start {nameof(JobContext.Docker)} container. Container id: {_containerId}");
                 await SendEventAsync(new StepResultEvent
                 {
                     State = States.Failed,
@@ -83,130 +80,85 @@ namespace CodeManagerAgent.Services
             }
 
             await ExecuteJobAsync();
+
+            var afterExecutionDateTime = DateTime.Now;
+            var totalTime = afterExecutionDateTime - beforeExecutionDateTime;
+
+            Logger.LogInformation($"Job ran for {totalTime.TotalSeconds} second(s).");
         }
 
-       /* private async Task ExecuteStepsAsync(StepConfiguration step, int index)
+        protected override async Task ExecuteStepAsync(StepConfiguration step, int stepIndex)
         {
-            // TODO: log name
-            var (bin, rest) = step.Cmd.Split(" ") switch { var result =>
-                (result[0], string.Join(" ", new ArraySegment<string>(result, 1, result.Length - 1))) };
+            var command = step.Cmd.Split(" ");
+
             var execCreateResponse =
                 await _dockerClient.Exec.ExecCreateContainerAsync(_containerId, new ContainerExecCreateParameters
                 {
-                    Cmd = new List<string>() {bin, rest},
+                    Cmd = command,
                     AttachStdout = true,
                     AttachStderr = true
                 });
-            
-            
-            var stream = await _dockerClient.Exec.StartAndAttachContainerExecAsync(execCreateResponse.ID, true);
-            
-            await using var outputStream = new StreamWriter(File.Open(Path.Join(_jobConfiguration.LogPath, $"{index}.log"), FileMode.Create, FileAccess.ReadWrite, FileShare.Read));
-            await ProcessOutputStreamAsync(stream, outputStream, index);
+
+
+            var stream =
+                await _dockerClient.Exec.StartAndAttachContainerExecAsync(execCreateResponse.ID, false); // true?
+
+            await StreamLogAsync(stepIndex, () => ProcessOutputStreamAsync(stream, async () =>
+            {
+                var exitCode = (await _dockerClient.Exec.InspectContainerExecAsync(execCreateResponse.ID)).ExitCode;
+                return new[] {$"Exit code: {exitCode}", Environment.NewLine};
+            }));
 
             var exitCode = (await _dockerClient.Exec.InspectContainerExecAsync(execCreateResponse.ID)).ExitCode;
+            if (exitCode != 0) throw new StepFailedException {Name = step.Name, ExitCode = exitCode};
+        }
 
-            if (exitCode != 0)
-            {
-                // LOG exit code
-                await WriteAndFlushAsync(outputStream, $"\nExit code: {exitCode}", index);
-                throw new StepFailedException();
-            }
-        }*/
-
-       protected override async Task<long> ExecuteCommandAsync(int stepIndex, IList<string> command, StreamWriter outputStream)
-       {
-           var execCreateResponse =
-               await _dockerClient.Exec.ExecCreateContainerAsync(_containerId, new ContainerExecCreateParameters
-               {
-                   Cmd = command,
-                   AttachStdout = true,
-                   AttachStderr = true
-               });
-            
-
-           var stream = await _dockerClient.Exec.StartAndAttachContainerExecAsync(execCreateResponse.ID, true);
-           await ProcessOutputStreamAsync(stepIndex, stream, outputStream);
-
-           return (await _dockerClient.Exec.InspectContainerExecAsync(execCreateResponse.ID)).ExitCode;
-       }
-
-       private async Task ProcessOutputStreamAsync(int stepIndex, MultiplexedStream stream, StreamWriter outputStreamWriter)
+        private async IAsyncEnumerable<string> ProcessOutputStreamAsync(MultiplexedStream stream,
+            Func<Task<string[]>> additionalPostStreamData)
         {
             const int chunkSize = 4096; // 4 KiB
             var buffer = new byte[chunkSize];
-            
+
             MultiplexedStream.ReadResult result;
 
             var log = new StringBuilder();
             while (!(result = await stream.ReadOutputAsync(buffer, 0, buffer.Length, default)).EOF)
             {
                 log.Append(Encoding.UTF8.GetString(new ArraySegment<byte>(buffer, 0, result.Count)));
-                ProcessStringBuilder(log, async (data) =>
-                {
-                    await WriteAndFlushAsync(outputStreamWriter, data, stepIndex);
-                    // TODO: send to signalr stream
-                });
-                /*   if (result.Target == MultiplexedStream.TargetStream.StandardError)
-                   {
-                       log.Insert(0, "Error: ");
-                   }*/
-             // TODO: log stream type
 
-             CancellationToken.ThrowIfCancellationRequested();;
+                await foreach (var line in ProcessStringBuilder(log)) yield return line;
+                // TODO: log stream type
+
+                CancellationToken.ThrowIfCancellationRequested();
+                ;
             }
-            
-            ProcessStringBuilder(log, async (data) =>
-            {
-                await WriteAndFlushAsync(outputStreamWriter, data, stepIndex);
-                // TODO: send to signalr stream
-            });
-            
+
+            await foreach (var line in ProcessStringBuilder(log)) yield return line;
+
             // in case there is something left in the string builder
             var dataToStream = log.ToString();
-            await WriteAndFlushAsync(outputStreamWriter, dataToStream, stepIndex);
+            yield return dataToStream;
+
+            foreach (var item in await additionalPostStreamData())
+                yield return item;
             // TODO: send to signalr stream
             // stream rest of the lines
         }
-       
-       private static void ProcessStringBuilder(StringBuilder sb, Action<string> stream)
-       {
-           for (var i=0; i< sb.Length; i++)
-           {
-               if (sb[i] != '\n') continue;
-               stream(sb.ToString(0, i + 1));
-               sb.Remove(0, i + 1);
-               i -= i + 1;
-           }
-       }
-       
-       /*
-        *       private async Task ProcessOutputStreamAsync(int stepIndex, MultiplexedStream stream, StreamWriter outputStreamWriter)
-        {
-            const int chunkSize = 4096; // 4 KiB
-            var buffer = new byte[chunkSize];
-            
-            MultiplexedStream.ReadResult result;
 
-            var log = new StringBuilder();
-            while (!(result = await stream.ReadOutputAsync(buffer, 0, buffer.Length, default)).EOF)
+        private static async IAsyncEnumerable<string> ProcessStringBuilder(StringBuilder sb)
+        {
+            for (var i = 0; i < sb.Length; i++)
             {
-                log.Append()
-                var log = new StringBuilder(Encoding.UTF8.GetString(new ArraySegment<byte>(buffer, 0, result.Count)));
-                if (result.Target == MultiplexedStream.TargetStream.StandardError)
-                {
-                    log.Insert(0, "Error: ");
-                }
-                
-                await WriteAndFlushAsync(outputStreamWriter, log.ToString(), stepIndex);
-                
-                CancellationToken.ThrowIfCancellationRequested();;
+                // stream lines only
+                if (sb[i] != '\n') continue;
+                await Task.Yield();
+                yield return sb.ToString(0, i + 1);
+                sb.Remove(0, i + 1);
+                i -= i + 1;
             }
         }
-        * 
-        */
 
-       public override void Dispose()
+        public override void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
@@ -215,18 +167,15 @@ namespace CodeManagerAgent.Services
         private void Dispose(bool disposing)
         {
             if (disposing)
-            {
                 _dockerClient?.Containers.StopContainerAsync(_containerId, new ContainerStopParameters()).Wait();
-            }
             _dockerClient?.Dispose();
         }
 
         public override async ValueTask DisposeAsync()
         {
             if (_dockerClient is not null)
-            {
-                await _dockerClient.Containers.StopContainerAsync(_containerId, new ContainerStopParameters()).ConfigureAwait(false);
-            }
+                await _dockerClient.Containers.StopContainerAsync(_containerId, new ContainerStopParameters())
+                    .ConfigureAwait(false);
             Dispose(false);
             GC.SuppressFinalize(this);
         }

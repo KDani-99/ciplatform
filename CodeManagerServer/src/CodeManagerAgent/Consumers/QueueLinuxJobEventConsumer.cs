@@ -4,13 +4,15 @@ using CodeManager.Data.Events;
 using CodeManagerAgent.Factories;
 using CodeManagerAgent.Services;
 using MassTransit;
+using Microsoft.Extensions.Logging;
 
 namespace CodeManagerAgent.Consumers
 {
     public class QueueLinuxJobEventConsumer : QueueJobEventConsumer, IConsumer<QueueLinuxJobEvent>
     {
-        public QueueLinuxJobEventConsumer(IAgentService agentService, IRequestClient<RequestJobCommand> requestClient, IJobHandlerServiceFactory jobHandlerServiceFactory)
-            : base(agentService, requestClient, jobHandlerServiceFactory)
+        public QueueLinuxJobEventConsumer(IAgentService agentService, IRequestClient<RequestJobCommand> requestClient,
+            IJobHandlerServiceFactory jobHandlerServiceFactory, ILogger<QueueJobEventConsumer> logger)
+            : base(agentService, requestClient, jobHandlerServiceFactory, logger)
         {
         }
 

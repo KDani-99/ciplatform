@@ -1,6 +1,5 @@
 using System;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using CodeManager.Data.Configuration;
 using CodeManager.Data.Events;
 using CodeManagerAgent.Configuration;
@@ -9,13 +8,9 @@ using CodeManagerAgent.Factories;
 using CodeManagerAgent.Hubs.Consumers;
 using CodeManagerAgent.Services;
 using Docker.DotNet;
-using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-using HubConnection = Microsoft.AspNet.SignalR.Client.HubConnection;
 
 namespace CodeManagerAgent
 {

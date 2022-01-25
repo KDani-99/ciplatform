@@ -5,6 +5,7 @@ using CodeManagerAgent.Configuration;
 using CodeManagerAgent.Services;
 using Docker.DotNet;
 using MassTransit;
+using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -14,16 +15,20 @@ namespace CodeManagerAgent.Factories
     {
         private readonly IDockerClient _dockerClient;
 
-        public DockerJobHandlerServiceFactory(IDockerClient dockerClient, IAgentService agentService, IBusControl busControl, IOptions<AgentConfiguration> agentConfiguration)
-            : base(agentService, busControl, agentConfiguration)
+        public DockerJobHandlerServiceFactory(HubConnection hubConnection, IDockerClient dockerClient,
+            IAgentService agentService, IBusControl busControl, IOptions<AgentConfiguration> agentConfiguration,
+            ILoggerFactory loggerFactory)
+            : base(hubConnection, agentService, busControl, agentConfiguration, loggerFactory)
         {
             _dockerClient = dockerClient ?? throw new ArgumentNullException(nameof(dockerClient));
         }
-        
-        public override IJobHandlerService Create(string repository, string token, JobConfiguration jobConfiguration, CancellationToken cancellationToken)
+
+        public override IJobHandlerService Create(string repository, string token, JobConfiguration jobConfiguration,
+            CancellationToken cancellationToken)
         {
-            return new DockerJobHandlerService(repository, token, jobConfiguration, AgentConfiguration,_dockerClient, BusControl,
-                AgentService, cancellationToken);
+            return new DockerJobHandlerService(repository, token, jobConfiguration, HubConnection, AgentConfiguration,
+                _dockerClient, BusControl,
+                AgentService, LoggerFactory.CreateLogger<JobHandlerService>(), cancellationToken);
         }
     }
 }

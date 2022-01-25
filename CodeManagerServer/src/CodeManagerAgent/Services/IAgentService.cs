@@ -1,7 +1,5 @@
 ﻿using System.Threading;
-using System.Threading.Tasks;
 using CodeManager.Data.Agent;
-using MassTransit;
 
 namespace CodeManagerAgent.Services
 {

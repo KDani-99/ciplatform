@@ -9,7 +9,8 @@ namespace CodeManagerAgent.Hubs.Consumers
 {
     public class QueueWindowsJobEventConsumer : QueueJobEventConsumer, IConsumer<QueueWindowsJobEvent>
     {
-        public QueueWindowsJobEventConsumer(IAgentService agentService, IRequestClient<RequestJobCommand> requestClient, IJobHandlerServiceFactory jobHandlerServiceFactory)
+        public QueueWindowsJobEventConsumer(IAgentService agentService, IRequestClient<RequestJobCommand> requestClient,
+            IJobHandlerServiceFactory jobHandlerServiceFactory)
             : base(agentService, requestClient, jobHandlerServiceFactory)
         {
         }

@@ -1,7 +1,6 @@
 ﻿using System;
 using CodeManager.Data.Commands;
 using CodeManager.Data.Configuration;
-using CodeManager.Data.Events;
 using CodeManagerAgent.Configuration;
 using CodeManagerAgent.Consumers;
 using GreenPipes;
@@ -20,7 +19,7 @@ namespace CodeManagerAgent.Extensions
                 var massTransitConfiguration =
                     configuration.GetSection("MassTransitConfiguration").Get<MassTransitConfiguration>();
                 var agentConfiguration = configuration.GetSection("AgentConfiguration").Get<AgentConfiguration>();
-                
+
                 busConfigurator.AddRequestClient<RequestJobCommand>();
                 switch (agentConfiguration.Context)
                 {

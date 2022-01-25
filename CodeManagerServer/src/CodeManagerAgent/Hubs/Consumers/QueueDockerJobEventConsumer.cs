@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using CodeManager.Data.Commands;
 using CodeManager.Data.Events;
 using CodeManagerAgent.Factories;
@@ -10,7 +9,8 @@ namespace CodeManagerAgent.Hubs.Consumers
 {
     public class QueueDockerJobEventConsumer : QueueJobEventConsumer, IConsumer<QueueDockerJobEvent>
     {
-        public QueueDockerJobEventConsumer(IAgentService agentService, IRequestClient<RequestJobCommand> requestClient, IJobHandlerServiceFactory jobHandlerServiceFactory)
+        public QueueDockerJobEventConsumer(IAgentService agentService, IRequestClient<RequestJobCommand> requestClient,
+            IJobHandlerServiceFactory jobHandlerServiceFactory)
             : base(agentService, requestClient, jobHandlerServiceFactory)
         {
         }

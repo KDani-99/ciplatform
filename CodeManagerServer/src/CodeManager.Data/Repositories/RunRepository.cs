@@ -20,6 +20,7 @@ namespace CodeManager.Data.Repositories
             return DbContext
                 .Runs
                 .Include(x => x.Jobs)
+                    .ThenInclude(x => x.Steps)
                 .FirstOrDefaultAsync(job => job.Id == id);
         }
 

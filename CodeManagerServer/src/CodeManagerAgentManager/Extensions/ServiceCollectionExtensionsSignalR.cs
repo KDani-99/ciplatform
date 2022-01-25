@@ -12,7 +12,7 @@ namespace CodeManagerAgentManager.Extensions
         {
             var wsConfiguration = configuration.GetSection("WebSocketConfiguration").Get<WebSocketConfiguration>();
             var connection = new HubConnectionBuilder()
-                .WithUrl($"{wsConfiguration.Host}/{wsConfiguration.Hub}", options => options.AccessTokenProvider = () => Task.FromResult(token))
+                .WithUrl($"{wsConfiguration.Host}/{wsConfiguration.Hub}", options => options.AccessTokenProvider = () => Task.FromResult(""))
                 .Build();
 
             return serviceCollection.AddSingleton(connection);

@@ -39,17 +39,20 @@ namespace CodeManagerAgent.Hubs
         
         public override Task OnConnectedAsync()
         {
+            Console.WriteLine("Client connected");
             return base.OnConnectedAsync();
         }
 
         public override Task OnDisconnectedAsync(Exception exception)
         {
+            Console.WriteLine("Client disconnected");
             return base.OnDisconnectedAsync(exception);
         }
         
-        public Task UploadStream(int runId, int jobId, int step, IAsyncEnumerable<string> stream)
+        [HubMethodName("UploadLogStream")]
+        public Task UploadLogStreamAsync(IAsyncEnumerable<string> stream, long runId, long jobId, int step)
         {
-            return _logStreamService.WriteStreamAsync(runId, jobId, step, stream);
+            return _logStreamService.WriteStreamAsync(stream, runId, jobId, step);
         }
 
     }

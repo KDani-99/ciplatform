@@ -5,6 +5,6 @@ namespace CodeManagerAgentManager.Services
 {
     public interface ILogStreamService
     {
-        public Task WriteStreamAsync(int runId, int jobId, int step, IAsyncEnumerable<string> stream);
+        public Task WriteStreamAsync(IAsyncEnumerable<string> stream, long runId, long jobId, int step);
     }
 }

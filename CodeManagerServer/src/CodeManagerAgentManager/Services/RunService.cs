@@ -68,6 +68,11 @@ namespace CodeManagerAgentManager.Services
                 await _busControl.Publish(queueJobEvent);
                 // TODO: send job queued event back to the client
 
+                job.Steps.Insert(0, new Step
+                {
+                    Name = "Checkout repository (setup)"
+                });
+                
                 job.State = States.Queued;
                 await _runRepository.UpdateAsync(run); // TODO: use job repository?
             }

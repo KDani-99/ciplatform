@@ -34,6 +34,7 @@ namespace CodeManager.Data.Database
         public DbSet<Run> Runs { get; set; }
         public DbSet<Job> Jobs { get; set; }
         public DbSet<Step> Steps { get; set; }
+        public DbSet<Variable> Variables { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -42,10 +43,18 @@ namespace CodeManager.Data.Database
             
             modelBuilder.Entity<User>()
                 .HasOne(user => user.Plan);
+            
+            modelBuilder.Entity<Project>()
+                .HasMany(project => project.Runs)
+                .WithOne(run => run.Project);
 
             modelBuilder.Entity<TeamMember>()
                 .HasOne(teamMember => teamMember.Team)
                 .WithMany(team => team.Members);
+
+            modelBuilder.Entity<Variable>()
+                .HasOne(variable => variable.Project)
+                .WithMany(project => project.Variables);
 
             modelBuilder.Entity<LoginHistory>()
                 .HasOne(history => history.User)

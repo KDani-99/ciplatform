@@ -22,24 +22,31 @@ namespace CodeManagerWebApi.Hubs
         public Task SubscribeToChannelAsync(long runId, long jobId)
         {
             // TODO: verify whether the user is allowed to see the run details
-            return Groups.AddToGroupAsync(Context.ConnectionId, $"{runId}/{jobId}");
+            return Groups.AddToGroupAsync(Context.ConnectionId, GetGroupName(runId, jobId));
         }
 
         [HubMethodName("UnsubscribeFromChannel")]
         public Task UnsubscribeFromChannelAsync(long runId, long jobId)
         {
-            Groups.RemoveFromGroupAsync(Context.ConnectionId, $"{runId}/{jobId}"); // In general, you should not include await when calling the Groups.Remove method because the connection id that you are trying to remove might no longer be available. 
+            Groups.RemoveFromGroupAsync(Context.ConnectionId, GetGroupName(runId, jobId)); // In general, you should not include await when calling the Groups.Remove method because the connection id that you are trying to remove might no longer be available. 
             return Task.CompletedTask;
         }
 
-        /*[HubMethodName("StreamLogs")]
-        public async IAsyncEnumerable<string> StreamLogsAsync(IAsyncEnumerable<string> stream, long runId, long jobId, int step, [EnumeratorCancellation]
+        [HubMethodName("SendLogsToChannel")]
+        public async Task SendLogsToChannelAsync(IAsyncEnumerable<string> stream, long runId, long jobId, int step, [EnumeratorCancellation]
             CancellationToken cancellationToken)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            Clients.All.SendCoreAsync("", stream, runId);
-            // stream it back to the client
+            await foreach (var item in stream.WithCancellation(cancellationToken))
+            {
+                await Task.Yield();
+                await Clients.Group(GetGroupName(runId, jobId)).SendAsync("ReceiveLogs", item, cancellationToken: cancellationToken);
+            }
 
-        }*/
+        }
+
+        private static string GetGroupName(long runId, long jobId)
+        {
+            return $"{runId.ToString()}/{jobId.ToString()}";
+        }
     }
 }

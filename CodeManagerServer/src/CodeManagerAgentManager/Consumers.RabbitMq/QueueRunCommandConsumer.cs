@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using CodeManager.Data.Commands;
+using CodeManager.Data.Configuration;
 using CodeManagerAgentManager.Services;
 using MassTransit;
 using Microsoft.Extensions.Logging;
@@ -12,7 +13,7 @@ namespace CodeManagerAgentManager.Consumers.RabbitMq
         private readonly IRunService<QueueRunCommand> _runService;
         private readonly ILogger<QueueRunCommandConsumer> _logger;
 
-        public QueueRunCommandConsumer(IRunService<QueueRunCommand> runService, ILogger<QueueRunCommandConsumer> logger)
+        public QueueRunCommandConsumer(IRunService<QueueRunCommand> runService, ILogger<QueueRunCommandConsumer> logger, IFileProcessorService<RunConfiguration> runConfigurationFileProcessorService)
         {
             _runService = runService ?? throw new ArgumentNullException(nameof(runService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -31,7 +32,6 @@ namespace CodeManagerAgentManager.Consumers.RabbitMq
             }
             catch (Exception exception)
             {
-                // TODO: send error
                 _logger.LogError($"Failed to consume `{nameof(QueueRunCommand)}`. Error: {exception.Message}");
                 await context.RespondAsync(new FailedQueueRunCommandResponse());
             }

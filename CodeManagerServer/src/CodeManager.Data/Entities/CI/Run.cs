@@ -12,5 +12,7 @@ namespace CodeManager.Data.Entities.CI
         public States State { get; set; } = States.NotRun;
         public DateTime StartedDateTime { get; set; }
         public DateTime FinishedDateTime { get; set; }
+        
+        public Project Project { get; set; }
     }
 }

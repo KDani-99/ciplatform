@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using CodeManager.Core.Hubs.Clients;
 using CodeManager.Core.Hubs.Messages;
@@ -9,6 +11,7 @@ using CodeManager.Data.Events;
 using CodeManager.Data.Repositories;
 using CodeManagerAgentManager.Services;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
 
 namespace CodeManagerAgent.Hubs
 {
@@ -16,11 +19,13 @@ namespace CodeManagerAgent.Hubs
     {
         private readonly IRunRepository _runRepository;
         private readonly ILogStreamService _logStreamService;
+        private readonly ILogger<AgentHub> _logger;
 
-        public AgentHub(IRunRepository runRepository, ILogStreamService logStreamService)
+        public AgentHub(IRunRepository runRepository, ILogStreamService logStreamService, ILogger<AgentHub> logger)
         {
             _runRepository = runRepository ?? throw new ArgumentNullException(nameof(runRepository));
             _logStreamService = logStreamService ?? throw new ArgumentNullException(nameof(logStreamService));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         [HubMethodName("SetAgentState")]
@@ -52,7 +57,16 @@ namespace CodeManagerAgent.Hubs
         [HubMethodName("UploadLogStream")]
         public Task UploadLogStreamAsync(IAsyncEnumerable<string> stream, long runId, long jobId, int step)
         {
-            return _logStreamService.WriteStreamAsync(stream, runId, jobId, step);
+            try
+            {
+                return _logStreamService.WriteStreamAsync(stream, runId, jobId, step);
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError($"An unexpected error has occured. Message: {exception.Message}.");
+            }
+
+            return Task.CompletedTask;
         }
 
     }

@@ -15,6 +15,8 @@ namespace CodeManagerAgentManager.Extensions
                 .WithUrl($"{wsConfiguration.Host}/{wsConfiguration.Hub}", options => options.AccessTokenProvider = () => Task.FromResult(""))
                 .Build();
 
+            connection.StartAsync().Wait(); // TODO:
+
             return serviceCollection.AddSingleton(connection);
         }
     }

@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CodeManager.Data.Commands;
 using CodeManager.Data.Configuration;
+using CodeManager.Data.Entities;
 using CodeManager.Data.Entities.CI;
 using CodeManager.Data.Events;
 using CodeManager.Data.Extensions;
@@ -29,10 +30,11 @@ namespace CodeManagerAgentManager.Services
         private readonly IRunRepository _runRepository;
         private readonly ITokenService<JwtSecurityToken> _tokenService;
         private readonly JsonSerializerOptions _jsonSerializerOptions;
+        private readonly IFileProcessorService<RunConfiguration> _runConfigurationFileProcessorService;
 
         public RunService(JsonSerializerOptions jsonSerializerOptions, IRunRepository runRepository, ILogger<RunService> logger,
             IOptions<AgentManagerConfiguration> agentManagerConfiguration, IBusControl busControl,
-            ITokenService<JwtSecurityToken> tokenService)
+            ITokenService<JwtSecurityToken> tokenService, IFileProcessorService<RunConfiguration> runConfigurationFileProcessorService)
         {
             _jsonSerializerOptions = jsonSerializerOptions;
             _runRepository = runRepository ?? throw new ArgumentNullException(nameof(runRepository));
@@ -41,11 +43,15 @@ namespace CodeManagerAgentManager.Services
                                          throw new ArgumentNullException(nameof(agentManagerConfiguration));
             _busControl = busControl ?? throw new ArgumentNullException(nameof(busControl));
             _tokenService = tokenService ?? throw new ArgumentNullException(nameof(tokenService));
+            _runConfigurationFileProcessorService = runConfigurationFileProcessorService ?? throw new ArgumentNullException(nameof(runConfigurationFileProcessorService));
         }
 
         public async Task<long> QueueAsync(QueueRunCommand cmd)
         {
-            var run = await SaveRunConfiguration(cmd);
+            var runConfiguration =
+                await _runConfigurationFileProcessorService.ProcessAsync(cmd.RunConfigurationString, cmd.ProjectId);
+            
+            var run = await SaveRunConfiguration(cmd.Repository, cmd.ProjectId, runConfiguration);
 
             foreach (var job in run.Jobs)
             {
@@ -62,7 +68,7 @@ namespace CodeManagerAgentManager.Services
                     JobContext.Docker => new QueueDockerJobEvent {Token = base64Token},
                     JobContext.Linux => new QueueLinuxJobEvent {Token = base64Token},
                     JobContext.Windows => new QueueWindowsJobEvent {Token = base64Token},
-                    _ => throw new ArgumentOutOfRangeException("The job context must be one of the following types: 'Linux', 'Windows', 'Docker'")
+                    _ => throw new ArgumentOutOfRangeException($"The job context must be one of the following types: '{nameof(JobContext.Linux)}', '{nameof(JobContext.Windows)}', '{nameof(JobContext.Docker)}'")
                 };
 
                 await _busControl.Publish(queueJobEvent);
@@ -86,12 +92,12 @@ namespace CodeManagerAgentManager.Services
         }
 
 
-        private async Task<Run> SaveRunConfiguration(QueueRunCommand cmd)
+        private async Task<Run> SaveRunConfiguration(string repository, long projectId, RunConfiguration runConfiguration)
         {
-            var runConfiguration = new Run
+            var run = new Run
             {
-                Repository = cmd.Repository,
-                Jobs = cmd.RunConfiguration.Jobs.Select(job => new Job
+                Repository = repository,
+                Jobs = runConfiguration.Jobs.Select(job => new Job
                 {
                     JsonContext = JsonSerializer.Serialize(job.Value, _jsonSerializerOptions),
                     Context = job.Value.Context,
@@ -104,12 +110,13 @@ namespace CodeManagerAgentManager.Services
                     }).ToList(),
                     State = States.NotRun
                 }).ToList(),
-                State = States.NotRun
+                State = States.NotRun,
+                Project = new Project {Id = projectId}
             };
 
-            await _runRepository.CreateAsync(runConfiguration);
+            await _runRepository.CreateAsync(run);
 
-            return runConfiguration;
+            return run;
         }
     }
 }

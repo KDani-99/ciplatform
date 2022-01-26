@@ -1,4 +1,7 @@
-﻿namespace CodeManager.Data.Entities
+﻿using System.Collections.Generic;
+using CodeManager.Data.Entities.CI;
+
+namespace CodeManager.Data.Entities
 {
     public class Project : Entity
     {
@@ -8,5 +11,8 @@
         public bool IsSSH { get; set; }
         public string SecretToken { get; set; } // Either SSH or access token
         public Team Team { get; set; }
+        public List<Variable> Variables { get; set; }
+        
+        public List<Run> Runs { get; set; }
     }
 }

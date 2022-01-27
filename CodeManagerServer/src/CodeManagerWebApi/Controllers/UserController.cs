@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Net;
 using System.Threading.Tasks;
 using CodeManager.Data.Commands;
 using CodeManager.Data.Configuration;
@@ -52,7 +53,7 @@ namespace CodeManagerWebApi.Controllers
             await _userService.CreateUser(userDto);
             _logger.LogInformation($"User `{userDto.Username}` created @ {DateTime.Now}");
 
-            return StatusCode(201);
+            return StatusCode((int)HttpStatusCode.Created);
         }
         
         [HttpPost, Route("login")]

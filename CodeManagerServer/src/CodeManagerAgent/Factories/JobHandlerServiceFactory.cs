@@ -3,6 +3,7 @@ using System.Threading;
 using CodeManager.Data.Configuration;
 using CodeManagerAgent.Configuration;
 using CodeManagerAgent.Services;
+using CodeManagerAgent.WebSocket;
 using MassTransit;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Logging;
@@ -14,16 +15,13 @@ namespace CodeManagerAgent.Factories
     {
         protected readonly IOptions<AgentConfiguration> AgentConfiguration;
         protected readonly IAgentService AgentService;
-        protected readonly IBusControl BusControl;
-        protected readonly HubConnection HubConnection;
+        protected readonly IWorkerClient WorkerClient;
         protected readonly ILoggerFactory LoggerFactory;
 
-        protected JobHandlerServiceFactory(HubConnection hubConnection, IAgentService agentService,
-            IBusControl busControl, IOptions<AgentConfiguration> agentConfiguration, ILoggerFactory loggerFactory)
+        protected JobHandlerServiceFactory(IWorkerClient workerClient, IAgentService agentService, IOptions<AgentConfiguration> agentConfiguration, ILoggerFactory loggerFactory)
         {
-            HubConnection = hubConnection ?? throw new ArgumentNullException(nameof(hubConnection));
+            WorkerClient = workerClient ?? throw new ArgumentNullException(nameof(workerClient));
             AgentService = agentService ?? throw new ArgumentNullException(nameof(agentService));
-            BusControl = busControl ?? throw new ArgumentNullException(nameof(busControl));
             AgentConfiguration = agentConfiguration ?? throw new ArgumentNullException(nameof(agentConfiguration));
             LoggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
         }

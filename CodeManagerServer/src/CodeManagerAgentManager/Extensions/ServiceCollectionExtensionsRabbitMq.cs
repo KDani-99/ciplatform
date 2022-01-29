@@ -23,7 +23,6 @@ namespace CodeManagerAgentManager.Extensions
                 // TODO: make consumers temporary
 
                 busConfigurator.AddConsumer<QueueRunCommandConsumer>();
-                busConfigurator.AddConsumer<StepLogEventConsumer>();
                 busConfigurator.AddConsumer<StepResultEventConsumer>();
                 busConfigurator.AddConsumer<RequestJobCommandConsumer>();
 
@@ -44,12 +43,6 @@ namespace CodeManagerAgentManager.Extensions
                         opts.ConfigureConsumer<QueueRunCommandConsumer>(context);
                         //opts.SingleActiveConsumer
                     });
-                    cfg.ReceiveEndpoint(massTransitConfiguration.Queues["StepLogEventQueue"],
-                        opts =>
-                        {
-                            opts.AutoDelete = true;
-                            opts.ConfigureConsumer<StepLogEventConsumer>(context);
-                        });
                     cfg.ReceiveEndpoint(massTransitConfiguration.Queues["StepResultEventQueue"],
                         opts =>
                         {

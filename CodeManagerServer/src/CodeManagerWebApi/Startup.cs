@@ -84,6 +84,7 @@ namespace CodeManagerWebApi
                 {
                     endpoints.MapControllers();
                     endpoints.MapHub<RunsHub>("/runs");
+                    endpoints.MapHub<ManagerHub>("/manager");
                 })
                 .UseHealthChecks("/api/health");
         }

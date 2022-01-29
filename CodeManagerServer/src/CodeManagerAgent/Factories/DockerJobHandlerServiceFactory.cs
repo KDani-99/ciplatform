@@ -3,6 +3,7 @@ using System.Threading;
 using CodeManager.Data.Configuration;
 using CodeManagerAgent.Configuration;
 using CodeManagerAgent.Services;
+using CodeManagerAgent.WebSocket;
 using Docker.DotNet;
 using MassTransit;
 using Microsoft.AspNetCore.SignalR.Client;
@@ -15,10 +16,10 @@ namespace CodeManagerAgent.Factories
     {
         private readonly IDockerClient _dockerClient;
 
-        public DockerJobHandlerServiceFactory(HubConnection hubConnection, IDockerClient dockerClient,
-            IAgentService agentService, IBusControl busControl, IOptions<AgentConfiguration> agentConfiguration,
+        public DockerJobHandlerServiceFactory(IWorkerClient workerClient, IDockerClient dockerClient,
+            IAgentService agentService, IOptions<AgentConfiguration> agentConfiguration,
             ILoggerFactory loggerFactory)
-            : base(hubConnection, agentService, busControl, agentConfiguration, loggerFactory)
+            : base(workerClient, agentService, agentConfiguration, loggerFactory)
         {
             _dockerClient = dockerClient ?? throw new ArgumentNullException(nameof(dockerClient));
         }
@@ -26,8 +27,8 @@ namespace CodeManagerAgent.Factories
         public override IJobHandlerService Create(string repository, string token, JobConfiguration jobConfiguration,
             CancellationToken cancellationToken)
         {
-            return new DockerJobHandlerService(repository, token, jobConfiguration, HubConnection, AgentConfiguration,
-                _dockerClient, BusControl,
+            return new DockerJobHandlerService(repository, token, jobConfiguration, WorkerClient, AgentConfiguration,
+                _dockerClient,
                 AgentService, LoggerFactory.CreateLogger<JobHandlerService>(), cancellationToken);
         }
     }

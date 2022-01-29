@@ -4,12 +4,14 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using CodeManager.Core.Hubs.Common;
 using CodeManager.Data.Configuration;
 using CodeManager.Data.Events;
 using CodeManager.Data.Extensions;
 using CodeManager.Data.JsonWebTokens;
 using CodeManagerAgent.Configuration;
 using CodeManagerAgent.Exceptions;
+using CodeManagerAgent.WebSocket;
 using MassTransit;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Logging;
@@ -21,12 +23,11 @@ namespace CodeManagerAgent.Services
     {
         private readonly AgentConfiguration _agentConfiguration;
 
-        private readonly HubConnection _hubConnection;
+        private readonly IWorkerClient _workerClient;
         private readonly string _repository;
 
         private readonly string _token;
         protected readonly IAgentService AgentService;
-        protected readonly IBusControl BusControl;
         protected readonly CancellationToken CancellationToken;
 
         protected readonly JobConfiguration JobConfiguration;
@@ -41,9 +42,8 @@ namespace CodeManagerAgent.Services
             string repository,
             string token,
             JobConfiguration jobConfiguration,
-            HubConnection hubConnection,
+            IWorkerClient workerClient,
             IOptions<AgentConfiguration> agentConfiguration,
-            IBusControl busControl,
             IAgentService agentService,
             ILogger<JobHandlerService> logger,
             CancellationToken cancellationToken)
@@ -54,9 +54,8 @@ namespace CodeManagerAgent.Services
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _agentConfiguration =
                 agentConfiguration.Value ?? throw new ArgumentNullException(nameof(agentConfiguration));
-            _hubConnection = hubConnection ?? throw new ArgumentNullException(nameof(hubConnection));
+            _workerClient = workerClient ?? throw new ArgumentNullException(nameof(workerClient));
             Logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            BusControl = busControl ?? throw new ArgumentNullException(nameof(busControl));
             AgentService = agentService ?? throw new ArgumentNullException(nameof(agentService));
             JobConfiguration = jobConfiguration ?? throw new ArgumentNullException(nameof(jobConfiguration));
             CancellationToken = cancellationToken;
@@ -109,7 +108,7 @@ namespace CodeManagerAgent.Services
                     {
                         State = States.Running,
                         StepIndex = step
-                    });
+                    }, CommonAgentManagerHubMethods.StepResultEvent);
 
                     await ExecuteStepAsync(JobConfiguration.Steps[step], step);
 
@@ -117,7 +116,7 @@ namespace CodeManagerAgent.Services
                     {
                         State = States.Successful,
                         StepIndex = step
-                    });
+                    }, CommonAgentManagerHubMethods.StepResultEvent);
                 }
             }
             catch (OperationCanceledException exception)
@@ -127,7 +126,7 @@ namespace CodeManagerAgent.Services
                 {
                     State = States.Cancelled,
                     StepIndex = step
-                });
+                }, CommonAgentManagerHubMethods.StepResultEvent);
             }
             catch (StepFailedException exception)
             {
@@ -136,7 +135,7 @@ namespace CodeManagerAgent.Services
                 {
                     State = States.Failed,
                     StepIndex = step
-                });
+                }, CommonAgentManagerHubMethods.StepResultEvent);
             }
             catch (Exception exception)
             {
@@ -145,7 +144,7 @@ namespace CodeManagerAgent.Services
                 {
                     State = States.Failed,
                     StepIndex = step
-                });
+                }, CommonAgentManagerHubMethods.StepResultEvent);
                 // rest will be marked as skipped
             }
             finally
@@ -158,13 +157,13 @@ namespace CodeManagerAgent.Services
 
         protected async Task StreamLogAsync(int stepIndex, Func<IAsyncEnumerable<string>> stream)
         {
-            await _hubConnection.SendAsync("UploadLogStream", stream(), RunId, JobId, stepIndex);
+            await _workerClient.HubConnection.SendAsync("UploadLogStream", stream(), RunId, JobId, stepIndex);
         }
 
-        protected Task SendEventAsync<TEvent>(TEvent @event)
+        protected Task SendEventAsync<TEvent>(TEvent @event, string hubMethod)
         {
-            if (@event is ISecureMessage secureMessage) secureMessage.Token = _token;
-            return BusControl.Publish(@event);
+            if (@event is ISecureMessage secureMessage) secureMessage.Token = _token; // TODO: token not required since signalr
+            return _workerClient.HubConnection.SendAsync(hubMethod);
         }
 
         private string GetLogFilePath(int stepIndex)

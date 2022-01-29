@@ -1,14 +1,18 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using CodeManager.Core.Services;
 using CodeManager.Data.Commands;
+using CodeManager.Data.Configuration;
 using CodeManager.Data.Database;
 using CodeManager.Data.Repositories;
 using CodeManagerAgent.Hubs;
+using CodeManagerAgentManager.Cache;
 using CodeManagerAgentManager.Configuration;
 using CodeManagerAgentManager.Extensions;
 using CodeManagerAgentManager.Repositories;
 using CodeManagerAgentManager.Services;
+using CodeManagerAgentManager.WebSocket;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +21,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using StackExchange.Redis;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace CodeManagerAgentManager
 {
@@ -49,18 +55,31 @@ namespace CodeManagerAgentManager
                 .Configure<LogStreamServiceConfiguration>(
                     Configuration.GetSection("LogStreamServiceConfiguration"))
                 .Configure<RedisConfiguration>(Configuration.GetSection("RedisConfiguration"))
+                .Configure<WebSocketConfiguration>(Configuration.GetSection("WebSocketConfiguration"))
                 .AddDbContext<CodeManagerDbContext>(options =>
                     options.UseNpgsql(Configuration.GetValue<string>("ConnectionString")))
-                .AddSingleton<IWorkerConnectionRepository, WorkerConnectionRepository>()
+                .AddSingleton<IConnectionCache, RedisConnectionCache>()
+                .AddSingleton<IManagerClient, ManagerClient>()
+                .AddScoped<IWorkerConnectionRepository, WorkerConnectionRepository>()
                 .AddScoped<IRunRepository, RunRepository>()
+                .AddScoped((_) => new DeserializerBuilder()
+                    .WithNamingConvention(LowerCaseNamingConvention.Instance)
+                    .Build())
+                .AddScoped<IJobService<AcceptedRequestJobCommandResponse>, JobService>()
+                .AddScoped<IVariableRepository, VariableRepository>()
+                .AddScoped<IVariableService, VariableService>()
+                .AddScoped<IEncryptionService, EncryptionService>()
+                .AddScoped<IFileProcessorService<RunConfiguration>, YmlFileProcessorService>()
                 .AddScoped<IRunService<QueueRunCommand>, RunService>()
                 .AddScoped<ITokenService<JwtSecurityToken>, TokenService>()
                 .AddScoped<IRunRepository, RunRepository>()
                 .AddScoped<ILogStreamService, LogStreamService>()
-                .AddScoped<IWorkerConnectionRepository, WorkerConnectionRepository>()
+                .AddScoped<IWorkerConnectionService, WorkerConnectionService>()
                 .AddSignalR().Services
                 .AddRabbitMq(Configuration);
             //.AddSignalRClient(Configuration);
+
+            services.AddHostedService<Manager>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

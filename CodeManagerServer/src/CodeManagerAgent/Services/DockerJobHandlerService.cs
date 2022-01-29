@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using CodeManager.Core.Hubs.Common;
 using CodeManager.Data.Configuration;
 using CodeManager.Data.Events;
 using CodeManagerAgent.Configuration;
 using CodeManagerAgent.Exceptions;
+using CodeManagerAgent.WebSocket;
 using Docker.DotNet;
 using Docker.DotNet.Models;
 using MassTransit;
@@ -26,14 +28,13 @@ namespace CodeManagerAgent.Services
             string repository,
             string token,
             JobConfiguration jobConfiguration,
-            HubConnection hubConnection,
+            IWorkerClient workerClient,
             IOptions<AgentConfiguration> agentConfiguration,
             IDockerClient dockerClient,
-            IBusControl bus,
             IAgentService agentService,
             ILogger<JobHandlerService> logger,
             CancellationToken cancellationToken) :
-            base(repository, token, jobConfiguration, hubConnection, agentConfiguration, bus, agentService, logger,
+            base(repository, token, jobConfiguration, workerClient, agentConfiguration, agentService, logger,
                 cancellationToken)
         {
             _dockerClient = dockerClient ?? throw new ArgumentNullException(nameof(dockerClient));
@@ -75,7 +76,7 @@ namespace CodeManagerAgent.Services
                 {
                     State = States.Failed,
                     StepIndex = -1 // start container step
-                });
+                }, CommonAgentManagerHubMethods.StepResultEvent);
                 return;
             }
 

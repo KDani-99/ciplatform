@@ -8,6 +8,7 @@ using CodeManager.Data.Entities;
 using CodeManager.Data.Repositories;
 using CodeManagerAgentManager.Configuration;
 using CodeManagerAgentManager.Exceptions;
+using CodeManagerAgentManager.WebSocket;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Options;
 
@@ -17,13 +18,13 @@ namespace CodeManagerAgentManager.Services
     {
         private readonly LogStreamServiceConfiguration _logStreamServiceConfiguration;
         private readonly IRunRepository _runRepository;
-        private readonly HubConnection _hubConnection;
+        private readonly IManagerClient _managerClient;
         
-        public LogStreamService(IOptions<LogStreamServiceConfiguration> logStreamServiceConfiguration, IRunRepository runRepository, HubConnection hubConnection)
+        public LogStreamService(IOptions<LogStreamServiceConfiguration> logStreamServiceConfiguration, IRunRepository runRepository, IManagerClient managerClient)
         {
             _logStreamServiceConfiguration = logStreamServiceConfiguration.Value ?? throw new ArgumentNullException(nameof(logStreamServiceConfiguration));
             _runRepository = runRepository ?? throw new ArgumentNullException(nameof(runRepository));
-            _hubConnection = hubConnection ?? throw new ArgumentNullException(nameof(hubConnection));
+            _managerClient = managerClient ?? throw new ArgumentNullException(nameof(managerClient));
         }
         
         public async Task ProcessStreamAsync(IAsyncEnumerable<string> stream, long runId, long jobId, int stepIndex)
@@ -66,7 +67,7 @@ namespace CodeManagerAgentManager.Services
                 await outputStream.WriteAsync(filtered);
                 await outputStream.FlushAsync();
                 
-                await _hubConnection.SendAsync("StreamLogToChannel", line);
+                await _managerClient.HubConnection.SendAsync("StreamLogToChannel", line);
 
                 sizeInBytes += Encoding.UTF8.GetByteCount(filtered);
                 numberOfLines++;

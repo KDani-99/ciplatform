@@ -4,5 +4,6 @@
     {
         public const string QueueRunCommand = "QueueRunCommand";
         public const string RequestJobCommand = "RequestJobCommand";
+        public const string StepResultEvent = "StepResultEvent";
     }
 }

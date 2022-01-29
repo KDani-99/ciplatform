@@ -1,32 +1,23 @@
 ﻿using System;
 using System.Threading.Tasks;
-using CodeManager.Core.Hubs.Clients;
-using CodeManager.Core.Hubs.Consumers;
 using CodeManager.Data.Configuration;
 using CodeManager.Data.Events;
-using CodeManagerAgent.Configuration;
-using CodeManagerAgent.Hubs;
 using Microsoft.AspNetCore.SignalR.Client;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace CodeManagerAgent.WebSocket
+namespace CodeManagerAgentManager.WebSocket
 {
-    public class WorkerClient : IWorkerClient, IDisposable
+    public class ManagerClient : IManagerClient, IDisposable
     {
-        // TODO: do the same with this class as I did with redis, register this class as singleton
+               // TODO: do the same with this class as I did with redis, register this class as singleton
         public HubConnection HubConnection { get; }
-        private readonly IServiceProvider _serviceProvider;
-        private readonly ILogger<WorkerClient> _logger;
+        private readonly ILogger<ManagerClient> _logger;
 
-        public WorkerClient(IServiceProvider serviceProvider, IOptions<WebSocketConfiguration> webSocketConfiguration, IOptions<AgentConfiguration> agentConfiguration, ILogger<WorkerClient> logger)
+        public ManagerClient(IOptions<WebSocketConfiguration> webSocketConfiguration, ILogger<ManagerClient> logger)
         {
-            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-
-            var agentConfigurationValue =
-                agentConfiguration.Value ?? throw new ArgumentNullException(nameof(agentConfiguration));
+            
             var wsConfiguration = webSocketConfiguration.Value ?? throw new ArgumentNullException(nameof(webSocketConfiguration));
             
             HubConnection = new HubConnectionBuilder()
@@ -34,7 +25,6 @@ namespace CodeManagerAgent.WebSocket
                     options =>
                     {
                         options.AccessTokenProvider = () => Task.FromResult("");
-                        options.Headers.Add("W-JobContext", agentConfigurationValue.Context.ToString());
                     })
                 .Build();
 
@@ -44,20 +34,8 @@ namespace CodeManagerAgent.WebSocket
             
             HubConnection.ServerTimeout = TimeSpan.FromSeconds(180);
             HubConnection.HandshakeTimeout = TimeSpan.FromSeconds(60);
-
-            RegisterMethods();
         }
-
-        private void RegisterMethods()
-        {
-            _logger.LogInformation("Registering worker events...");
-            HubConnection.On<QueueDockerJobEvent>(CommonHubMethods.QueueDockerJobEvent,
-                message => _serviceProvider.GetService<IConsumer<QueueDockerJobEvent>>()?.Consume(message));
-            HubConnection.On<QueueLinuxJobEvent>(CommonHubMethods.QueueLinuxJobEvent,
-                message => _serviceProvider.GetService<IConsumer<QueueLinuxJobEvent>>()?.Consume(message));
-            HubConnection.On<QueueWindowsJobEvent>(CommonHubMethods.QueueWindowsJobEvent,
-                message => _serviceProvider.GetService<IConsumer<QueueWindowsJobEvent>>()?.Consume(message));
-        }
+        
 
         private Task OnConnectionClose(Exception exception)
         {

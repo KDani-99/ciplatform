@@ -7,6 +7,7 @@ using CodeManager.Data.Configuration;
 using CodeManagerAgent.Configuration;
 using CodeManagerAgent.Exceptions;
 using CodeManagerAgent.Extensions;
+using CodeManagerAgent.WebSocket;
 using MassTransit;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Logging;
@@ -18,9 +19,9 @@ namespace CodeManagerAgent.Services
     {
         // unit of work
         public LinuxJobHandlerService(string repository, string token, JobConfiguration jobConfiguration,
-            HubConnection hubConnection, IOptions<AgentConfiguration> agentConfiguration, IBusControl bus,
+            IWorkerClient workerClient, IOptions<AgentConfiguration> agentConfiguration,
             IAgentService agentService, ILogger<JobHandlerService> logger, CancellationToken cancellationToken)
-            : base(repository, token, jobConfiguration, hubConnection, agentConfiguration, bus, agentService, logger,
+            : base(repository, token, jobConfiguration, workerClient, agentConfiguration, agentService, logger,
                 cancellationToken)
         {
         }

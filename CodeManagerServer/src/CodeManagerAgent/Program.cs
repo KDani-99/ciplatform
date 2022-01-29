@@ -54,13 +54,14 @@ namespace CodeManagerAgent
                     services.AddSingleton<IWorkerClient, WorkerClient>();
                     services.AddScoped<IDockerClient>(_ => new DockerClientConfiguration().CreateClient());
 
+                    services.AddHostedService<Worker>();
                     // transient services = 1 unit of work, each invocation returns a new service => like a factory
-                  /*  services.AddTransient<IConsumer<QueueDockerJobEvent>, QueueDockerJobEventConsumer>();
-                    services.AddTransient<IConsumer<QueueLinuxJobEvent>, QueueLinuxJobEventConsumer>();
-                    services.AddTransient<IConsumer<QueueWindowsJobEvent>, QueueWindowsJobEventConsumer>();
-                    services.AddRabbitMq(hostContext.Configuration);*/
-                  
-                    
+                    /*  services.AddTransient<IConsumer<QueueDockerJobEvent>, QueueDockerJobEventConsumer>();
+                      services.AddTransient<IConsumer<QueueLinuxJobEvent>, QueueLinuxJobEventConsumer>();
+                      services.AddTransient<IConsumer<QueueWindowsJobEvent>, QueueWindowsJobEventConsumer>();
+                      services.AddRabbitMq(hostContext.Configuration);*/
+
+
                 });
         }
 

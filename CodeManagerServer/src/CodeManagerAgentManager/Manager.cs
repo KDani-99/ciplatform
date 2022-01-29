@@ -1,27 +1,19 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using CodeManagerAgent.WebSocket;
+using CodeManagerAgentManager.WebSocket;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using System.Linq;
-using System.Net.NetworkInformation;
-using System.Net.Sockets;
-using System.Net.WebSockets;
-using Microsoft.AspNetCore.SignalR;
-using Microsoft.AspNetCore.SignalR.Client;
 
-namespace CodeManagerAgent
+namespace CodeManagerAgentManager
 {
-    public class Worker : BackgroundService
+    public class Manager : BackgroundService
     {
-        private readonly ILogger<Worker> _logger;
-        private readonly IWorkerClient _workerClient;
+        private readonly ILogger<Manager> _logger;
+        private readonly IManagerClient _workerClient;
         private readonly IHost _host;
 
-        public Worker(ILogger<Worker> logger, IWorkerClient workerClient, IHost host)
+        public Manager(ILogger<Manager> logger, IManagerClient workerClient, IHost host)
         {
             _logger = logger;
             _workerClient = workerClient;
@@ -32,7 +24,7 @@ namespace CodeManagerAgent
         {
             try
             {
-                _logger.LogInformation("Starting worker...");
+                _logger.LogInformation("Starting manager...");
                 await _workerClient.HubConnection.StartAsync(stoppingToken);
                 _logger.LogInformation("Connected to remote host.");
             }

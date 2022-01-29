@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 
-namespace CodeManagerWebApi.Entities.Configuration
+namespace CodeManagerWebApi.Configuration
 {
     public class DatabaseConfiguration
     {

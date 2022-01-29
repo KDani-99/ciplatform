@@ -1,14 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using CodeManager.Core.Hubs.Clients;
 using CodeManager.Core.Hubs.Messages;
 using CodeManager.Data.Agent;
+using CodeManager.Data.Commands;
+using CodeManager.Data.Configuration;
+using CodeManager.Data.Entities;
 using CodeManager.Data.Entities.CI;
 using CodeManager.Data.Events;
 using CodeManager.Data.Repositories;
+using CodeManagerAgentManager.Repositories;
 using CodeManagerAgentManager.Services;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
@@ -17,41 +22,121 @@ namespace CodeManagerAgent.Hubs
 {
     public class AgentHub : Hub<IAgentClient>
     {
-        private readonly IRunRepository _runRepository;
+        private readonly IWorkerConnectionService _workerConnectionService;
+        private readonly IJobService<AcceptedRequestJobCommandResponse> _jobService;
+        private readonly IStepService<StepResultEvent> _stepService;
         private readonly ILogStreamService _logStreamService;
         private readonly ILogger<AgentHub> _logger;
 
-        public AgentHub(IRunRepository runRepository, ILogStreamService logStreamService, ILogger<AgentHub> logger)
+        private const string HeaderKey = "W-JobContext"; // W for Worker
+
+        public AgentHub(IWorkerConnectionService workerConnectionService, IJobService<AcceptedRequestJobCommandResponse> jobService, ILogStreamService logStreamService, ILogger<AgentHub> logger, IStepService<StepResultEvent> stepService)
         {
-            _runRepository = runRepository ?? throw new ArgumentNullException(nameof(runRepository));
+            _workerConnectionService = workerConnectionService ??
+                                          throw new ArgumentNullException(nameof(workerConnectionService));
+            _jobService = jobService ?? throw new ArgumentNullException(nameof(jobService));
             _logStreamService = logStreamService ?? throw new ArgumentNullException(nameof(logStreamService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _stepService = stepService ?? throw new ArgumentNullException(nameof(stepService));
         }
 
-        [HubMethodName("SetAgentState")]
-        public Task SetAgentStateAsync(AgentState agentState)
+        public override async Task OnConnectedAsync()
         {
-            switch (agentState)
+            try
             {
-                case AgentState.Available:
-                    return Groups.AddToGroupAsync(Context.ConnectionId, nameof(AgentState.Available));
-                case AgentState.Working:
-                    return Groups.RemoveFromGroupAsync(Context.ConnectionId, nameof(AgentState.Available));
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(agentState));
+                var jobContextString = Context.GetHttpContext().Request.Headers
+                    .First(header => header.Key == HeaderKey).Value;
+
+                if (!Enum.TryParse(jobContextString, out JobContext jobContext))
+                {
+                    throw new ArgumentException($"Invalid value provided for '{HeaderKey}' header.");
+                }
+
+                await _workerConnectionService.AddWorkerConnectionOfTypeAsync(new WorkerConnectionData
+                {
+                    AgentState = AgentState.Offline, // must be configured first
+                    HostMachineInformation = null,
+                    ConnectionId = Context.ConnectionId,
+                    JobContext = jobContext
+                });
+            }
+            catch (Exception exception)
+            {
+                Context.Abort();
+                _logger.LogError($"A client tried to connect without a valid '{HeaderKey}' header. Message: " + exception.Message);
+                return;
+            }
+
+            await base.OnConnectedAsync();
+        }
+
+        public override async Task OnDisconnectedAsync(Exception exception)
+        {
+            await _workerConnectionService.RemoveWorkerConnectionAsync(Context.ConnectionId);
+            await base.OnDisconnectedAsync(exception);
+        }
+
+        [HubMethodName("Configure")]
+        public async Task ConfigureWorkerAsync(HostMachineInformation hostMachineInformation, AgentState agentState)
+        {
+            try
+            {
+                // TODO: validate data?
+                await _workerConnectionService.UpdateWorkerConnectionAsync(new WorkerConnectionData
+                {
+                    HostMachineInformation = hostMachineInformation,
+                    AgentState = agentState,
+                    ConnectionId = Context.ConnectionId // jobcontext wont be updated
+                });
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError($"Failed to configure worker. Error: {exception.Message}");
+                // TODO: disconnect worker?
+            }
+        }
+
+        [HubMethodName("RequestJob")]
+        public async Task<AcceptedRequestJobCommandResponse> RequestJobAsync(RequestJobCommand context)
+        {
+            try
+            {
+                var jobParams = await _jobService.ProcessJobRequestTokenAsync(context.Token);
+
+                return jobParams;
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError($"Failed to consume `{nameof(RequestJobCommand)}`. Error: {exception.Message}");
+                return null;
             }
         }
         
-        public override Task OnConnectedAsync()
+        [HubMethodName("UpdateAgentState")]
+        public Task UpdateAgentStateAsync(AgentState agentState)
         {
-            Console.WriteLine("Client connected");
-            return base.OnConnectedAsync();
+            return agentState switch
+            {
+                AgentState.Available => Groups.AddToGroupAsync(Context.ConnectionId, nameof(AgentState.Available)),
+                AgentState.Working => Groups.RemoveFromGroupAsync(Context.ConnectionId, nameof(AgentState.Working)),
+                _ => throw new ArgumentOutOfRangeException(nameof(agentState))
+            };
         }
 
-        public override Task OnDisconnectedAsync(Exception exception)
+        [HubMethodName("StepResultEvent")]
+        public async Task ReceiveStepResultEventAsync(StepResultEvent stepResultEvent)
         {
-            Console.WriteLine("Client disconnected");
-            return base.OnDisconnectedAsync(exception);
+            try
+            {
+                await _stepService.ProcessStepResultAsync(stepResultEvent);
+                
+                // todo: publish rabbitmq ProcessedStepResultEvent that contains the run id, job id and step id
+                
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError($"Failed to consume `{nameof(StepResultEvent)}`. Error: {exception.Message}");
+            }
         }
         
         [HubMethodName("UploadLogStream")]
@@ -59,7 +144,7 @@ namespace CodeManagerAgent.Hubs
         {
             try
             {
-                return _logStreamService.WriteStreamAsync(stream, runId, jobId, step);
+                return _logStreamService.ProcessStreamAsync(stream, runId, jobId, step);
             }
             catch (Exception exception)
             {
@@ -68,6 +153,8 @@ namespace CodeManagerAgent.Hubs
 
             return Task.CompletedTask;
         }
+        
+        // TODO: add other type of stream processor
 
     }
 }

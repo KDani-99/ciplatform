@@ -7,6 +7,7 @@ using CodeManager.Data.Repositories;
 using CodeManagerAgent.Hubs;
 using CodeManagerAgentManager.Configuration;
 using CodeManagerAgentManager.Extensions;
+using CodeManagerAgentManager.Repositories;
 using CodeManagerAgentManager.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -15,6 +16,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using StackExchange.Redis;
 
 namespace CodeManagerAgentManager
 {
@@ -46,13 +48,16 @@ namespace CodeManagerAgentManager
                     Configuration.GetSection("TokenConfiguration"))
                 .Configure<LogStreamServiceConfiguration>(
                     Configuration.GetSection("LogStreamServiceConfiguration"))
+                .Configure<RedisConfiguration>(Configuration.GetSection("RedisConfiguration"))
                 .AddDbContext<CodeManagerDbContext>(options =>
                     options.UseNpgsql(Configuration.GetValue<string>("ConnectionString")))
+                .AddSingleton<IWorkerConnectionRepository, WorkerConnectionRepository>()
                 .AddScoped<IRunRepository, RunRepository>()
                 .AddScoped<IRunService<QueueRunCommand>, RunService>()
                 .AddScoped<ITokenService<JwtSecurityToken>, TokenService>()
                 .AddScoped<IRunRepository, RunRepository>()
                 .AddScoped<ILogStreamService, LogStreamService>()
+                .AddScoped<IWorkerConnectionRepository, WorkerConnectionRepository>()
                 .AddSignalR().Services
                 .AddRabbitMq(Configuration);
             //.AddSignalRClient(Configuration);

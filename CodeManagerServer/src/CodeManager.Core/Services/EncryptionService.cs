@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using CodeManager.Data.Configuration;
 using Microsoft.Extensions.Options;
 
-namespace CodeManager.Data.Services
+namespace CodeManager.Core.Services
 {
     public class EncryptionService : IEncryptionService
     {

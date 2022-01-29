@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using CodeManager.Core.Hubs.Common;
 using CodeManager.Data.Agent;
 using CodeManager.Data.Commands;
 using CodeManager.Data.Events;
 using CodeManagerAgent.Factories;
 using CodeManagerAgent.Services;
 using MassTransit;
+using Microsoft.AspNetCore.SignalR.Client;
 
 namespace CodeManagerAgent.Hubs.Consumers
 {
@@ -14,13 +16,13 @@ namespace CodeManagerAgent.Hubs.Consumers
     {
         private readonly IAgentService _agentService;
         private readonly IJobHandlerServiceFactory _jobHandlerServiceFactory;
-        private readonly IRequestClient<RequestJobCommand> _requestClient;
+        private readonly HubConnection _hubConnection;
 
-        protected QueueJobEventConsumer(IAgentService agentService, IRequestClient<RequestJobCommand> requestClient,
+        protected QueueJobEventConsumer(HubConnection hubConnection ,IAgentService agentService,
             IJobHandlerServiceFactory jobHandlerServiceFactory)
         {
+            _hubConnection = hubConnection ?? throw new ArgumentNullException(nameof(hubConnection));
             _agentService = agentService ?? throw new ArgumentNullException(nameof(agentService));
-            _requestClient = requestClient ?? throw new ArgumentNullException(nameof(requestClient));
             _jobHandlerServiceFactory = jobHandlerServiceFactory ??
                                         throw new ArgumentNullException(nameof(jobHandlerServiceFactory));
         }
@@ -31,26 +33,23 @@ namespace CodeManagerAgent.Hubs.Consumers
             {
                 _agentService.AgentState = AgentState.Working;
 
-                var response =
-                    await _requestClient
-                        .GetResponse<AcceptedRequestJobCommandResponse, RejectedRequestJobCommandResponse>(
-                            new RequestJobCommand
-                            {
-                                Token = queueJobEvent.Token
-                            });
-
-                if (response.Is(out Response<AcceptedRequestJobCommandResponse> acceptedRequestJobCommandResponse))
+                var response = await _hubConnection.InvokeAsync<AcceptedRequestJobCommandResponse>(CommonAgentManagerHubMethods.RequestJobCommand, new RequestJobCommand
                 {
-                    // start working
+                    Token = queueJobEvent.Token
+                });
+
+                if (response != null)
+                {
+                    // TODO: only set agent state server side?
                     _agentService.CancellationTokenSource = new CancellationTokenSource();
 
-                    await _jobHandlerServiceFactory.Create(acceptedRequestJobCommandResponse.Message.Repository,
-                            acceptedRequestJobCommandResponse.Message.Token,
-                            acceptedRequestJobCommandResponse.Message.JobConfiguration,
+                    await _jobHandlerServiceFactory.Create(response.Repository,
+                            response.Token,
+                            response.JobConfiguration,
                             _agentService.CancellationTokenSource.Token)
                         .StartAsync();
                 }
-                else if (response.Is(out Response<RejectedRequestJobCommandResponse> rejectedRequestJobCommandResponse))
+                else
                 {
                     _agentService.AgentState = AgentState.Available;
                 }

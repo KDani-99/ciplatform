@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Threading.Tasks;
+using CodeManager.Data.DataTransfer;
 using CodeManager.Data.Entities;
 using CodeManagerWebApi.DataTransfer;
 using CodeManagerWebApi.Services;
@@ -34,7 +35,7 @@ namespace CodeManagerWebApi.Controllers
         [HttpPut, Route("{projectId:long}/vars")] // constant long param
         public async Task<IActionResult> CreateOrUpdateProjectVariableAsync([FromRoute] long projectId,[FromBody] VariableDto variableDto)
         {
-            // Logically, a variable cant exist without a project, so thats the reason why I decided not to make a separate controller for that
+            // Logically, a variable cant exist without a project, so that's the reason why I decided not to make a separate controller for that
             // TODO: validate dto
             // TODO: verify user permission
 
@@ -43,5 +44,7 @@ namespace CodeManagerWebApi.Controllers
             
             return StatusCode((int)HttpStatusCode.NoContent);
         }
+        
+        
     }
 }

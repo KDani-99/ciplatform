@@ -32,12 +32,14 @@ namespace CodeManagerWebApi.Hubs
             return Task.CompletedTask;
         }
 
-        [HubMethodName("SendLogsToChannel")]
+        [HubMethodName("StreamLogToChannel")]
         public async Task SendLogsToChannelAsync(IAsyncEnumerable<string> stream, long runId, long jobId, int step, [EnumeratorCancellation]
             CancellationToken cancellationToken)
         {
             await foreach (var item in stream.WithCancellation(cancellationToken))
             {
+                cancellationToken.ThrowIfCancellationRequested();
+                
                 await Task.Yield();
                 await Clients.Group(GetGroupName(runId, jobId)).SendAsync("ReceiveLogs", item, cancellationToken: cancellationToken);
             }

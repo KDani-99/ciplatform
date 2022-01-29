@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using CodeManager.Data.Entities;
 using CodeManagerWebApi.Entities;
-using CodeManagerWebApi.Entities.Configuration;
+using CodeManagerWebApi.Configuration;
 using CodeManagerWebApi.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;

@@ -3,7 +3,7 @@ using CodeManager.Data.DataTransfer;
 using CodeManager.Data.Entities;
 using CodeManagerWebApi.DataTransfer;
 
-namespace CodeManager.Core.Services
+namespace CodeManagerWebApi.Services
 {
     public interface IVariableService
     {

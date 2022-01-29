@@ -36,13 +36,14 @@ namespace CodeManagerWebApi.Controllers
         public async Task<IActionResult> QueueRun()
         {
             string content = await new StreamReader(Request.Body).ReadToEndAsync();
-            var deserializer = new DeserializerBuilder()
+          /*  var deserializer = new DeserializerBuilder()
                 .WithNamingConvention(LowerCaseNamingConvention.Instance)
                 .Build();
             
-            var configuration = deserializer.Deserialize<RunConfiguration>(content);
+            var configuration = deserializer.Deserialize<RunConfiguration>(content);*/
             
-            var response = await _requestClient.GetResponse<SuccessfulQueueRunCommandResponse, FailedQueueRunCommandResponse>(new QueueRunCommand {RunConfiguration = configuration, Repository = "https://github.com/KDani-99/doc-assistant"});
+          // TODO: send data with the request
+            var response = await _requestClient.GetResponse<SuccessfulQueueRunCommandResponse, FailedQueueRunCommandResponse>(new QueueRunCommand {RunConfigurationString = content, Repository = "https://github.com/KDani-99/doc-assistant"});
 
             return Ok();
         }

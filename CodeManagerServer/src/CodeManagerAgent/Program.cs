@@ -7,6 +7,7 @@ using CodeManagerAgent.Extensions;
 using CodeManagerAgent.Factories;
 using CodeManagerAgent.Hubs.Consumers;
 using CodeManagerAgent.Services;
+using CodeManagerAgent.WebSocket;
 using Docker.DotNet;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -46,14 +47,20 @@ namespace CodeManagerAgent
                                 "The agent context must be one of the following types: 'Linux', 'Windows', 'Docker'");
                     }
 
+                    services.Configure<WebSocketConfiguration>(
+                        hostContext.Configuration.GetSection("WebSocketConfiguration"));
                     services.Configure<AgentConfiguration>(hostContext.Configuration.GetSection("AgentConfiguration"));
                     services.AddSingleton<IAgentService, AgentService>();
+                    services.AddSingleton<IWorkerClient, WorkerClient>();
                     services.AddScoped<IDockerClient>(_ => new DockerClientConfiguration().CreateClient());
-                    services.AddSignalRClient(hostContext.Configuration);
-                    services.AddTransient<IConsumer<QueueDockerJobEvent>, QueueDockerJobEventConsumer>();
+
+                    // transient services = 1 unit of work, each invocation returns a new service => like a factory
+                  /*  services.AddTransient<IConsumer<QueueDockerJobEvent>, QueueDockerJobEventConsumer>();
                     services.AddTransient<IConsumer<QueueLinuxJobEvent>, QueueLinuxJobEventConsumer>();
                     services.AddTransient<IConsumer<QueueWindowsJobEvent>, QueueWindowsJobEventConsumer>();
-                    services.AddRabbitMq(hostContext.Configuration);
+                    services.AddRabbitMq(hostContext.Configuration);*/
+                  
+                    
                 });
         }
 

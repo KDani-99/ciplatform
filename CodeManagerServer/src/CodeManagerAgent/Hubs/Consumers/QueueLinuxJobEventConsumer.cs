@@ -1,17 +1,18 @@
 ﻿using System.Threading.Tasks;
+using CodeManager.Core.Hubs.Consumers;
 using CodeManager.Data.Commands;
 using CodeManager.Data.Events;
 using CodeManagerAgent.Factories;
 using CodeManagerAgent.Services;
-using MassTransit;
+using Microsoft.AspNetCore.SignalR.Client;
 
 namespace CodeManagerAgent.Hubs.Consumers
 {
     public class QueueLinuxJobEventConsumer : QueueJobEventConsumer, IConsumer<QueueLinuxJobEvent>
     {
-        public QueueLinuxJobEventConsumer(IAgentService agentService, IRequestClient<RequestJobCommand> requestClient,
+        public QueueLinuxJobEventConsumer(HubConnection hubConnection, IAgentService agentService,
             IJobHandlerServiceFactory jobHandlerServiceFactory)
-            : base(agentService, requestClient, jobHandlerServiceFactory)
+            : base(hubConnection, agentService, jobHandlerServiceFactory)
         {
         }
 

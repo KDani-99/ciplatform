@@ -9,7 +9,7 @@ using CodeManager.Data.Extensions;
 using CodeManager.Data.Repositories;
 using CodeManagerWebApi.DataTransfer;
 using CodeManagerWebApi.Entities;
-using CodeManagerWebApi.Entities.Configuration;
+using CodeManagerWebApi.Configuration;
 using CodeManagerWebApi.Exceptions;
 using CodeManagerWebApi.Utils.Extensions;
 using Microsoft.AspNetCore.Http;
@@ -68,11 +68,13 @@ namespace CodeManagerWebApi.Services
 
         public async Task<UserDto> GetUserAsync(long id)
         {
+            // TODO: throw exception if it does not exist
             return (await _userRepository.GetAsync(id)).FromUser();
         }
 
         public Task<bool> ExistsAsync(long id)
         {
+            // TODO: throw exception if it does not exist
             return _userRepository.ExistsAsync(user => user.Id == id);
         }
 

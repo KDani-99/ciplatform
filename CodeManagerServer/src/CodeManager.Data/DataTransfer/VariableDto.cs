@@ -1,4 +1,4 @@
-﻿namespace CodeManagerWebApi.DataTransfer
+﻿namespace CodeManager.Data.DataTransfer
 {
     public class VariableDto
     {

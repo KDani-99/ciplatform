@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 
 namespace CodeManagerAgentManager.Consumers.RabbitMq
 {
+    [Obsolete("Use the streaming provided by SignalR instead")]
     public class StepLogEventConsumer : IConsumer<StepLogEvent>
     {
         private readonly ITokenService<JwtSecurityToken> _tokenService;

@@ -1,4 +1,4 @@
-﻿namespace CodeManagerWebApi.Entities.Configuration
+﻿namespace CodeManagerWebApi.Configuration
 {
     public class UserConfiguration
     {

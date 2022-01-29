@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using CodeManager.Data.Repositories;
 using CodeManagerWebApi.Database;
-using CodeManagerWebApi.Entities.Configuration;
+using CodeManagerWebApi.Configuration;
 using CodeManagerWebApi.Extensions;
 using CodeManagerWebApi.Hubs;
 using CodeManagerWebApi.Services;

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using CodeManager.Data.Entities;
 using CodeManagerWebApi.DataTransfer;
 using CodeManagerWebApi.Entities;
-using CodeManagerWebApi.Entities.Configuration;
+using CodeManagerWebApi.Configuration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;

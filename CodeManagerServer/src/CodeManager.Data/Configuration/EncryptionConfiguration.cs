@@ -1,4 +1,4 @@
-﻿namespace CodeManagerWebApi.Entities.Configuration
+﻿namespace CodeManager.Data.Configuration
 {
     public class EncryptionConfiguration
     {

@@ -6,6 +6,8 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using CodeManager.Data.Commands;
 using CodeManager.Data.Configuration;
+using CodeManager.Data.DataTransfer;
+using CodeManager.Data.Entities;
 using CodeManager.Data.Events;
 using CodeManager.Data.Extensions;
 using CodeManager.Data.JsonWebTokens;
@@ -18,65 +20,23 @@ using Microsoft.Extensions.Logging;
 namespace CodeManagerAgentManager.Consumers.RabbitMq
 {
     public class RequestJobCommandConsumer : IConsumer<RequestJobCommand>
-    {
-        private readonly IRunRepository _runRepository;
-        private readonly ITokenService<JwtSecurityToken> _tokenService;
+    { // cant be made abstract is it is being called by rmq
+        private readonly IJobService<AcceptedRequestJobCommandResponse> _jobService;
         private readonly ILogger<StepResultEventConsumer> _logger;
-        private readonly JsonSerializerOptions _jsonSerializerOptions;
-        public RequestJobCommandConsumer(JsonSerializerOptions jsonSerializerOptions,IRunRepository runRepository, ITokenService<JwtSecurityToken> tokenService, ILogger<StepResultEventConsumer> logger)
+
+        public RequestJobCommandConsumer(IJobService<AcceptedRequestJobCommandResponse> jobService, ILogger<StepResultEventConsumer> logger)
         {
-            _jsonSerializerOptions =
-                jsonSerializerOptions ?? throw new ArgumentNullException(nameof(jsonSerializerOptions));
-            _runRepository = runRepository ?? throw new ArgumentNullException(nameof(runRepository));
-            _tokenService = tokenService ?? throw new ArgumentNullException(nameof(tokenService));
+            _jobService = jobService ?? throw new ArgumentNullException(nameof(jobService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
         public async Task Consume(ConsumeContext<RequestJobCommand> context)
         {
             // Received from a connected worker (agent)
             // RPC
-
             try
             {
-                var token = await _tokenService.VerifyJobRequestTokenAsync(context.Message.Token);
-                var runId = long.Parse(token.Claims.First(claim => claim.Type == CustomJwtRegisteredClaimNames.RunId).Value);
-                var jobId = long.Parse(token.Claims.First(claim => claim.Type == CustomJwtRegisteredClaimNames.JobId)
-                    .Value);
-
-                var run = await _runRepository.GetAsync(runId) ?? throw new RunDoesNotExistException();
-
-                if (run.State == States.Failed)
-                {
-                    // TODO: run requires different states, it cant be "Skipped"
-                    throw new RunFailedException();
-                }
-                
-                var job = run.Jobs.First(item => item.Id == jobId);
-
-                if (job.State != States.Queued)
-                {
-                    throw new RunAlreadyStartedException(); // job already started by a different consumer
-                }
-                
-                if (run.State != States.Running)
-                {
-                    run.State = States.Running;
-                }
-                
-                job.State = States.Running;
-                job.StartDateTime = DateTime.Now;
-                
-                await _runRepository.UpdateAsync(run);
-
-                var jobToken = await _tokenService.CreateJobTokenAsync(runId, jobId);
-                var x = JsonSerializer.Deserialize<JobConfiguration>(job.JsonContext, _jsonSerializerOptions) ;
-                await context.RespondAsync(new AcceptedRequestJobCommandResponse
-                {
-                    Token = jobToken.ToBase64String(),
-                    JobConfiguration = JsonSerializer.Deserialize<JobConfiguration>(job.JsonContext, _jsonSerializerOptions),
-                    Repository = run.Repository
-                });
-
+                var jobParams = await _jobService.ProcessJobRequestTokenAsync(context.Message.Token);
+                await context.RespondAsync(jobParams);
             }
             catch (Exception exception)
             {

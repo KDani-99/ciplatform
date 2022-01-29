@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
-using CodeManagerWebApi.Entities.Configuration;
+using CodeManager.Data.Configuration;
 using Microsoft.Extensions.Options;
 
-namespace CodeManagerWebApi.Services
+namespace CodeManager.Data.Services
 {
     public class EncryptionService : IEncryptionService
     {

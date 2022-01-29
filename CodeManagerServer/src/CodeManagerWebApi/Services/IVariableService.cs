@@ -1,8 +1,9 @@
 ﻿using System.Threading.Tasks;
+using CodeManager.Data.DataTransfer;
 using CodeManager.Data.Entities;
 using CodeManagerWebApi.DataTransfer;
 
-namespace CodeManagerWebApi.Services
+namespace CodeManager.Core.Services
 {
     public interface IVariableService
     {

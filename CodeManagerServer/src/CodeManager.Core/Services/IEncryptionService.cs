@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace CodeManagerWebApi.Services
+namespace CodeManager.Data.Services
 {
     public interface IEncryptionService
     {

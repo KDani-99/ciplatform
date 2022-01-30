@@ -1,10 +1,10 @@
 ﻿using System.Threading.Tasks;
+using CodeManager.Data.Events;
 
 namespace CodeManagerAgentManager.Services
 {
-    public interface IJobService<T>
-        where T : new()
+    public interface IJobService
     {
-        public Task<T> ProcessJobRequestTokenAsync(string token);
+        public Task<IQueueJobEvent> ProcessJobRequestTokenAsync(string token);
     }
 }

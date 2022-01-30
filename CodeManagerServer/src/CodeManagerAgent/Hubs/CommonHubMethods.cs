@@ -2,8 +2,8 @@
 {
     public static class CommonHubMethods
     {
-        public const string QueueDockerJobEvent = "QueueDockerJobEvent";
-        public const string QueueLinuxJobEvent = "QueueLinuxJobEvent";
-        public const string QueueWindowsJobEvent = "QueueWindowsJobEvent";
+        public const string QueueDockerJob = "QueueDockerJob";
+        public const string QueueLinuxJob = "QueueLinuxJob";
+        public const string QueueWindowsJob = "QueueWindowsJob";
     }
 }

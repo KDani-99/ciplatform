@@ -10,10 +10,10 @@ namespace CodeManagerAgentManager.Consumers.RabbitMq
 {
     public class QueueRunCommandConsumer : IConsumer<QueueRunCommand>
     {
-        private readonly IRunService<QueueRunCommand> _runService;
+        private readonly IRunService _runService;
         private readonly ILogger<QueueRunCommandConsumer> _logger;
 
-        public QueueRunCommandConsumer(IRunService<QueueRunCommand> runService, ILogger<QueueRunCommandConsumer> logger, IFileProcessorService<RunConfiguration> runConfigurationFileProcessorService)
+        public QueueRunCommandConsumer(IRunService runService, ILogger<QueueRunCommandConsumer> logger, IFileProcessorService<RunConfiguration> runConfigurationFileProcessorService)
         {
             _runService = runService ?? throw new ArgumentNullException(nameof(runService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));

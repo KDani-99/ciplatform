@@ -5,11 +5,13 @@ using CodeManager.Core.Services;
 using CodeManager.Data.Commands;
 using CodeManager.Data.Configuration;
 using CodeManager.Data.Database;
+using CodeManager.Data.Events;
 using CodeManager.Data.Repositories;
 using CodeManagerAgent.Hubs;
 using CodeManagerAgentManager.Cache;
 using CodeManagerAgentManager.Configuration;
 using CodeManagerAgentManager.Extensions;
+using CodeManagerAgentManager.Hubs;
 using CodeManagerAgentManager.Repositories;
 using CodeManagerAgentManager.Services;
 using CodeManagerAgentManager.WebSocket;
@@ -47,7 +49,7 @@ namespace CodeManagerAgentManager
                 {
                     Converters =
                     {
-                        new JsonStringEnumConverter()
+                        new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)
                     }
                 })
                 .Configure<TokenServiceConfiguration>(
@@ -65,16 +67,16 @@ namespace CodeManagerAgentManager
                 .AddScoped((_) => new DeserializerBuilder()
                     .WithNamingConvention(LowerCaseNamingConvention.Instance)
                     .Build())
-                .AddScoped<IJobService<AcceptedRequestJobCommandResponse>, JobService>()
                 .AddScoped<IVariableRepository, VariableRepository>()
                 .AddScoped<IVariableService, VariableService>()
                 .AddScoped<IEncryptionService, EncryptionService>()
                 .AddScoped<IFileProcessorService<RunConfiguration>, YmlFileProcessorService>()
-                .AddScoped<IRunService<QueueRunCommand>, RunService>()
+                .AddScoped<IRunService, RunService>()
                 .AddScoped<ITokenService<JwtSecurityToken>, TokenService>()
                 .AddScoped<IRunRepository, RunRepository>()
                 .AddScoped<ILogStreamService, LogStreamService>()
                 .AddScoped<IWorkerConnectionService, WorkerConnectionService>()
+                .AddScoped<IStepService<StepResultEvent>, StepService>()
                 .AddSignalR().Services
                 .AddRabbitMq(Configuration);
             //.AddSignalRClient(Configuration);

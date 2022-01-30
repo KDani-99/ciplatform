@@ -19,7 +19,7 @@ using Microsoft.Extensions.Logging;
 
 namespace CodeManagerAgentManager.Consumers.RabbitMq
 {
-    public class RequestJobCommandConsumer : IConsumer<RequestJobCommand>
+    /*public class RequestJobCommandConsumer : IConsumer<RequestJobCommand>
     { // cant be made abstract is it is being called by rmq
         private readonly IJobService<AcceptedRequestJobCommandResponse> _jobService;
         private readonly ILogger<StepResultEventConsumer> _logger;
@@ -44,5 +44,5 @@ namespace CodeManagerAgentManager.Consumers.RabbitMq
                 _logger.LogError($"Failed to consume `{nameof(RequestJobCommand)}`. Error: {exception.Message}");
             }
         }
-    }
+    }*/
 }

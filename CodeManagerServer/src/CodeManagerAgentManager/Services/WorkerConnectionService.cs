@@ -26,22 +26,24 @@ namespace CodeManagerAgentManager.Services
         {
             var serialized = JsonSerializer.Serialize(workerConnectionData, _jsonSerializerOptions);
 
-            await _workerConnectionRepository.AddToPoolAsync(workerConnectionData.JobContext, serialized);
+            await _workerConnectionRepository.AddToPoolAsync(workerConnectionData.JobContext, workerConnectionData.ConnectionId);
             await _workerConnectionRepository.AddAsync(workerConnectionData.ConnectionId, serialized);
         }
 
         public async Task RemoveWorkerConnectionAsync(string connectionId)
         {
-            var workerConnectionData = JsonSerializer.Deserialize<WorkerConnectionData>(connectionId, _jsonSerializerOptions);
+            var jsonString = await _workerConnectionRepository.GetAsync(connectionId);
+            var workerConnectionData = JsonSerializer.Deserialize<WorkerConnectionData>(jsonString, _jsonSerializerOptions);
             await _workerConnectionRepository.RemoveFromPoolAsync(workerConnectionData.JobContext, connectionId);
             await _workerConnectionRepository.RemoveAsync(connectionId);
         }
 
         public async Task UpdateWorkerConnectionAsync(WorkerConnectionData workerConnectionData)
         {
+            var jsonString = await _workerConnectionRepository.GetAsync(workerConnectionData.ConnectionId);
             var stored =
                 JsonSerializer.Deserialize<WorkerConnectionData>(
-                    await _workerConnectionRepository.GetAsync(workerConnectionData.ConnectionId));
+                    jsonString, _jsonSerializerOptions);
 
             workerConnectionData.JobContext = stored.JobContext;
             
@@ -51,7 +53,7 @@ namespace CodeManagerAgentManager.Services
 
         public Task<IEnumerable<string>> GetAvailableWorkerConnectionIdsOfTypeAsync(JobContext jobContext)
         {
-            return _workerConnectionRepository.GetAsync(jobContext);
+            return _workerConnectionRepository.GetAllAsync(jobContext);
         }
 
         public Task<IEnumerable<WorkerConnectionData>> GetAvailableWorkerConnectionsAsync()

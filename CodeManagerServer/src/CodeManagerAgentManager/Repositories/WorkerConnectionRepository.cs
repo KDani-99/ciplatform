@@ -55,11 +55,21 @@ namespace CodeManagerAgentManager.Repositories
             return AddAsync(connectionId, workerData);
         }
 
-        public async Task<IEnumerable<string>> GetAsync(JobContext jobContext)
+        public async Task<IEnumerable<string>> GetAllAsync(JobContext jobContext)
         {
             var workerConnections = await _connectionCache.Database.SetMembersAsync(jobContext.GetDisplayName());
 
             return workerConnections.Select(connection => connection.ToString());
         }
+
+        /*public async IAsyncEnumerable<string> GetAsync(JobContext jobContext)
+        {
+            var members = await _connectionCache.Database.SetMembersAsync(jobContext.GetDisplayName());
+
+            foreach (var member in members)
+            {
+                yield return member;
+            }
+        }*/
     }
 }

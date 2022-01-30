@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using CodeManager.Data.Entities;
 using CodeManager.Data.Repositories;
@@ -37,18 +38,22 @@ namespace CodeManagerAgentManager.Services
 
             var run = await _runRepository.GetAsync(runId);
             var job = run.Jobs.First(item => item.Id == jobId); // TODO: lazy load!!
-            var step = job.Steps[stepIndex];
+            var step = job.Steps[stepIndex]; // TODO: use step id instead of index
 
-            var secrets = run.Project.Variables
+           /* var secrets = run.Project.Variables
                 .Where(variable => variable.IsSecret)
                 .Select(s => s.Value)
-                .ToList();
+                .ToList();*/
+           var secrets = new List<string>();
             
             step.LogPath = logPath;
             await _runRepository.UpdateAsync(run);
             
             await using var outputStream = new StreamWriter(File.Open(logPath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read));
             
+            var channel = Channel.CreateUnbounded<string>();
+            await _managerClient.HubConnection.SendAsync("StreamLogToChannel", channel.Reader, runId, jobId, stepIndex);
+
             await foreach (var line in stream)
             {
                 if (_logStreamServiceConfiguration.MaxLinePerFile != 0 && numberOfLines >= _logStreamServiceConfiguration.MaxLinePerFile)
@@ -64,14 +69,17 @@ namespace CodeManagerAgentManager.Services
                 var filtered = FilterSecrets(line, secrets);
 
                 Console.Write(filtered);
+                
+                await channel.Writer.WriteAsync(filtered); //TEST
+                
                 await outputStream.WriteAsync(filtered);
                 await outputStream.FlushAsync();
-                
-                await _managerClient.HubConnection.SendAsync("StreamLogToChannel", line);
 
                 sizeInBytes += Encoding.UTF8.GetByteCount(filtered);
                 numberOfLines++;
             }
+
+            channel.Writer.Complete();
         }
 
         private string GetLogPath(long runId, long jobId, int step)

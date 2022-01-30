@@ -24,7 +24,7 @@ namespace CodeManagerAgentManager.Extensions
 
                 busConfigurator.AddConsumer<QueueRunCommandConsumer>();
                 busConfigurator.AddConsumer<StepResultEventConsumer>();
-                busConfigurator.AddConsumer<RequestJobCommandConsumer>();
+               // busConfigurator.AddConsumer<RequestJobCommandConsumer>();
 
                 busConfigurator.SetKebabCaseEndpointNameFormatter();
 
@@ -49,12 +49,12 @@ namespace CodeManagerAgentManager.Extensions
                             opts.AutoDelete = true;
                             opts.ConfigureConsumer<StepResultEventConsumer>(context);
                         });
-                    cfg.ReceiveEndpoint(massTransitConfiguration.Queues["RequestJobCommandQueue"],
+                   /* cfg.ReceiveEndpoint(massTransitConfiguration.Queues["RequestJobCommandQueue"],
                         opts =>
                         {
                             opts.AutoDelete = true;
                             opts.ConfigureConsumer<RequestJobCommandConsumer>(context);
-                        });
+                        });*/
                 });
 
                 services.AddMassTransitHostedService(true);

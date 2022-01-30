@@ -13,6 +13,6 @@ namespace CodeManagerAgentManager.Repositories
         public Task<bool> RemoveAsync(string connectionId); // TODO: removes from data hash
         public Task<bool> RemoveFromPoolAsync(JobContext jobContext, string connectionId); // TODO: removes only from the pool = makes it unavailable
         public Task<bool> UpdateAsync(string connectionId, string workerData);
-        public Task<IEnumerable<string>> GetAsync(JobContext jobContext);
+        public Task<IEnumerable<string>> GetAllAsync(JobContext jobContext);
     }
 }

@@ -1,11 +1,10 @@
 ﻿using System.Threading.Tasks;
+using CodeManager.Data.Commands;
 
 namespace CodeManagerAgentManager.Services
 {
-    public interface IRunService<T>
-        where T : new()
-
+    public interface IRunService
     {
-        public Task<long> QueueAsync(T cmd);
+        public Task<long> QueueAsync(QueueRunCommand cmd);
     }
 }

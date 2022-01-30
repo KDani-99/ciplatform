@@ -18,23 +18,21 @@ using CodeManagerAgentManager.Services;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 
-namespace CodeManagerAgent.Hubs
+namespace CodeManagerAgentManager.Hubs
 {
     public class AgentHub : Hub<IAgentClient>
     {
         private readonly IWorkerConnectionService _workerConnectionService;
-        private readonly IJobService<AcceptedRequestJobCommandResponse> _jobService;
         private readonly IStepService<StepResultEvent> _stepService;
         private readonly ILogStreamService _logStreamService;
         private readonly ILogger<AgentHub> _logger;
 
         private const string HeaderKey = "W-JobContext"; // W for Worker
 
-        public AgentHub(IWorkerConnectionService workerConnectionService, IJobService<AcceptedRequestJobCommandResponse> jobService, ILogStreamService logStreamService, ILogger<AgentHub> logger, IStepService<StepResultEvent> stepService)
+        public AgentHub(IWorkerConnectionService workerConnectionService, ILogStreamService logStreamService, ILogger<AgentHub> logger, IStepService<StepResultEvent> stepService)
         {
             _workerConnectionService = workerConnectionService ??
                                           throw new ArgumentNullException(nameof(workerConnectionService));
-            _jobService = jobService ?? throw new ArgumentNullException(nameof(jobService));
             _logStreamService = logStreamService ?? throw new ArgumentNullException(nameof(logStreamService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _stepService = stepService ?? throw new ArgumentNullException(nameof(stepService));
@@ -96,22 +94,6 @@ namespace CodeManagerAgent.Hubs
             }
         }
 
-        [HubMethodName("RequestJob")]
-        public async Task<AcceptedRequestJobCommandResponse> RequestJobAsync(RequestJobCommand context)
-        {
-            try
-            {
-                var jobParams = await _jobService.ProcessJobRequestTokenAsync(context.Token);
-
-                return jobParams;
-            }
-            catch (Exception exception)
-            {
-                _logger.LogError($"Failed to consume `{nameof(RequestJobCommand)}`. Error: {exception.Message}");
-                return null;
-            }
-        }
-        
         [HubMethodName("UpdateAgentState")]
         public Task UpdateAgentStateAsync(AgentState agentState)
         {

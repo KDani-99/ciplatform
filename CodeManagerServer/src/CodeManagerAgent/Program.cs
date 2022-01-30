@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.InteropServices;
+using CodeManager.Core.Hubs.Consumers;
 using CodeManager.Data.Configuration;
 using CodeManager.Data.Events;
 using CodeManagerAgent.Configuration;
@@ -53,7 +54,7 @@ namespace CodeManagerAgent
                     services.AddSingleton<IAgentService, AgentService>();
                     services.AddSingleton<IWorkerClient, WorkerClient>();
                     services.AddScoped<IDockerClient>(_ => new DockerClientConfiguration().CreateClient());
-
+                    services.AddTransient<IConsumer<QueueJobEvent>, QueueJobEventConsumer>();
                     services.AddHostedService<Worker>();
                     // transient services = 1 unit of work, each invocation returns a new service => like a factory
                     /*  services.AddTransient<IConsumer<QueueDockerJobEvent>, QueueDockerJobEventConsumer>();

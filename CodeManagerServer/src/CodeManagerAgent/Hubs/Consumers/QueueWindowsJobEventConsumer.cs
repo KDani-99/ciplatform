@@ -8,15 +8,15 @@ using Microsoft.AspNetCore.SignalR.Client;
 
 namespace CodeManagerAgent.Hubs.Consumers
 {
-    public class QueueWindowsJobEventConsumer : QueueJobEventConsumer, IConsumer<QueueWindowsJobEvent>
+    public class QueueWindowsJobEventConsumer : QueueJobEventConsumer, IConsumer<QueueJobEvent>
     {
-        public QueueWindowsJobEventConsumer(HubConnection hubConnection, IAgentService agentService,
+        public QueueWindowsJobEventConsumer(IAgentService agentService,
             IJobHandlerServiceFactory jobHandlerServiceFactory)
-            : base(hubConnection, agentService, jobHandlerServiceFactory)
+            : base(agentService, jobHandlerServiceFactory)
         {
         }
 
-        public Task Consume(QueueWindowsJobEvent context)
+        public Task Consume(QueueJobEvent context)
         {
             return base.Consume(context);
         }

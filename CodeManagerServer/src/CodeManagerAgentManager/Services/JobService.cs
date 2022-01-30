@@ -8,14 +8,16 @@ using System.Threading.Tasks;
 using CodeManager.Data.Commands;
 using CodeManager.Data.Configuration;
 using CodeManager.Data.Entities;
+using CodeManager.Data.Entities.CI;
+using CodeManager.Data.Events;
 using CodeManager.Data.Extensions;
 using CodeManager.Data.JsonWebTokens;
 using CodeManager.Data.Repositories;
 using CodeManagerAgentManager.Exceptions;
-
+// TODO: remove this file
 namespace CodeManagerAgentManager.Services
 {
-    public class JobService : IJobService<AcceptedRequestJobCommandResponse>
+  /*  public class JobService : IJobService
     {
         private readonly JsonSerializerOptions _jsonSerializerOptions;
         private readonly IRunRepository _runRepository;
@@ -33,24 +35,11 @@ namespace CodeManagerAgentManager.Services
             _tokenService = tokenService ?? throw new ArgumentNullException(nameof(tokenService));
         }
 
-        public async Task<AcceptedRequestJobCommandResponse> ProcessJobRequestTokenAsync(string requestToken)
+        public async Task<IQueueJobEvent> ProcessJobRequestTokenAsync(Run run, Job job)
         {
-            var token = await _tokenService.VerifyJobRequestTokenAsync(requestToken);
-            var runId = long.Parse(token.Claims.First(claim => claim.Type == CustomJwtRegisteredClaimNames.RunId)
-                .Value);
-            var jobId = long.Parse(token.Claims.First(claim => claim.Type == CustomJwtRegisteredClaimNames.JobId)
-                .Value);
-
-            var run = await _runRepository.GetAsync(runId) ?? throw new RunDoesNotExistException();
-
             if (run.State == States.Failed)
                 // TODO: run requires different states, it cant be "Skipped"
                 throw new RunFailedException();
-
-            var job = run.Jobs.First(item => item.Id == jobId);
-
-            if (job.State != States.Queued)
-                throw new RunAlreadyStartedException(); // job already started by a different consumer
 
             run.State = States.Running;
 
@@ -86,5 +75,5 @@ namespace CodeManagerAgentManager.Services
 
             return jobConfiguration;
         }
-    }
+    }*/
 }

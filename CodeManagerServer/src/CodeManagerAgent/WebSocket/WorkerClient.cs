@@ -2,7 +2,9 @@
 using System.Threading.Tasks;
 using CodeManager.Core.Hubs.Clients;
 using CodeManager.Core.Hubs.Consumers;
+using CodeManager.Data.Agent;
 using CodeManager.Data.Configuration;
+using CodeManager.Data.Entities;
 using CodeManager.Data.Events;
 using CodeManagerAgent.Configuration;
 using CodeManagerAgent.Hubs;
@@ -17,15 +19,17 @@ namespace CodeManagerAgent.WebSocket
     {
         // TODO: do the same with this class as I did with redis, register this class as singleton
         public HubConnection HubConnection { get; }
+        
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<WorkerClient> _logger;
+        private readonly AgentConfiguration _agentConfiguration;
 
         public WorkerClient(IServiceProvider serviceProvider, IOptions<WebSocketConfiguration> webSocketConfiguration, IOptions<AgentConfiguration> agentConfiguration, ILogger<WorkerClient> logger)
         {
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-            var agentConfigurationValue =
+            _agentConfiguration =
                 agentConfiguration.Value ?? throw new ArgumentNullException(nameof(agentConfiguration));
             var wsConfiguration = webSocketConfiguration.Value ?? throw new ArgumentNullException(nameof(webSocketConfiguration));
             
@@ -34,14 +38,14 @@ namespace CodeManagerAgent.WebSocket
                     options =>
                     {
                         options.AccessTokenProvider = () => Task.FromResult("");
-                        options.Headers.Add("W-JobContext", agentConfigurationValue.Context.ToString());
+                        options.Headers.Add("W-JobContext", _agentConfiguration.Context.ToString());
                     })
                 .Build();
 
             HubConnection.Reconnecting += OnReconnection;
             HubConnection.Reconnected += OnReconnected;
             HubConnection.Closed += OnConnectionClose;
-            
+
             HubConnection.ServerTimeout = TimeSpan.FromSeconds(180);
             HubConnection.HandshakeTimeout = TimeSpan.FromSeconds(60);
 
@@ -51,13 +55,42 @@ namespace CodeManagerAgent.WebSocket
         private void RegisterMethods()
         {
             _logger.LogInformation("Registering worker events...");
-            HubConnection.On<QueueDockerJobEvent>(CommonHubMethods.QueueDockerJobEvent,
-                message => _serviceProvider.GetService<IConsumer<QueueDockerJobEvent>>()?.Consume(message));
-            HubConnection.On<QueueLinuxJobEvent>(CommonHubMethods.QueueLinuxJobEvent,
-                message => _serviceProvider.GetService<IConsumer<QueueLinuxJobEvent>>()?.Consume(message));
-            HubConnection.On<QueueWindowsJobEvent>(CommonHubMethods.QueueWindowsJobEvent,
-                message => _serviceProvider.GetService<IConsumer<QueueWindowsJobEvent>>()?.Consume(message));
+
+            var methodName = _agentConfiguration.Context switch
+            {
+                JobContext.Docker => CommonHubMethods.QueueDockerJob,
+                JobContext.Linux => CommonHubMethods.QueueLinuxJob,
+                JobContext.Windows => CommonHubMethods.QueueWindowsJob
+            };
+
+            HubConnection.On<QueueJobEvent>(methodName,
+                message =>
+                {
+                    try
+                    {
+                        var x = _serviceProvider.GetService<IConsumer<QueueJobEvent>>();
+                        Console.WriteLine(x.GetType());
+                        x.Consume(message);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex);
+                    }
+                });
+
+            /*  HubConnection.On<QueueJobEvent>(CommonHubMethods.QueueDockerJobEvent,
+                  message => _serviceProvider.GetService<IConsumer<QueueDockerJobEvent>>()?.Consume(message));
+              HubConnection.On<QueueJobEvent>(CommonHubMethods.QueueLinuxJobEvent,
+                  message => _serviceProvider.GetService<IConsumer<QueueLinuxJobEvent>>()?.Consume(message));
+              HubConnection.On<QueueJobEvent>(CommonHubMethods.QueueWindowsJobEvent,
+                  message => _serviceProvider.GetService<IConsumer<QueueWindowsJobEvent>>()?.Consume(message));*/
         }
+        
+        public Task ConfigureAsync()
+        {
+            return HubConnection.SendAsync("Configure", new HostMachineInformation(), AgentState.Available);
+        }
+
 
         private Task OnConnectionClose(Exception exception)
         {

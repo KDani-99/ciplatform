@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using CodeManager.Data.Database;
 using CodeManager.Data.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace CodeManager.Data.Repositories
 {
@@ -15,32 +17,39 @@ namespace CodeManager.Data.Repositories
 
         public override Task<Variable> GetAsync(long id)
         {
-            throw new NotImplementedException();
+            return DbContext.Variables.FirstOrDefaultAsync(variable => variable.Id == id);
         }
 
         public override Task<List<Variable>> GetAsync(Expression<Func<Variable, bool>> expression)
         {
-            throw new NotImplementedException();
+            return DbContext.Variables.Where(expression).ToListAsync();
         }
 
         public override Task<bool> ExistsAsync(Expression<Func<Variable, bool>> expression)
         {
-            throw new NotImplementedException();
+            return DbContext.Variables.AnyAsync(expression);
         }
 
-        public override Task<long> CreateAsync(Variable entity)
+        public override async Task<long> CreateAsync(Variable entity)
         {
-            throw new NotImplementedException();
+            await DbContext.Variables.AddAsync(entity);
+            await DbContext.SaveChangesAsync();
+
+            return entity.Id;
         }
 
-        public override Task UpdateAsync(Variable entity)
+        public override async Task UpdateAsync(Variable entity)
         {
-            throw new NotImplementedException();
+            DbContext.Variables.Update(entity);
+            await DbContext.SaveChangesAsync();
         }
 
-        public override Task DeleteAsync(long id)
+        public override async Task DeleteAsync(long id)
         {
-            throw new NotImplementedException();
+            var entity = await DbContext.Variables.Where(user => user.Id == id).FirstOrDefaultAsync();
+            DbContext.Variables.Remove(entity);
+            
+            await DbContext.SaveChangesAsync();
         }
     }
 }

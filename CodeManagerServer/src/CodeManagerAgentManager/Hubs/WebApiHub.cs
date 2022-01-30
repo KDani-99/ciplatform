@@ -11,10 +11,10 @@ namespace CodeManagerAgent.Hubs
     [Obsolete("Use rabbitmq for webapi-manager communication")]
     public class WebApiHub : Hub
     {
-        private readonly IRunService<QueueRunCommand> _runService;
+        private readonly IRunService _runService;
         private readonly ILogger<WebApiHub> _logger;
         
-        public WebApiHub(IRunService<QueueRunCommand> runService, ILogger<WebApiHub> logger)
+        public WebApiHub(IRunService runService, ILogger<WebApiHub> logger)
         {
             _runService = runService ?? throw new ArgumentNullException(nameof(runService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));

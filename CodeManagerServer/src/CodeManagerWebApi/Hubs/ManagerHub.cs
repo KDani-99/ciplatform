@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
@@ -19,19 +20,31 @@ namespace CodeManagerWebApi.Hubs
             _runsHubContext = runsHubContext ?? throw new ArgumentNullException(nameof(runsHubContext));
         }
         
-        [HubMethodName("StreamLogToChannel")]
-        public async Task SendLogsToChannelAsync(IAsyncEnumerable<string> stream, long runId, long jobId, int step, [EnumeratorCancellation]
-            CancellationToken cancellationToken)
+       /* [HubMethodName("StreamLogToChannel")]
+        public async Task SendLogsToChannelAsync(IAsyncEnumerable<string> stream, long runId, long jobId, int step)
         {
-            await foreach (var item in stream.WithCancellation(cancellationToken))
+            await foreach (var item in stream)
             {
-                cancellationToken.ThrowIfCancellationRequested();
-                
+                Console.Write(item);
                 await Task.Yield();
-                await _runsHubContext.Clients.Group(GetGroupName(runId, jobId)).SendAsync("ReceiveLogs", item, cancellationToken: cancellationToken);
+                await _runsHubContext.Clients.Group(GetGroupName(runId, jobId)).SendAsync("ReceiveLogs", item);
             }
 
-        }
+        }*/
+
+       [HubMethodName("StreamLogToChannel")]
+       public async Task StreamLogsToChannelAsync(ChannelReader<string> stream, long runId, long jobId, int step)
+       {
+           while (await stream.WaitToReadAsync())
+           {
+               while (stream.TryRead(out var item))
+               {
+                   Console.Write(item);
+                   await _runsHubContext.Clients.Group(GetGroupName(runId, jobId)).SendAsync("ReceiveLogs", item); // why send? because thats the only way to ""stream"" it to multiple clients
+                   // as regular streaming involves only a single client
+               }
+           }
+       }
         
         private static string GetGroupName(long runId, long jobId)
         {

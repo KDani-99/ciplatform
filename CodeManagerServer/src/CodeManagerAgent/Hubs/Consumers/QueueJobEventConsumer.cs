@@ -2,64 +2,48 @@
 using System.Threading;
 using System.Threading.Tasks;
 using CodeManager.Core.Hubs.Common;
+using CodeManager.Core.Hubs.Consumers;
 using CodeManager.Data.Agent;
 using CodeManager.Data.Commands;
 using CodeManager.Data.Events;
 using CodeManagerAgent.Factories;
 using CodeManagerAgent.Services;
-using MassTransit;
 using Microsoft.AspNetCore.SignalR.Client;
 
 namespace CodeManagerAgent.Hubs.Consumers
 {
-    public abstract class QueueJobEventConsumer
+    public class QueueJobEventConsumer : IConsumer<QueueJobEvent>
     {
         private readonly IAgentService _agentService;
         private readonly IJobHandlerServiceFactory _jobHandlerServiceFactory;
-        private readonly HubConnection _hubConnection;
 
-        protected QueueJobEventConsumer(HubConnection hubConnection ,IAgentService agentService,
+        public QueueJobEventConsumer(IAgentService agentService,
             IJobHandlerServiceFactory jobHandlerServiceFactory)
         {
-            _hubConnection = hubConnection ?? throw new ArgumentNullException(nameof(hubConnection));
             _agentService = agentService ?? throw new ArgumentNullException(nameof(agentService));
             _jobHandlerServiceFactory = jobHandlerServiceFactory ??
                                         throw new ArgumentNullException(nameof(jobHandlerServiceFactory));
         }
 
-        protected async Task Consume(IQueueJobEvent queueJobEvent)
+        public async Task Consume(QueueJobEvent queueJobEvent)
         {
-            if (_agentService.AgentState == AgentState.Available)
+            try
             {
+                // TODO: only set agent state server side?
                 _agentService.AgentState = AgentState.Working;
+            
+                _agentService.CancellationTokenSource = new CancellationTokenSource();
 
-                var response = await _hubConnection.InvokeAsync<AcceptedRequestJobCommandResponse>(CommonAgentManagerHubMethods.RequestJobCommand, new RequestJobCommand
-                {
-                    Token = queueJobEvent.Token
-                });
-
-                if (response != null)
-                {
-                    // TODO: only set agent state server side?
-                    _agentService.CancellationTokenSource = new CancellationTokenSource();
-
-                    await _jobHandlerServiceFactory.Create(response.Repository,
-                            response.Token,
-                            response.JobConfiguration,
-                            _agentService.CancellationTokenSource.Token)
-                        .StartAsync();
-                }
-                else
-                {
-                    _agentService.AgentState = AgentState.Available;
-                }
+                await _jobHandlerServiceFactory.Create(queueJobEvent.Repository,
+                        queueJobEvent.Token,
+                        queueJobEvent.JobConfiguration,
+                        _agentService.CancellationTokenSource.Token)
+                    .StartAsync();
             }
-            else
+            catch (Exception exception)
             {
-                _agentService.AgentState = AgentState.Available;
+                Console.WriteLine(exception);
             }
-            // TODO: reset agent state if request times out
-            // else busy
         }
     }
 }

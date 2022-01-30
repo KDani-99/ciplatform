@@ -35,6 +35,7 @@ namespace CodeManagerAgent
                 _logger.LogInformation("Starting worker...");
                 await _workerClient.HubConnection.StartAsync(stoppingToken);
                 _logger.LogInformation("Connected to remote host.");
+                await _workerClient.ConfigureAsync();
             }
             catch (Exception exception)
             {

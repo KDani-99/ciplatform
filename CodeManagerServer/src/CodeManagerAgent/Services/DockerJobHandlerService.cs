@@ -55,8 +55,7 @@ namespace CodeManagerAgent.Services
                 },
                 JobConfiguration.AuthConfig,
                 new Progress<JSONMessage>());
-
-
+            
             var container = await _dockerClient.Containers.CreateContainerAsync(new CreateContainerParameters
             {
                 Image = JobConfiguration.Image,

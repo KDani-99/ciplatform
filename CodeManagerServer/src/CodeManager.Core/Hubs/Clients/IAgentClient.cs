@@ -5,8 +5,8 @@ namespace CodeManager.Core.Hubs.Clients
 {
     public interface IAgentClient
     {
-        public Task QueueDockerJobEvent(QueueDockerJobEvent queueDockerJobEvent);
-        public Task QueueWindowsJobEvent(QueueWindowsJobEvent queueWindowsJobEvent);
-        public Task QueueLinuxJobEvent(QueueWindowsJobEvent queueWindowsJobEvent);
+        public Task QueueDockerJob(QueueJobEvent queueDockerJobEvent);
+        public Task QueueWindowsJob(QueueJobEvent queueWindowsJobEvent);
+        public Task QueueLinuxJob(QueueJobEvent queueWindowsJobEvent);
     }
 }

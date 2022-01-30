@@ -28,11 +28,11 @@ namespace CodeManagerWebApi.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] TeamDto teamDto)
+        public async Task<IActionResult> Create([FromBody] CreateTeamDto createTeamDto)
         {
             var user = HttpContext.Items["user"] as User;
-            await _teamService.CreateTeamAsync(teamDto, user);
-            _logger.LogInformation($"Team `{teamDto.Name}` created @ {DateTime.Now}");
+            await _teamService.CreateTeamAsync(createTeamDto, user);
+            _logger.LogInformation($"Team `{createTeamDto.Name}` created @ {DateTime.Now}");
             
             return StatusCode((int)HttpStatusCode.Created);
         }

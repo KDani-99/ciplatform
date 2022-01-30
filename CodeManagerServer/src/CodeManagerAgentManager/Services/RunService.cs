@@ -7,6 +7,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using CodeManager.Core.Hubs.Clients;
+using CodeManager.Data.Agent;
 using CodeManager.Data.Commands;
 using CodeManager.Data.Configuration;
 using CodeManager.Data.Entities;
@@ -16,9 +17,11 @@ using CodeManager.Data.Extensions;
 using CodeManager.Data.Repositories;
 using CodeManagerAgentManager.Configuration;
 using CodeManagerAgentManager.Exceptions;
-using CodeManagerAgentManager.Hubs;
+using CodeManagerAgentManager.WebSocket;
+using CodeManagerAgentManager.WebSocket.Hubs;
 using MassTransit;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -29,8 +32,8 @@ namespace CodeManagerAgentManager.Services
         private readonly AgentManagerConfiguration _agentManagerConfiguration;
 
         // Single unit of work, run and dispose
-        private readonly IBusControl _busControl;
         private readonly IHubContext<AgentHub, IAgentClient> _hubContext;
+        private readonly IManagerClient _managerClient;
         private readonly JsonSerializerOptions _jsonSerializerOptions;
         private readonly ILogger<RunService> _logger;
         private readonly IFileProcessorService<RunConfiguration> _runConfigurationFileProcessorService;
@@ -41,8 +44,8 @@ namespace CodeManagerAgentManager.Services
 
         public RunService(JsonSerializerOptions jsonSerializerOptions, IVariableService variableService,
             IRunRepository runRepository, ILogger<RunService> logger,
-            IOptions<AgentManagerConfiguration> agentManagerConfiguration, IBusControl busControl,
-            IHubContext<AgentHub, IAgentClient> hubContext, IWorkerConnectionService workerConnectionService,
+            IOptions<AgentManagerConfiguration> agentManagerConfiguration,
+            IHubContext<AgentHub, IAgentClient> hubContext, IManagerClient managerClient, IWorkerConnectionService workerConnectionService,
             ITokenService<JwtSecurityToken> tokenService,
             IFileProcessorService<RunConfiguration> runConfigurationFileProcessorService)
         {
@@ -53,8 +56,8 @@ namespace CodeManagerAgentManager.Services
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _agentManagerConfiguration = agentManagerConfiguration.Value ??
                                          throw new ArgumentNullException(nameof(agentManagerConfiguration));
-            _busControl = busControl ?? throw new ArgumentNullException(nameof(busControl));
             _hubContext = hubContext ?? throw new ArgumentNullException(nameof(hubContext));
+            _managerClient = managerClient ?? throw new ArgumentNullException(nameof(managerClient));
             _workerConnectionService = workerConnectionService ??
                                        throw new ArgumentNullException(nameof(workerConnectionService));
             _tokenService = tokenService ?? throw new ArgumentNullException(nameof(tokenService));
@@ -99,8 +102,6 @@ namespace CodeManagerAgentManager.Services
                 ParseSecretsAsync(JsonSerializer.Deserialize<JobConfiguration>(job.JsonContext, _jsonSerializerOptions),
                     variables.ToList());
 
-            // TODO: remove job request token
-
             var queueJobEvent = new QueueJobEvent
             {
                 Token = jobToken.ToBase64String(),
@@ -124,6 +125,8 @@ namespace CodeManagerAgentManager.Services
                         $"The job context must be one of the following types: '{nameof(JobContext.Linux)}', '{nameof(JobContext.Windows)}', '{nameof(JobContext.Docker)}'");
             }
 
+            await UpdateWorkerStateAsync(workerConnectionId);
+
             //await _busControl.Publish(queueJobEvent);
             // TODO: send job queued event back to the client
 
@@ -134,6 +137,15 @@ namespace CodeManagerAgentManager.Services
 
             job.State = States.Running;
             job.StartDateTime = DateTime.Now;
+
+            await NotifyWebApi(job);
+        }
+
+        private async Task UpdateWorkerStateAsync(string connectionId)
+        {
+            var workerConnectionData = await _workerConnectionService.GetWorkerConnectionAsync(connectionId);
+            workerConnectionData.AgentState = AgentState.Working;
+            await _workerConnectionService.UpdateWorkerConnectionAsync(workerConnectionData);
         }
 
         private async Task<Run> SaveRunConfigurationAsync(string repository, long projectId,
@@ -162,6 +174,15 @@ namespace CodeManagerAgentManager.Services
             await _runRepository.CreateAsync(run);
 
             return run;
+        }
+
+        private Task NotifyWebApi(Job job)
+        {
+            var processed = new ProcessedJobRequest
+            {
+                JobId = job.Id
+            };
+            return _managerClient.HubConnection.SendAsync(CommonWebApiMethods.JobQueueResponse, processed);
         }
 
         private static JobConfiguration ParseSecretsAsync(JobConfiguration jobConfiguration, IList<Variable> variables)

@@ -7,6 +7,7 @@ namespace CodeManagerAgentManager.Services
 {
     public interface IWorkerConnectionService
     {
+        public Task<WorkerConnectionData> GetWorkerConnectionAsync(string connectionId);
         public Task AddWorkerConnectionOfTypeAsync(WorkerConnectionData workerConnectionData);
         public Task RemoveWorkerConnectionAsync(string connectionId);
         public Task UpdateWorkerConnectionAsync(WorkerConnectionData workerConnectionData);

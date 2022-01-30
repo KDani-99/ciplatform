@@ -18,7 +18,7 @@ using CodeManagerAgentManager.Services;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 
-namespace CodeManagerAgentManager.Hubs
+namespace CodeManagerAgentManager.WebSocket.Hubs
 {
     public class AgentHub : Hub<IAgentClient>
     {
@@ -110,7 +110,7 @@ namespace CodeManagerAgentManager.Hubs
         {
             try
             {
-                await _stepService.ProcessStepResultAsync(stepResultEvent);
+                await _stepService.ProcessStepResultAsync(stepResultEvent, Context.ConnectionId);
                 
                 // todo: publish rabbitmq ProcessedStepResultEvent that contains the run id, job id and step id
                 

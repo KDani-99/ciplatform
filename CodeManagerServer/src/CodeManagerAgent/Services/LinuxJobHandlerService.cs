@@ -19,9 +19,8 @@ namespace CodeManagerAgent.Services
     {
         // unit of work
         public LinuxJobHandlerService(string repository, string token, JobConfiguration jobConfiguration,
-            IWorkerClient workerClient, IOptions<AgentConfiguration> agentConfiguration,
-            IAgentService agentService, ILogger<JobHandlerService> logger, CancellationToken cancellationToken)
-            : base(repository, token, jobConfiguration, workerClient, agentConfiguration, agentService, logger,
+            IWorkerClient workerClient, IOptions<AgentConfiguration> agentConfiguration, ILogger<JobHandlerService> logger, CancellationToken cancellationToken)
+            : base(repository, token, jobConfiguration, workerClient, agentConfiguration, logger,
                 cancellationToken)
         {
         }

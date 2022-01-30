@@ -6,7 +6,7 @@ using CodeManager.Data.Events;
 using CodeManagerAgent.Configuration;
 using CodeManagerAgent.Extensions;
 using CodeManagerAgent.Factories;
-using CodeManagerAgent.Hubs.Consumers;
+using CodeManagerAgent.WebSocket.Consumers;
 using CodeManagerAgent.Services;
 using CodeManagerAgent.WebSocket;
 using Docker.DotNet;

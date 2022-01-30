@@ -6,10 +6,12 @@ using CodeManager.Data.Commands;
 using CodeManager.Data.Configuration;
 using CodeManagerWebApi.DataTransfer;
 using CodeManagerWebApi.Services;
+using CodeManagerWebApi.WebSocket;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Logging;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
@@ -23,13 +25,13 @@ namespace CodeManagerWebApi.Controllers
     {
         private readonly IUserService _userService;
         private readonly ILogger<UserController> _logger;
-        private readonly IRequestClient<QueueRunCommand> _requestClient;
-        
-        public UserController(IUserService userService, ILogger<UserController> logger, IRequestClient<QueueRunCommand> requestClient)
+        private readonly IWebApiClient _webApiClient;
+
+        public UserController(IUserService userService, ILogger<UserController> logger, IWebApiClient webApiClient)
         {
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _requestClient = requestClient;
+            _webApiClient = webApiClient;
         }
 
         [HttpPost, Route("test")]
@@ -43,9 +45,11 @@ namespace CodeManagerWebApi.Controllers
             var configuration = deserializer.Deserialize<RunConfiguration>(content);*/
             
           // TODO: send data with the request
-            var response = await _requestClient.GetResponse<SuccessfulQueueRunCommandResponse, FailedQueueRunCommandResponse>(new QueueRunCommand {RunConfigurationString = content, Repository = "https://github.com/KDani-99/doc-assistant"});
+           // var response = await _requestClient.GetResponse<SuccessfulQueueRunCommandResponse, FailedQueueRunCommandResponse>(new QueueRunCommand {RunConfigurationString = content, Repository = "https://github.com/KDani-99/doc-assistant"});
 
-            return Ok();
+           var response = await _webApiClient.HubConnection.InvokeAsync<long?>(CommonManagerMethods.QueueRun);
+           
+            return Ok(response);
         }
 
         [HttpPost, Route("register")]

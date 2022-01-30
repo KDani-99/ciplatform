@@ -11,7 +11,7 @@ using CodeManagerAgent.Hubs;
 using CodeManagerAgentManager.Cache;
 using CodeManagerAgentManager.Configuration;
 using CodeManagerAgentManager.Extensions;
-using CodeManagerAgentManager.Hubs;
+using CodeManagerAgentManager.WebSocket.Hubs;
 using CodeManagerAgentManager.Repositories;
 using CodeManagerAgentManager.Services;
 using CodeManagerAgentManager.WebSocket;
@@ -104,6 +104,7 @@ namespace CodeManagerAgentManager
             {
                 endpoints.MapControllers();
                 endpoints.MapHub<AgentHub>("/agent");
+                endpoints.MapHub<WebApiHub>("/webapi");
             });
         }
     }

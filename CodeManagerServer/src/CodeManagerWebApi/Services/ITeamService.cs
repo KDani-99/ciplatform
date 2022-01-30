@@ -7,7 +7,7 @@ namespace CodeManagerWebApi.Services
 {
     public interface ITeamService
     {
-        public Task CreateTeamAsync(TeamDto teamDto, User user);
+        public Task CreateTeamAsync(CreateTeamDto createTeamDto, User user);
         public Task DeleteTeamAsync(long id);
     }
 }

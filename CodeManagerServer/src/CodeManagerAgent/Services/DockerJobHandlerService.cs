@@ -18,7 +18,7 @@ using Microsoft.Extensions.Options;
 
 namespace CodeManagerAgent.Services
 {
-    public sealed class DockerJobHandlerService : JobHandlerService
+    public class DockerJobHandlerService : JobHandlerService
     {
         private readonly IDockerClient _dockerClient;
         private string _containerId;
@@ -31,10 +31,9 @@ namespace CodeManagerAgent.Services
             IWorkerClient workerClient,
             IOptions<AgentConfiguration> agentConfiguration,
             IDockerClient dockerClient,
-            IAgentService agentService,
             ILogger<JobHandlerService> logger,
             CancellationToken cancellationToken) :
-            base(repository, token, jobConfiguration, workerClient, agentConfiguration, agentService, logger,
+            base(repository, token, jobConfiguration, workerClient, agentConfiguration, logger,
                 cancellationToken)
         {
             _dockerClient = dockerClient ?? throw new ArgumentNullException(nameof(dockerClient));
@@ -85,6 +84,8 @@ namespace CodeManagerAgent.Services
             var totalTime = afterExecutionDateTime - beforeExecutionDateTime;
 
             Logger.LogInformation($"Job ran for {totalTime.TotalSeconds} second(s).");
+            
+          //  Dispose();
         }
 
         protected override async Task ExecuteStepAsync(StepConfiguration step, int stepIndex)

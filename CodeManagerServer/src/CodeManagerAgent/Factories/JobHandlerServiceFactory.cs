@@ -27,6 +27,6 @@ namespace CodeManagerAgent.Factories
         }
 
         public abstract IJobHandlerService Create(string repository, string token, JobConfiguration jobConfiguration,
-            CancellationToken cancellationToken);
+            CancellationToken cancellationToken = default);
     }
 }

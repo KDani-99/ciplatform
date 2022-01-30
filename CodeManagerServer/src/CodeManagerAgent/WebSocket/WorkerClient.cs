@@ -7,7 +7,6 @@ using CodeManager.Data.Configuration;
 using CodeManager.Data.Entities;
 using CodeManager.Data.Events;
 using CodeManagerAgent.Configuration;
-using CodeManagerAgent.Hubs;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

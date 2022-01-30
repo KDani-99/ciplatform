@@ -1,27 +1,19 @@
-﻿namespace CodeManagerWebApi.DataTransfer
+﻿using FluentValidation;
+
+namespace CodeManagerWebApi.DataTransfer
 {
-    public class TeamDto
+    public class CreateTeamDto
     {
         public string Name { get; set; }
         public string Image { get; set; }
     }
     
-    public class UserDtoValidator : AbstractValidator<UserDto> {
-        public UserDtoValidator() {
-            RuleFor(x => x.Username)
-                .NotNull()
-                .Matches("(^[a-zA-Z0-9]{1}([a-zA-Z0-9-_]{2,48})[a-zA-Z0-9]{1}$)")
-                .WithMessage("Field `username` must be between 4 and 50 characters.");
+    public class CreateTeamDtoValidator : AbstractValidator<CreateTeamDto> {
+        public CreateTeamDtoValidator() {
             RuleFor(x => x.Name)
-                .Length(1, 75)
-                .WithMessage("Field `name` must be between 1 and 75 characters.");
-            RuleFor(x => x.Email)
-                .EmailAddress()
-                .WithMessage("Field `email` is invalid.");
-            RuleFor(x => x.Password)
                 .NotNull()
-                .Length(8, 255)
-                .WithMessage("Field `password` is invalid.");
+                .Length(1, 50)
+                .WithMessage("Field `name` must be between 1 and 50 characters.");
         }
     }
 }

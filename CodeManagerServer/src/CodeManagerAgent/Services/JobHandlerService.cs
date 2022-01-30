@@ -27,7 +27,6 @@ namespace CodeManagerAgent.Services
         private readonly string _repository;
 
         private readonly string _token;
-        protected readonly IAgentService AgentService;
         protected readonly CancellationToken CancellationToken;
 
         protected readonly JobConfiguration JobConfiguration;
@@ -44,7 +43,6 @@ namespace CodeManagerAgent.Services
             JobConfiguration jobConfiguration,
             IWorkerClient workerClient,
             IOptions<AgentConfiguration> agentConfiguration,
-            IAgentService agentService,
             ILogger<JobHandlerService> logger,
             CancellationToken cancellationToken)
         {
@@ -56,7 +54,6 @@ namespace CodeManagerAgent.Services
                 agentConfiguration.Value ?? throw new ArgumentNullException(nameof(agentConfiguration));
             _workerClient = workerClient ?? throw new ArgumentNullException(nameof(workerClient));
             Logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            AgentService = agentService ?? throw new ArgumentNullException(nameof(agentService));
             JobConfiguration = jobConfiguration ?? throw new ArgumentNullException(nameof(jobConfiguration));
             CancellationToken = cancellationToken;
             // SendEndpoint = busControl.GetSendEndpoint(responseAddress).Result;
@@ -104,6 +101,7 @@ namespace CodeManagerAgent.Services
                 {
                     CancellationToken.ThrowIfCancellationRequested();
 
+                    Logger.LogInformation($"Executing step {JobConfiguration.Steps[step].Name}...");
                     await SendEventAsync(new StepResultEvent
                     {
                         State = States.Running,
@@ -112,6 +110,7 @@ namespace CodeManagerAgent.Services
 
                     await ExecuteStepAsync(JobConfiguration.Steps[step], step);
 
+                    Logger.LogInformation($"Successfully executed step {JobConfiguration.Steps[step].Name}.");
                     await SendEventAsync(new StepResultEvent
                     {
                         State = States.Successful,
@@ -119,7 +118,7 @@ namespace CodeManagerAgent.Services
                     }, CommonAgentManagerHubMethods.StepResultEvent);
                 }
             }
-            catch (OperationCanceledException exception)
+            catch (OperationCanceledException)
             {
                 Logger.LogError("Job was cancelled remotely.");
                 await SendEventAsync(new StepResultEvent
@@ -163,12 +162,7 @@ namespace CodeManagerAgent.Services
         protected Task SendEventAsync<TEvent>(TEvent @event, string hubMethod)
         {
             if (@event is ISecureMessage secureMessage) secureMessage.Token = _token; // TODO: token not required since signalr
-            return _workerClient.HubConnection.SendAsync(hubMethod);
-        }
-
-        private string GetLogFilePath(int stepIndex)
-        {
-            return Path.Join(_agentConfiguration.LogDirectory, JobId.ToString(), $"step-{stepIndex}.log");
+            return _workerClient.HubConnection.SendAsync(hubMethod, @event);
         }
     }
 }

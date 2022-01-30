@@ -1,4 +1,4 @@
-﻿namespace CodeManagerAgent.Hubs
+﻿namespace CodeManagerAgent.WebSocket
 {
     public static class CommonHubMethods
     {

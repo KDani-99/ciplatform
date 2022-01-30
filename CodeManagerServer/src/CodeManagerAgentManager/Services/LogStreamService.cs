@@ -40,6 +40,7 @@ namespace CodeManagerAgentManager.Services
             var job = run.Jobs.First(item => item.Id == jobId); // TODO: lazy load!!
             var step = job.Steps[stepIndex]; // TODO: use step id instead of index
 
+            // TODO: commented out for tesint purposes
            /* var secrets = run.Project.Variables
                 .Where(variable => variable.IsSecret)
                 .Select(s => s.Value)

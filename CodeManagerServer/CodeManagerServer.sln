@@ -1,14 +1,19 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeManagerWebApi", "src\CodeManagerWebApi\CodeManagerWebApi.csproj", "{CB0D3BF3-893A-4726-AFCB-A2816ADF9A0C}"
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31815.197
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeManagerWebApi", "src\CodeManagerWebApi\CodeManagerWebApi.csproj", "{CB0D3BF3-893A-4726-AFCB-A2816ADF9A0C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeManagerAgent", "src\CodeManagerAgent\CodeManagerAgent.csproj", "{1E814981-D485-4AD5-A8DB-2163FCE10E12}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeManagerAgent", "src\CodeManagerAgent\CodeManagerAgent.csproj", "{1E814981-D485-4AD5-A8DB-2163FCE10E12}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeManager.Data", "src\CodeManager.Data\CodeManager.Data.csproj", "{2FDAEE08-6369-48C6-9B6D-9F01A375178C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeManager.Data", "src\CodeManager.Data\CodeManager.Data.csproj", "{2FDAEE08-6369-48C6-9B6D-9F01A375178C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeManager.Core", "src\CodeManager.Core\CodeManager.Core.csproj", "{6DD2B021-C927-47AC-BDF2-3FBFD53F9661}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeManager.Core", "src\CodeManager.Core\CodeManager.Core.csproj", "{6DD2B021-C927-47AC-BDF2-3FBFD53F9661}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeManagerAgentManager", "src\CodeManagerAgentManager\CodeManagerAgentManager.csproj", "{48D7F655-591B-4007-B068-C7E40A472DED}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeManagerAgentManager", "src\CodeManagerAgentManager\CodeManagerAgentManager.csproj", "{48D7F655-591B-4007-B068-C7E40A472DED}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeManagerAgent.Tests", "test\CodeManagerAgent.Tests\CodeManagerAgent.Tests.csproj", "{2712BE29-DCB7-47C6-97D8-195C82C71613}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,10 +29,6 @@ Global
 		{1E814981-D485-4AD5-A8DB-2163FCE10E12}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1E814981-D485-4AD5-A8DB-2163FCE10E12}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1E814981-D485-4AD5-A8DB-2163FCE10E12}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F6649007-2488-4347-9B77-BC93C1411D3C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F6649007-2488-4347-9B77-BC93C1411D3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F6649007-2488-4347-9B77-BC93C1411D3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F6649007-2488-4347-9B77-BC93C1411D3C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2FDAEE08-6369-48C6-9B6D-9F01A375178C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2FDAEE08-6369-48C6-9B6D-9F01A375178C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2FDAEE08-6369-48C6-9B6D-9F01A375178C}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -40,5 +41,15 @@ Global
 		{48D7F655-591B-4007-B068-C7E40A472DED}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{48D7F655-591B-4007-B068-C7E40A472DED}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{48D7F655-591B-4007-B068-C7E40A472DED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2712BE29-DCB7-47C6-97D8-195C82C71613}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2712BE29-DCB7-47C6-97D8-195C82C71613}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2712BE29-DCB7-47C6-97D8-195C82C71613}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2712BE29-DCB7-47C6-97D8-195C82C71613}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {89293DBF-F19A-45D8-A77F-5A9D7F718050}
 	EndGlobalSection
 EndGlobal

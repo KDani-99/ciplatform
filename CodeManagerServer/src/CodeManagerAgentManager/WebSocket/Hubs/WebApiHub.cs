@@ -8,7 +8,6 @@ using Microsoft.Extensions.Logging;
 
 namespace CodeManagerAgent.Hubs
 {
-    [Obsolete("Use rabbitmq for webapi-manager communication")]
     public class WebApiHub : Hub
     {
         private readonly IRunService _runService;
@@ -20,7 +19,7 @@ namespace CodeManagerAgent.Hubs
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        [HubMethodName("QueueRunRequest")]
+        [HubMethodName("QueueRun")]
         public async Task<long?> QueueRunRequestAsync(QueueRunCommand request)
         {
             try

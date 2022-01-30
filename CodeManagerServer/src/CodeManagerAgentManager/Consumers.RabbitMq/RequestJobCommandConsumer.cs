@@ -6,7 +6,6 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using CodeManager.Data.Commands;
 using CodeManager.Data.Configuration;
-using CodeManager.Data.DataTransfer;
 using CodeManager.Data.Entities;
 using CodeManager.Data.Events;
 using CodeManager.Data.Extensions;

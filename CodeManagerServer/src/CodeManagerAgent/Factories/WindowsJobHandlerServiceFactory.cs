@@ -20,8 +20,7 @@ namespace CodeManagerAgent.Factories
         public override IJobHandlerService Create(string repository, string token, JobConfiguration jobConfiguration,
             CancellationToken cancellationToken)
         {
-            return new WindowsJobHandlerService(repository, token, jobConfiguration, WorkerClient, AgentConfiguration,
-                AgentService, LoggerFactory.CreateLogger<JobHandlerService>(), cancellationToken);
+            return new WindowsJobHandlerService(repository, token, jobConfiguration, WorkerClient, AgentConfiguration, LoggerFactory.CreateLogger<JobHandlerService>(), cancellationToken);
         }
     }
 }

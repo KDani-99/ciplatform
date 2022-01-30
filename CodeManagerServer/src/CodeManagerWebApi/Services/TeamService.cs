@@ -19,7 +19,7 @@ namespace CodeManagerWebApi.Services
             _teamRepository = teamRepository ?? throw new ArgumentNullException(nameof(teamRepository));
         }
 
-        public async Task CreateTeamAsync(TeamDto teamDto, User user)
+        public async Task CreateTeamAsync(CreateTeamDto createTeamDto, User user)
         {
             if (!user.Roles.Contains(Roles.Admin))
             {
@@ -34,15 +34,15 @@ namespace CodeManagerWebApi.Services
                 }
             }
 
-            if (await _teamRepository.ExistsAsync(teamEntity => teamEntity.Name == teamDto.Name))
+            if (await _teamRepository.ExistsAsync(teamEntity => teamEntity.Name == createTeamDto.Name))
             {
                 throw new TeamAlreadyExistsException();
             }
             
             var team = new Team
             {
-                Name = teamDto.Name,
-                Image = teamDto.Image,
+                Name = createTeamDto.Name,
+                Image = createTeamDto.Image,
                 Owner = user,
                 Members = new List<TeamMember>
                 {

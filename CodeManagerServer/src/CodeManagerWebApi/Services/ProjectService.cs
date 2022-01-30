@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using CodeManager.Data.Entities;
 using CodeManager.Data.Repositories;
 using CodeManagerWebApi.DataTransfer;
+using CodeManagerWebApi.Exceptions;
 
 namespace CodeManagerWebApi.Services
 {
@@ -15,17 +17,40 @@ namespace CodeManagerWebApi.Services
             _projectRepository = projectRepository ?? throw new ArgumentNullException(nameof(projectRepository));
         }
         
-        public Task<Project> GetProjectAsync(long id)
+        public async Task<Project> GetProjectAsync(long id, User user)
         {
-            return _projectRepository.GetAsync(id);
+            // check whether user is in the project
+            var project = (await _projectRepository.GetAsync(id)) ?? throw new ProjectDoesNotExistException();
+
+            if (!project.IsPrivateProject)
+            {
+                return project;
+            }
+
+            if (user.Teams.Any(team => team.Id == project.Team.Id))
+            {
+                throw new UnauthorizedAccessWebException("This project does not exist or you are not allowed to view this project.");
+            }
+
+            return project;
         }
 
-        public Task CreateProjectAsync(CreateProjectDto createProjectDto)
+        public async Task CreateProjectAsync(CreateProjectDto createProjectDto, User user)
         {
-            // TODO: verify details
-            return _projectRepository.CreateAsync(new Project
+            if (user.Teams.All(team => team.Id != createProjectDto.TeamId))
             {
+                throw new UnauthorizedAccessException("You are not a member of this team.");
+            }
 
+            await _projectRepository.CreateAsync(new Project
+            {
+                RepositoryUrl = createProjectDto.RepositoryUrl,
+                SecretToken = createProjectDto.SecretToken, // TODO: encrypt
+                Username = user.Username,
+                Team = new Team { Id = createProjectDto.TeamId }, // wont create new team, just references the ID
+                IsPrivateProject = createProjectDto.IsPrivateProject,
+                IsPrivateRepository = createProjectDto.IsPrivateRepository,
+                IsSSH = createProjectDto.IsSSH
             });
         }
     }

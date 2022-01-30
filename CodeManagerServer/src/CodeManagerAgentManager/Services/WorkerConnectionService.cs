@@ -6,6 +6,8 @@ using CodeManager.Data.Configuration;
 using CodeManager.Data.Entities;
 using CodeManagerAgentManager.Exceptions;
 using CodeManagerAgentManager.Repositories;
+using Newtonsoft.Json;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace CodeManagerAgentManager.Services
 {
@@ -21,7 +23,14 @@ namespace CodeManagerAgentManager.Services
             _workerConnectionRepository = workerConnectionRepository ??
                                        throw new ArgumentNullException(nameof(workerConnectionRepository));
         }
-        
+
+        public async Task<WorkerConnectionData> GetWorkerConnectionAsync(string connectionId)
+        {
+            var jsonString = await _workerConnectionRepository.GetAsync(connectionId);
+            
+            return JsonSerializer.Deserialize<WorkerConnectionData>(jsonString, _jsonSerializerOptions);
+        }
+
         public async Task AddWorkerConnectionOfTypeAsync(WorkerConnectionData workerConnectionData)
         {
             var serialized = JsonSerializer.Serialize(workerConnectionData, _jsonSerializerOptions);

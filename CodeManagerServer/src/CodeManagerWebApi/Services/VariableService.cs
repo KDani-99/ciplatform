@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Threading.Tasks;
 using CodeManager.Core.Services;
-using CodeManager.Data.DataTransfer;
 using CodeManager.Data.Entities;
 using CodeManager.Data.Repositories;
 using CodeManagerWebApi.DataTransfer;

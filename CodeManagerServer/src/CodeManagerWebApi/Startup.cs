@@ -6,10 +6,13 @@ using System.Threading.Tasks;
 using CodeManager.Data.Repositories;
 using CodeManagerWebApi.Database;
 using CodeManagerWebApi.Configuration;
+using CodeManagerWebApi.DataTransfer;
 using CodeManagerWebApi.Extensions;
 using CodeManagerWebApi.Hubs;
 using CodeManagerWebApi.Services;
 using CodeManagerWebApi.Utils.Extensions;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using MassTransit;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -36,6 +39,7 @@ namespace CodeManagerWebApi
         public void ConfigureServices(IServiceCollection services)
         {
             services
+                .AddFluentValidation()
                 .Configure<JwtConfiguration>(_configuration.GetSection("JwtConfiguration"))
                 .Configure<UserConfiguration>(_configuration.GetSection("UserConfiguration"))
                 .Configure<IConfiguration>(_configuration)
@@ -57,6 +61,13 @@ namespace CodeManagerWebApi
                     c.SwaggerDoc("v1", new OpenApiInfo {Title = "CodeManagerWebApi", Version = "v1"});
                 })
                 .AddHealthChecks();
+
+            services
+                .AddTransient<IValidator<CreateProjectDto>, CreateProjectDtoValidator>()
+                .AddTransient<IValidator<CreateTeamDto>, CreateTeamDtoValidator>()
+                .AddTransient<IValidator<LoginDto>, LoginDtoValidator>()
+                .AddTransient<IValidator<UserDto>, UserDtoValidator>()
+                .AddTransient<IValidator<VariableDto>, VariableDtoValidator>();
             
             services.AddAuthentication("JwtAuthToken")
                 .AddJwtBearer(opts => opts.MapInboundClaims = false)

@@ -5,6 +5,7 @@ namespace CodeManager.Data.Entities
 {
     public class Project : Entity
     {
+        public string Username { get; set; }
         public string RepositoryUrl { get; set; }
         public bool IsPrivateRepository { get; set; }
         public bool IsPrivateProject { get; set; }

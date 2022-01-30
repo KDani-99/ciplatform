@@ -6,7 +6,7 @@ namespace CodeManagerWebApi.Services
 {
     public interface IProjectService
     {
-        public Task<Project> GetProjectAsync(long id);
-        public Task CreateProjectAsync(CreateProjectDto createProjectDto);
+        public Task<Project> GetProjectAsync(long id, User user);
+        public Task CreateProjectAsync(CreateProjectDto createProjectDto, User user);
     }
 }

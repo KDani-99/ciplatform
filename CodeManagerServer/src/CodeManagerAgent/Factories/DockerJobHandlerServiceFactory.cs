@@ -28,8 +28,7 @@ namespace CodeManagerAgent.Factories
             CancellationToken cancellationToken)
         {
             return new DockerJobHandlerService(repository, token, jobConfiguration, WorkerClient, AgentConfiguration,
-                _dockerClient,
-                AgentService, LoggerFactory.CreateLogger<JobHandlerService>(), cancellationToken);
+                _dockerClient, LoggerFactory.CreateLogger<JobHandlerService>(), cancellationToken);
         }
     }
 }

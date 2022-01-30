@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
+using CodeManager.Data.Entities;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 
@@ -44,6 +45,18 @@ namespace CodeManagerWebApi.Hubs
                    // as regular streaming involves only a single client
                }
            }
+       }
+
+       [HubMethodName("NotifyStepResult")]
+       public async Task NotifyStepResultAsync(ProcessedStepResult processedStepResult)
+       {
+           // TODO:
+       }
+
+       [HubMethodName("NotifyJobQueueResponse")]
+       public async Task NotifyJobQueueResponseAsync(ProcessedJobRequest processedJobRequest)
+       {
+           // TODO:
        }
         
         private static string GetGroupName(long runId, long jobId)

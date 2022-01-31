@@ -16,17 +16,17 @@ using NUnit.Framework;
 
 namespace CodeManagerAgent.Tests
 {
-    public class DockerJobHandlerServiceFactoryTests
+    public class WindowsJobHandlerServiceFactoryTests
     {
         [Test]
-        public void Create_NewDockerJobHandlerServiceFactory_ShouldThrowArgumentNullException()
+        public void Create_NewWindowsJobHandlerServiceFactory_ShouldThrowArgumentNullException()
         {
             // Arrange
-            Assert.Throws<ArgumentNullException>(() => new DockerJobHandlerServiceFactory(null, null, null, null));
+            Assert.Throws<ArgumentNullException>(() => new WindowsJobHandlerServiceFactory(null, null, null));
         }
         
         [Test]
-        public void Create_NewDockerJobHandlerServiceWithCreate_ShouldReturnNewDockerHandlerServiceInstance()
+        public void Create_NewWindowsJobHandlerServiceWithCreate_ShouldReturnNewWindowsHandlerServiceInstance()
         {
             // Arrange
             var jobConfiguration = new JobConfiguration();
@@ -34,32 +34,30 @@ namespace CodeManagerAgent.Tests
             var fixture = new Fixture().Customize(new AutoMoqCustomization());
             var agentConfiguration = fixture.Create<IOptions<AgentConfiguration>>();
             var workerClient = new Mock<IWorkerClient>();
-            var dockerClient = new Mock<IDockerClient>();
             var loggerFactory = new Mock<ILoggerFactory>();
             var cancellationToken = CancellationToken.None;
-            var mockDockerJobHandlerServiceFactory = new DockerJobHandlerServiceFactory(workerClient.Object, dockerClient.Object, agentConfiguration, loggerFactory.Object);
+            var mockWindowsJobHandlerServiceFactory = new WindowsJobHandlerServiceFactory(workerClient.Object, agentConfiguration, loggerFactory.Object);
 
             // Act and Assert
-            Assert.DoesNotThrow(() =>  mockDockerJobHandlerServiceFactory.Create(jobDetails, jobConfiguration, cancellationToken));
-            Assert.NotNull(mockDockerJobHandlerServiceFactory.Create(jobDetails, jobConfiguration, cancellationToken));
-            Assert.IsInstanceOf<DockerJobHandlerService>(mockDockerJobHandlerServiceFactory.Create(jobDetails, jobConfiguration, cancellationToken));
+            Assert.DoesNotThrow(() =>  mockWindowsJobHandlerServiceFactory.Create(jobDetails, jobConfiguration, cancellationToken));
+            Assert.NotNull(mockWindowsJobHandlerServiceFactory.Create(jobDetails, jobConfiguration, cancellationToken));
+            Assert.IsInstanceOf<WindowsJobHandlerService>(mockWindowsJobHandlerServiceFactory.Create(jobDetails, jobConfiguration, cancellationToken));
         }
 
         [Test]
-        public void Create_NewDockerJobHandlerServiceWithCreate_ShouldThrowArgumentNullException()
+        public void Create_NewWindowsJobHandlerServiceWithCreate_ShouldThrowArgumentNullException()
         {
             // Arrange
             var fixture = new Fixture().Customize(new AutoMoqCustomization());
             var agentConfiguration = fixture.Create<IOptions<AgentConfiguration>>();
             var workerClient = new Mock<IWorkerClient>();
-            var dockerClient = new Mock<IDockerClient>();
             var loggerFactory = new Mock<ILoggerFactory>();
             var cancellationToken = CancellationToken.None;
-            var mockDockerJobHandlerServiceFactory = new DockerJobHandlerServiceFactory(workerClient.Object, dockerClient.Object, agentConfiguration, loggerFactory.Object);
-
+            var mockWindowsJobHandlerServiceFactory = new WindowsJobHandlerServiceFactory(workerClient.Object, agentConfiguration, loggerFactory.Object);
+            
             // Act and Assert
             Assert.Throws<ArgumentNullException>(() => 
-                mockDockerJobHandlerServiceFactory.Create(null, null, cancellationToken));
+                mockWindowsJobHandlerServiceFactory.Create(null, null, cancellationToken));
         }
     }
 }

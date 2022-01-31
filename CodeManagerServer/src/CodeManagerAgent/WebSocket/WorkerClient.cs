@@ -62,14 +62,14 @@ namespace CodeManagerAgent.WebSocket
                 JobContext.Windows => CommonHubMethods.QueueWindowsJob
             };
 
-            HubConnection.On<QueueJobEvent>(methodName,
+            HubConnection.On<QueueJobCommand>(methodName,
                 message =>
                 {
                     try
                     {
-                        var x = _serviceProvider.GetService<IConsumer<QueueJobEvent>>();
+                        var x = _serviceProvider.GetService<IConsumer<QueueJobCommand>>();
                         Console.WriteLine(x.GetType());
-                        x.Consume(message);
+                        x.ConsumeAsync(message);
                     }
                     catch (Exception ex)
                     {

@@ -5,6 +5,7 @@ using System.Threading.Channels;
 using System.Threading.Tasks;
 using CodeManager.Data.Configuration;
 using CodeManagerAgent.Configuration;
+using CodeManagerAgent.Entities;
 using CodeManagerAgent.Exceptions;
 using CodeManagerAgent.Extensions;
 using CodeManagerAgent.WebSocket;
@@ -18,9 +19,9 @@ namespace CodeManagerAgent.Services
     public class LinuxJobHandlerService : JobHandlerService
     {
         // unit of work
-        public LinuxJobHandlerService(string repository, string token, JobConfiguration jobConfiguration,
+        public LinuxJobHandlerService(JobDetails jobDetails, JobConfiguration jobConfiguration,
             IWorkerClient workerClient, IOptions<AgentConfiguration> agentConfiguration, ILogger<JobHandlerService> logger, CancellationToken cancellationToken)
-            : base(repository, token, jobConfiguration, workerClient, agentConfiguration, logger,
+            : base(jobDetails, jobConfiguration, workerClient, agentConfiguration, logger,
                 cancellationToken)
         {
         }

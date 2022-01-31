@@ -102,7 +102,7 @@ namespace CodeManagerAgentManager.Services
                 ParseSecretsAsync(JsonSerializer.Deserialize<JobConfiguration>(job.JsonContext, _jsonSerializerOptions),
                     variables.ToList());
 
-            var queueJobEvent = new QueueJobEvent
+            var queueJobEvent = new QueueJobCommand
             {
                 Token = jobToken.ToBase64String(),
                 JobConfiguration = jobConfiguration,

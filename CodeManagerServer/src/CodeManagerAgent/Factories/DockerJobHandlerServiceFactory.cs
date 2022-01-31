@@ -2,6 +2,7 @@
 using System.Threading;
 using CodeManager.Data.Configuration;
 using CodeManagerAgent.Configuration;
+using CodeManagerAgent.Entities;
 using CodeManagerAgent.Services;
 using CodeManagerAgent.WebSocket;
 using Docker.DotNet;
@@ -16,18 +17,16 @@ namespace CodeManagerAgent.Factories
     {
         private readonly IDockerClient _dockerClient;
 
-        public DockerJobHandlerServiceFactory(IWorkerClient workerClient, IDockerClient dockerClient,
-            IAgentService agentService, IOptions<AgentConfiguration> agentConfiguration,
-            ILoggerFactory loggerFactory)
-            : base(workerClient, agentService, agentConfiguration, loggerFactory)
+        public DockerJobHandlerServiceFactory(IWorkerClient workerClient, IDockerClient dockerClient, IOptions<AgentConfiguration> agentConfiguration, ILoggerFactory loggerFactory)
+            : base(workerClient, agentConfiguration, loggerFactory)
         {
             _dockerClient = dockerClient ?? throw new ArgumentNullException(nameof(dockerClient));
         }
 
-        public override IJobHandlerService Create(string repository, string token, JobConfiguration jobConfiguration,
+        public override IJobHandlerService Create(JobDetails jobDetails, JobConfiguration jobConfiguration,
             CancellationToken cancellationToken)
         {
-            return new DockerJobHandlerService(repository, token, jobConfiguration, WorkerClient, AgentConfiguration,
+            return new DockerJobHandlerService(jobDetails, jobConfiguration, WorkerClient, AgentConfiguration,
                 _dockerClient, LoggerFactory.CreateLogger<JobHandlerService>(), cancellationToken);
         }
     }

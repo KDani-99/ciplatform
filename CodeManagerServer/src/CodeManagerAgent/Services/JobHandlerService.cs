@@ -1,18 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CodeManager.Core.Hubs.Common;
 using CodeManager.Data.Configuration;
+using CodeManager.Data.Entities.CI;
 using CodeManager.Data.Events;
-using CodeManager.Data.Extensions;
-using CodeManager.Data.JsonWebTokens;
 using CodeManagerAgent.Configuration;
+using CodeManagerAgent.Entities;
 using CodeManagerAgent.Exceptions;
 using CodeManagerAgent.WebSocket;
-using MassTransit;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -22,47 +19,28 @@ namespace CodeManagerAgent.Services
     public abstract class JobHandlerService : IJobHandlerService
     {
         private readonly AgentConfiguration _agentConfiguration;
-
         private readonly IWorkerClient _workerClient;
-        private readonly string _repository;
-
-        private readonly string _token;
         protected readonly CancellationToken CancellationToken;
-
         protected readonly JobConfiguration JobConfiguration;
-        protected readonly long JobId;
 
+        protected readonly JobDetails JobDetails;
         protected readonly ILogger<JobHandlerService> Logger;
 
-        // protected readonly ISendEndpoint SendEndpoint;
-        protected readonly long RunId;
-
         protected JobHandlerService(
-            string repository,
-            string token,
+            JobDetails jobDetails,
             JobConfiguration jobConfiguration,
             IWorkerClient workerClient,
             IOptions<AgentConfiguration> agentConfiguration,
             ILogger<JobHandlerService> logger,
             CancellationToken cancellationToken)
         {
-            // TODO: read config file from mount
-            // TODO: or start is remotely as a process and read logs? => could directly stream docker container logs
-            _token = token ?? throw new ArgumentNullException(nameof(token));
-            _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+            JobDetails = jobDetails ?? throw new ArgumentNullException(nameof(jobDetails));
             _agentConfiguration =
                 agentConfiguration.Value ?? throw new ArgumentNullException(nameof(agentConfiguration));
             _workerClient = workerClient ?? throw new ArgumentNullException(nameof(workerClient));
             Logger = logger ?? throw new ArgumentNullException(nameof(logger));
             JobConfiguration = jobConfiguration ?? throw new ArgumentNullException(nameof(jobConfiguration));
             CancellationToken = cancellationToken;
-            // SendEndpoint = busControl.GetSendEndpoint(responseAddress).Result;
-
-            var decodedToken = _token.DecodeJwtToken();
-            RunId = long.Parse(decodedToken.Claims
-                .FirstOrDefault(claim => claim.Type == CustomJwtRegisteredClaimNames.RunId)?.Value!);
-            JobId = long.Parse(decodedToken.Claims
-                .FirstOrDefault(claim => claim.Type == CustomJwtRegisteredClaimNames.JobId)?.Value!);
         }
 
         public abstract ValueTask DisposeAsync();
@@ -72,7 +50,7 @@ namespace CodeManagerAgent.Services
         public virtual async Task StartAsync()
         {
             // Non zero exit code indicates failure @ the given job
-            Logger.LogInformation($"Starting job: {JobId} (Run: {RunId})...");
+            Logger.LogInformation($"Starting job: {JobDetails.JobId} (Run: {JobDetails.RunId})...");
 
             var beforeExecutionDateTime = DateTime.Now;
             await ExecuteJobAsync();
@@ -86,7 +64,7 @@ namespace CodeManagerAgent.Services
         protected async Task ExecuteJobAsync()
         {
             // TODO: signal job start
-            var step = -1; // indicated unknown
+            var stepIndex = -1; // indicated unknown
 
             try
             {
@@ -94,28 +72,13 @@ namespace CodeManagerAgent.Services
                 JobConfiguration.Steps.Insert(0, new StepConfiguration
                 {
                     Name = "Checkout repository (setup)",
-                    Cmd = $"git clone {_repository} {_agentConfiguration.WorkingDirectory}"
+                    Cmd = $"git clone {JobDetails.Repository} {_agentConfiguration.WorkingDirectory}"
                 });
 
-                for (step = 0; step < JobConfiguration.Steps.Count; step++)
+                for (stepIndex = 0; stepIndex < JobConfiguration.Steps.Count; stepIndex++)
                 {
                     CancellationToken.ThrowIfCancellationRequested();
-
-                    Logger.LogInformation($"Executing step {JobConfiguration.Steps[step].Name}...");
-                    await SendEventAsync(new StepResultEvent
-                    {
-                        State = States.Running,
-                        StepIndex = step
-                    }, CommonAgentManagerHubMethods.StepResultEvent);
-
-                    await ExecuteStepAsync(JobConfiguration.Steps[step], step);
-
-                    Logger.LogInformation($"Successfully executed step {JobConfiguration.Steps[step].Name}.");
-                    await SendEventAsync(new StepResultEvent
-                    {
-                        State = States.Successful,
-                        StepIndex = step
-                    }, CommonAgentManagerHubMethods.StepResultEvent);
+                    await ProcessStepAsync(stepIndex, JobConfiguration.Steps[stepIndex]);
                 }
             }
             catch (OperationCanceledException)
@@ -124,7 +87,7 @@ namespace CodeManagerAgent.Services
                 await SendEventAsync(new StepResultEvent
                 {
                     State = States.Cancelled,
-                    StepIndex = step
+                    StepIndex = stepIndex
                 }, CommonAgentManagerHubMethods.StepResultEvent);
             }
             catch (StepFailedException exception)
@@ -133,7 +96,7 @@ namespace CodeManagerAgent.Services
                 await SendEventAsync(new StepResultEvent
                 {
                     State = States.Failed,
-                    StepIndex = step
+                    StepIndex = stepIndex
                 }, CommonAgentManagerHubMethods.StepResultEvent);
             }
             catch (Exception exception)
@@ -142,13 +105,13 @@ namespace CodeManagerAgent.Services
                 await SendEventAsync(new StepResultEvent
                 {
                     State = States.Failed,
-                    StepIndex = step
+                    StepIndex = stepIndex
                 }, CommonAgentManagerHubMethods.StepResultEvent);
                 // rest will be marked as skipped
             }
             finally
             {
-                Logger.LogInformation($"Finished job: {JobId} (Run: {RunId}).");
+                Logger.LogInformation($"Finished job: {JobDetails.JobId} (Run: {JobDetails.RunId}).");
             }
         }
 
@@ -156,13 +119,34 @@ namespace CodeManagerAgent.Services
 
         protected async Task StreamLogAsync(int stepIndex, Func<IAsyncEnumerable<string>> stream)
         {
-            await _workerClient.HubConnection.SendAsync("UploadLogStream", stream(), RunId, JobId, stepIndex);
+            await _workerClient.HubConnection.SendAsync("UploadLogStream", stream(), JobDetails.RunId, JobDetails.JobId,
+                stepIndex);
         }
 
         protected Task SendEventAsync<TEvent>(TEvent @event, string hubMethod)
         {
-            if (@event is ISecureMessage secureMessage) secureMessage.Token = _token; // TODO: token not required since signalr
+            if (@event is ISecureMessage secureMessage)
+                secureMessage.Token = JobDetails.Token; // TODO: token not required since signalr
             return _workerClient.HubConnection.SendAsync(hubMethod, @event);
+        }
+
+        private async Task ProcessStepAsync(int stepIndex, StepConfiguration step)
+        {
+            Logger.LogInformation($"Executing step {step.Name}...");
+            await SendEventAsync(new StepResultEvent
+            {
+                State = States.Running,
+                StepIndex = stepIndex
+            }, CommonAgentManagerHubMethods.StepResultEvent);
+
+            await ExecuteStepAsync(step, stepIndex);
+
+            Logger.LogInformation($"Successfully executed step {step.Name}.");
+            await SendEventAsync(new StepResultEvent
+            {
+                State = States.Successful,
+                StepIndex = stepIndex
+            }, CommonAgentManagerHubMethods.StepResultEvent);
         }
     }
 }

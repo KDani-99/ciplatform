@@ -7,6 +7,7 @@ using CodeManager.Core.Hubs.Common;
 using CodeManager.Data.Configuration;
 using CodeManager.Data.Events;
 using CodeManagerAgent.Configuration;
+using CodeManagerAgent.Entities;
 using CodeManagerAgent.Exceptions;
 using CodeManagerAgent.WebSocket;
 using Docker.DotNet;
@@ -25,15 +26,14 @@ namespace CodeManagerAgent.Services
 
         // unit of work
         public DockerJobHandlerService(
-            string repository,
-            string token,
+            JobDetails jobDetails,
             JobConfiguration jobConfiguration,
             IWorkerClient workerClient,
             IOptions<AgentConfiguration> agentConfiguration,
             IDockerClient dockerClient,
             ILogger<JobHandlerService> logger,
             CancellationToken cancellationToken) :
-            base(repository, token, jobConfiguration, workerClient, agentConfiguration, logger,
+            base(jobDetails, jobConfiguration, workerClient, agentConfiguration, logger,
                 cancellationToken)
         {
             _dockerClient = dockerClient ?? throw new ArgumentNullException(nameof(dockerClient));
@@ -42,7 +42,7 @@ namespace CodeManagerAgent.Services
         public override async Task StartAsync()
         {
             var beforeExecutionDateTime = DateTime.Now;
-            Logger.LogInformation($"Starting {nameof(JobContext.Docker)} job: {JobId} (Run: {RunId})...");
+            Logger.LogInformation($"Starting {nameof(JobContext.Docker)} job: {JobDetails.JobId} (Run: {JobDetails.RunId})...");
 
             var (from, tag) = JobConfiguration.Image.Split(":") switch {var result => (result[0], result[1])};
 

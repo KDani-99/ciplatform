@@ -15,14 +15,10 @@ namespace CodeManagerAgent.Factories
     public abstract class JobHandlerServiceFactory : IJobHandlerServiceFactory
     {
         protected readonly IOptions<AgentConfiguration> AgentConfiguration;
-        protected readonly IWorkerClient WorkerClient;
-        protected readonly ILoggerFactory LoggerFactory;
 
-        protected JobHandlerServiceFactory(IWorkerClient workerClient, IOptions<AgentConfiguration> agentConfiguration, ILoggerFactory loggerFactory)
+        protected JobHandlerServiceFactory(IOptions<AgentConfiguration> agentConfiguration)
         {
-            WorkerClient = workerClient ?? throw new ArgumentNullException(nameof(workerClient));
             AgentConfiguration = agentConfiguration ?? throw new ArgumentNullException(nameof(agentConfiguration));
-            LoggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
         }
 
         public abstract IJobHandlerService Create(JobDetails jobDetails, JobConfiguration jobConfiguration,

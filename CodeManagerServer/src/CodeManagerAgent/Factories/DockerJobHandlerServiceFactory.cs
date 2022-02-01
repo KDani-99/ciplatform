@@ -17,8 +17,8 @@ namespace CodeManagerAgent.Factories
     {
         private readonly IDockerClient _dockerClient;
 
-        public DockerJobHandlerServiceFactory(IWorkerClient workerClient, IDockerClient dockerClient, IOptions<AgentConfiguration> agentConfiguration, ILoggerFactory loggerFactory)
-            : base(workerClient, agentConfiguration, loggerFactory)
+        public DockerJobHandlerServiceFactory(IDockerClient dockerClient, IOptions<AgentConfiguration> agentConfiguration)
+            : base(agentConfiguration)
         {
             _dockerClient = dockerClient ?? throw new ArgumentNullException(nameof(dockerClient));
         }
@@ -26,8 +26,8 @@ namespace CodeManagerAgent.Factories
         public override IJobHandlerService Create(JobDetails jobDetails, JobConfiguration jobConfiguration,
             CancellationToken cancellationToken)
         {
-            return new DockerJobHandlerService(jobDetails, jobConfiguration, WorkerClient, AgentConfiguration,
-                _dockerClient, LoggerFactory.CreateLogger<JobHandlerService>(), cancellationToken);
+            return new DockerJobHandlerService(jobDetails, jobConfiguration, AgentConfiguration,
+                _dockerClient, cancellationToken);
         }
     }
 }

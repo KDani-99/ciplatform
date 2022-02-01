@@ -1,12 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using CodeManager.Core.Hubs.Clients;
+using CodeManager.Core.Hubs.Common;
 using CodeManager.Core.Hubs.Consumers;
 using CodeManager.Data.Agent;
 using CodeManager.Data.Configuration;
 using CodeManager.Data.Entities;
 using CodeManager.Data.Events;
 using CodeManagerAgent.Configuration;
+using CodeManagerAgent.Entities;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -88,6 +92,16 @@ namespace CodeManagerAgent.WebSocket
         public Task ConfigureAsync()
         {
             return HubConnection.SendAsync("Configure", new HostMachineInformation(), AgentState.Available);
+        }
+
+        public Task StreamLogAsync(long runId, long jobId, long stepIndex, ChannelReader<string> stream)
+        {
+            return HubConnection.SendAsync("UploadLogStream", stream, runId, jobId, stepIndex); // TODO: CommonHubMethods const in Attribute
+        }
+
+        public Task SendStepResult(StepResultEvent stepResultEvent)
+        {
+            return HubConnection.SendAsync(CommonAgentManagerHubMethods.StepResultEvent, stepResultEvent);
         }
 
 

@@ -19,9 +19,8 @@ namespace CodeManagerAgent.Services
     public class LinuxJobHandlerService : JobHandlerService
     {
         // unit of work
-        public LinuxJobHandlerService(JobDetails jobDetails, JobConfiguration jobConfiguration,
-            IWorkerClient workerClient, IOptions<AgentConfiguration> agentConfiguration, ILogger<JobHandlerService> logger, CancellationToken cancellationToken)
-            : base(jobDetails, jobConfiguration, workerClient, agentConfiguration, logger,
+        public LinuxJobHandlerService(JobDetails jobDetails, JobConfiguration jobConfiguration, IOptions<AgentConfiguration> agentConfiguration, CancellationToken cancellationToken)
+            : base(jobDetails, jobConfiguration, agentConfiguration,
                 cancellationToken)
         {
         }
@@ -37,18 +36,18 @@ namespace CodeManagerAgent.Services
             // not required
         }
 
-        protected override async Task ExecuteStepAsync(StepConfiguration step, int stepIndex)
+        public override async Task ExecuteStepAsync(ChannelWriter<string> channelWriter, StepConfiguration step, int stepIndex)
         {
+            await base.ExecuteStepAsync(channelWriter, step, stepIndex);
+            
             var command = step.Cmd.Split(" ");
             using var process = new Process();
             process.ConfigureCliProcess(command.Take(1).First(), string.Join(" ", command.Skip(1)),
                 JobConfiguration.Environment); // or /bin/bash -c "<cmd>"
-
-            var channel = Channel.CreateUnbounded<string>();
-
+            
             process.OutputDataReceived += async (_, eventArgs) =>
-                await channel.Writer.WriteAsync(eventArgs.Data);
-            process.ErrorDataReceived += async (_, eventArgs) => await channel.Writer.WriteAsync(eventArgs.Data);
+                await channelWriter.WriteAsync(eventArgs.Data);
+            process.ErrorDataReceived += async (_, eventArgs) => await channelWriter.WriteAsync(eventArgs.Data);
 
             process.Start();
 
@@ -56,7 +55,6 @@ namespace CodeManagerAgent.Services
             process.BeginErrorReadLine();
 
             await process.WaitForExitAsync();
-            channel.Writer.Complete();
 
             if (process.ExitCode != 0)
                 // LOG exit code

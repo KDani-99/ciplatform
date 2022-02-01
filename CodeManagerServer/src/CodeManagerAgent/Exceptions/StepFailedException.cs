@@ -6,5 +6,9 @@ namespace CodeManagerAgent.Exceptions
     {
         public string Name { get; set; }
         public long ExitCode { get; set; }
+        
+        public StepFailedException() {}
+        
+        public StepFailedException(string message) : base(message) {}
     }
 }

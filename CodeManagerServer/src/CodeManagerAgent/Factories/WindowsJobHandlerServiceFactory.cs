@@ -13,15 +13,15 @@ namespace CodeManagerAgent.Factories
 {
     public class WindowsJobHandlerServiceFactory : JobHandlerServiceFactory
     {
-        public WindowsJobHandlerServiceFactory(IWorkerClient workerClient, IOptions<AgentConfiguration> agentConfiguration, ILoggerFactory loggerFactory)
-            : base(workerClient, agentConfiguration, loggerFactory)
+        public WindowsJobHandlerServiceFactory(IOptions<AgentConfiguration> agentConfiguration)
+            : base(agentConfiguration)
         {
         }
 
         public override IJobHandlerService Create(JobDetails jobDetails, JobConfiguration jobConfiguration,
             CancellationToken cancellationToken)
         {
-            return new WindowsJobHandlerService(jobDetails, jobConfiguration, WorkerClient, AgentConfiguration, LoggerFactory.CreateLogger<JobHandlerService>(), cancellationToken);
+            return new WindowsJobHandlerService(jobDetails, jobConfiguration, AgentConfiguration, cancellationToken);
         }
     }
 }

@@ -75,42 +75,5 @@ namespace CodeManagerAgent.Tests
             jobHandlerService
                 .Verify(x => x.DisposeAsync(), Times.Exactly(1));
         }
-        
-        [Test]
-        public async Task ReceiveAsync_ConsumeReceivedMessage_ShouldProcessJob()
-        {
-            // Arrange
-            var token = CreateMockJwtToken(new[]
-            {
-                new Claim(CustomJwtRegisteredClaimNames.JobId, "0"),
-                new Claim(CustomJwtRegisteredClaimNames.RunId, "0")
-            }).ToBase64String();
-            var queueJobCommand = new QueueJobCommand
-            {
-                Token = token
-            };
-            var agentService = new Mock<IAgentService>();
-            var jobHandlerServiceFactory = new Mock<IJobHandlerServiceFactory>();
-            var logger = new Mock<ILogger<QueueJobCommandConsumer>>();
-            var jobHandlerService = new Mock<IJobHandlerService>();
-
-            jobHandlerServiceFactory
-                .Setup(x => x.Create(It.IsAny<JobDetails>(), It.IsAny<JobConfiguration>(),
-                    It.IsAny<CancellationToken>()))
-                .Returns(jobHandlerService.Object);
-            
-            var consumer = new QueueJobCommandConsumer(agentService.Object, jobHandlerServiceFactory.Object, logger.Object);
-
-            // Act
-            await consumer.ConsumeAsync(queueJobCommand);
-            
-            // Assert
-            jobHandlerServiceFactory.Verify(x => x.Create(It.IsAny<JobDetails>(), It.IsAny<JobConfiguration>(),
-                It.IsAny<CancellationToken>()), Times.Exactly(1));
-            jobHandlerService
-                .Verify(x => x.StartAsync(), Times.Exactly(1));
-            jobHandlerService
-                .Verify(x => x.DisposeAsync(), Times.Exactly(1));
-        }
     }
 }

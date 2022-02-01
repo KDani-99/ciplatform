@@ -73,7 +73,7 @@ namespace CodeManagerAgent.Services
                 {
                     Name = "Checkout repository (setup)",
                     Cmd = $"git clone {JobDetails.Repository} {_agentConfiguration.WorkingDirectory}"
-                });
+                }); // TODO: <- remove this
 
                 for (stepIndex = 0; stepIndex < JobConfiguration.Steps.Count; stepIndex++)
                 {

@@ -28,7 +28,7 @@ namespace CodeManagerAgentManager.Services
             _managerClient = managerClient ?? throw new ArgumentNullException(nameof(managerClient));
         }
         
-        public async Task ProcessStreamAsync(IAsyncEnumerable<string> stream, long runId, long jobId, int stepIndex)
+        public async Task ProcessStreamAsync(ChannelReader<string> stream, long runId, long jobId, int stepIndex)
         {
             var numberOfLines = 0;
             var sizeInBytes = 0;
@@ -54,30 +54,33 @@ namespace CodeManagerAgentManager.Services
             
             var channel = Channel.CreateUnbounded<string>();
             await _managerClient.HubConnection.SendAsync("StreamLogToChannel", channel.Reader, runId, jobId, stepIndex);
-
-            await foreach (var line in stream)
+            
+            while (await stream.WaitToReadAsync())
             {
-                if (_logStreamServiceConfiguration.MaxLinePerFile != 0 && numberOfLines >= _logStreamServiceConfiguration.MaxLinePerFile)
+                while (stream.TryRead(out var line))
                 {
-                    throw new LogStreamException($"Unable to write more data to file {logPath}. Log file has reached the maximum number of lines (Max.:{_logStreamServiceConfiguration.MaxLinePerFile}).");
-                }
+                    if (_logStreamServiceConfiguration.MaxLinePerFile != 0 && numberOfLines >= _logStreamServiceConfiguration.MaxLinePerFile)
+                    {
+                        throw new LogStreamException($"Unable to write more data to file {logPath}. Log file has reached the maximum number of lines (Max.:{_logStreamServiceConfiguration.MaxLinePerFile}).");
+                    }
 
-                if (sizeInBytes >= _logStreamServiceConfiguration.MaxFileSize)
-                {
-                    throw new LogStreamException($"Unable to write more data to file {logPath}. Log file has reached the maximum size (Max.:{_logStreamServiceConfiguration.MaxFileSize}).");
-                }
+                    if (sizeInBytes >= _logStreamServiceConfiguration.MaxFileSize)
+                    {
+                        throw new LogStreamException($"Unable to write more data to file {logPath}. Log file has reached the maximum size (Max.:{_logStreamServiceConfiguration.MaxFileSize}).");
+                    }
 
-                var filtered = FilterSecrets(line, secrets);
+                    var filtered = FilterSecrets(line, secrets);
 
-                Console.Write(filtered);
+                    Console.Write(filtered);
                 
-                await channel.Writer.WriteAsync(filtered); //TEST
+                    await channel.Writer.WriteAsync(filtered); //TEST
                 
-                await outputStream.WriteAsync(filtered);
-                await outputStream.FlushAsync();
+                    await outputStream.WriteAsync(filtered);
+                    await outputStream.FlushAsync();
 
-                sizeInBytes += Encoding.UTF8.GetByteCount(filtered);
-                numberOfLines++;
+                    sizeInBytes += Encoding.UTF8.GetByteCount(filtered);
+                    numberOfLines++;
+                }
             }
 
             channel.Writer.Complete();

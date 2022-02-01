@@ -22,7 +22,7 @@ namespace CodeManagerAgent.Tests
         public void Create_NewDockerJobHandlerServiceFactory_ShouldThrowArgumentNullException()
         {
             // Arrange
-            Assert.Throws<ArgumentNullException>(() => new DockerJobHandlerServiceFactory(null, null, null, null));
+            Assert.Throws<ArgumentNullException>(() => new DockerJobHandlerServiceFactory( null, null));
         }
         
         [Test]
@@ -33,11 +33,9 @@ namespace CodeManagerAgent.Tests
             var jobDetails = new JobDetails();
             var fixture = new Fixture().Customize(new AutoMoqCustomization());
             var agentConfiguration = fixture.Create<IOptions<AgentConfiguration>>();
-            var workerClient = new Mock<IWorkerClient>();
             var dockerClient = new Mock<IDockerClient>();
-            var loggerFactory = new Mock<ILoggerFactory>();
             var cancellationToken = CancellationToken.None;
-            var mockDockerJobHandlerServiceFactory = new DockerJobHandlerServiceFactory(workerClient.Object, dockerClient.Object, agentConfiguration, loggerFactory.Object);
+            var mockDockerJobHandlerServiceFactory = new DockerJobHandlerServiceFactory(dockerClient.Object, agentConfiguration);
 
             // Act and Assert
             Assert.DoesNotThrow(() =>  mockDockerJobHandlerServiceFactory.Create(jobDetails, jobConfiguration, cancellationToken));
@@ -51,11 +49,9 @@ namespace CodeManagerAgent.Tests
             // Arrange
             var fixture = new Fixture().Customize(new AutoMoqCustomization());
             var agentConfiguration = fixture.Create<IOptions<AgentConfiguration>>();
-            var workerClient = new Mock<IWorkerClient>();
             var dockerClient = new Mock<IDockerClient>();
-            var loggerFactory = new Mock<ILoggerFactory>();
             var cancellationToken = CancellationToken.None;
-            var mockDockerJobHandlerServiceFactory = new DockerJobHandlerServiceFactory(workerClient.Object, dockerClient.Object, agentConfiguration, loggerFactory.Object);
+            var mockDockerJobHandlerServiceFactory = new DockerJobHandlerServiceFactory(dockerClient.Object, agentConfiguration);
 
             // Act and Assert
             Assert.Throws<ArgumentNullException>(() => 

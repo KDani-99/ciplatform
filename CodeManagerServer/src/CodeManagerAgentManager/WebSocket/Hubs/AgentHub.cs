@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using CodeManager.Core.Hubs.Clients;
 using CodeManager.Core.Hubs.Messages;
@@ -122,7 +123,7 @@ namespace CodeManagerAgentManager.WebSocket.Hubs
         }
         
         [HubMethodName("UploadLogStream")]
-        public Task UploadLogStreamAsync(IAsyncEnumerable<string> stream, long runId, long jobId, int step)
+        public Task UploadLogStreamAsync(ChannelReader<string> stream, long runId, long jobId, int step)
         {
             try
             {

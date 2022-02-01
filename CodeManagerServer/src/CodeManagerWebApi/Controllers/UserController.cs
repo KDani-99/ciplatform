@@ -26,12 +26,13 @@ namespace CodeManagerWebApi.Controllers
         private readonly IUserService _userService;
         private readonly ILogger<UserController> _logger;
         private readonly IWebApiClient _webApiClient;
+        private readonly IRequestClient<QueueRunCommand> _requestClient;
 
-        public UserController(IUserService userService, ILogger<UserController> logger, IWebApiClient webApiClient)
+        public UserController(IUserService userService, ILogger<UserController> logger, IRequestClient<QueueRunCommand> requestClient)
         {
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _webApiClient = webApiClient;
+            _requestClient = requestClient;
         }
 
         [HttpPost, Route("test")]
@@ -45,9 +46,9 @@ namespace CodeManagerWebApi.Controllers
             var configuration = deserializer.Deserialize<RunConfiguration>(content);*/
             
           // TODO: send data with the request
-           // var response = await _requestClient.GetResponse<SuccessfulQueueRunCommandResponse, FailedQueueRunCommandResponse>(new QueueRunCommand {RunConfigurationString = content, Repository = "https://github.com/KDani-99/doc-assistant"});
+            var response = await _requestClient.GetResponse<SuccessfulQueueRunCommandResponse, FailedQueueRunCommandResponse>(new QueueRunCommand {RunConfigurationString = content, Repository = "https://github.com/KDani-99/doc-assistant"});
 
-           var response = await _webApiClient.HubConnection.InvokeAsync<long?>(CommonManagerMethods.QueueRun);
+            //var response = await _webApiClient.HubConnection.InvokeAsync<long?>(CommonManagerMethods.QueueRun);
            
             return Ok(response);
         }

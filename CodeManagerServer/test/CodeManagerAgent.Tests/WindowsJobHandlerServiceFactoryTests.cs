@@ -22,7 +22,7 @@ namespace CodeManagerAgent.Tests
         public void Create_NewWindowsJobHandlerServiceFactory_ShouldThrowArgumentNullException()
         {
             // Arrange
-            Assert.Throws<ArgumentNullException>(() => new WindowsJobHandlerServiceFactory(null, null, null));
+            Assert.Throws<ArgumentNullException>(() => new WindowsJobHandlerServiceFactory(null));
         }
         
         [Test]
@@ -36,7 +36,7 @@ namespace CodeManagerAgent.Tests
             var workerClient = new Mock<IWorkerClient>();
             var loggerFactory = new Mock<ILoggerFactory>();
             var cancellationToken = CancellationToken.None;
-            var mockWindowsJobHandlerServiceFactory = new WindowsJobHandlerServiceFactory(workerClient.Object, agentConfiguration, loggerFactory.Object);
+            var mockWindowsJobHandlerServiceFactory = new WindowsJobHandlerServiceFactory(agentConfiguration);
 
             // Act and Assert
             Assert.DoesNotThrow(() =>  mockWindowsJobHandlerServiceFactory.Create(jobDetails, jobConfiguration, cancellationToken));
@@ -53,7 +53,7 @@ namespace CodeManagerAgent.Tests
             var workerClient = new Mock<IWorkerClient>();
             var loggerFactory = new Mock<ILoggerFactory>();
             var cancellationToken = CancellationToken.None;
-            var mockWindowsJobHandlerServiceFactory = new WindowsJobHandlerServiceFactory(workerClient.Object, agentConfiguration, loggerFactory.Object);
+            var mockWindowsJobHandlerServiceFactory = new WindowsJobHandlerServiceFactory(agentConfiguration);
             
             // Act and Assert
             Assert.Throws<ArgumentNullException>(() => 

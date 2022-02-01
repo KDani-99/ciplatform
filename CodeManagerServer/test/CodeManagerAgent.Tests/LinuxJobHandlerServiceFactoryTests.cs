@@ -21,7 +21,7 @@ namespace CodeManagerAgent.Tests
         public void Create_NewLinuxJobHandlerServiceFactory_ShouldThrowArgumentNullException()
         {
             // Arrange
-            Assert.Throws<ArgumentNullException>(() => new LinuxJobHandlerServiceFactory(null, null, null));
+            Assert.Throws<ArgumentNullException>(() => new LinuxJobHandlerServiceFactory( null));
         }
         
         [Test]
@@ -32,10 +32,8 @@ namespace CodeManagerAgent.Tests
             var jobDetails = new JobDetails();
             var fixture = new Fixture().Customize(new AutoMoqCustomization());
             var agentConfiguration = fixture.Create<IOptions<AgentConfiguration>>();
-            var workerClient = new Mock<IWorkerClient>();
-            var loggerFactory = new Mock<ILoggerFactory>();
             var cancellationToken = CancellationToken.None;
-            var mockLinuxJobHandlerServiceFactory = new LinuxJobHandlerServiceFactory(workerClient.Object, agentConfiguration, loggerFactory.Object);
+            var mockLinuxJobHandlerServiceFactory = new LinuxJobHandlerServiceFactory(agentConfiguration);
 
             // Act and Assert
             Assert.DoesNotThrow(() =>  mockLinuxJobHandlerServiceFactory.Create(jobDetails, jobConfiguration, cancellationToken));
@@ -49,10 +47,8 @@ namespace CodeManagerAgent.Tests
             // Arrange
             var fixture = new Fixture().Customize(new AutoMoqCustomization());
             var agentConfiguration = fixture.Create<IOptions<AgentConfiguration>>();
-            var workerClient = new Mock<IWorkerClient>();
-            var loggerFactory = new Mock<ILoggerFactory>();
             var cancellationToken = CancellationToken.None;
-            var mockLinuxJobHandlerServiceFactory = new LinuxJobHandlerServiceFactory(workerClient.Object, agentConfiguration, loggerFactory.Object);
+            var mockLinuxJobHandlerServiceFactory = new LinuxJobHandlerServiceFactory(agentConfiguration);
             
             // Act and Assert
             Assert.Throws<ArgumentNullException>(() => 

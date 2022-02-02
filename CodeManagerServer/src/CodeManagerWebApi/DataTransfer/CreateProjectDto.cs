@@ -11,7 +11,6 @@ namespace CodeManagerWebApi.DataTransfer
         public string RepositoryUrl { get; set; }
         public bool IsPrivateRepository { get; set; }
         public bool IsPrivateProject { get; set; }
-        public bool IsSSH { get; set; }
         public string Username { get; set; }
         public string SecretToken { get; set; } // Either SSH or access token
         public long TeamId { get; set; } // owner team id
@@ -29,9 +28,6 @@ namespace CodeManagerWebApi.DataTransfer
             RuleFor(x => x.IsPrivateProject)
                 .NotNull()
                 .WithMessage("Field `IsPrivateProject` is invalid.");
-            RuleFor(x => x.IsSSH)
-                .NotNull()
-                .WithMessage("Field `IsSSH` is invalid.");
             When(x => x.IsPrivateProject, () =>
             {
                 RuleFor(x => x.SecretToken)
@@ -39,20 +35,10 @@ namespace CodeManagerWebApi.DataTransfer
                     .Length(1, 255)
                     .WithMessage("Field `SecretToken` is required if the project is private.");
 
-                When(x => !x.IsSSH, () =>
-                {
-                    RuleFor(x => x.Username)
-                        .NotNull()
-                        .Length(1, 255)
-                        .WithMessage("Field `Username` is required if not using ssh.");
-                })
-                .Otherwise(() =>
-                {
-                    RuleFor(x => x.SecretToken)
-                        .NotNull()
-                        .Length(1, 255)
-                        .WithMessage("Field `SecretToken` is required if the project is private (SSH key).");
-                });;
+                RuleFor(x => x.Username)
+                    .NotNull()
+                    .Length(1, 255)
+                    .WithMessage("Field `Username` is required if not using ssh.");
             });
             RuleFor(x => x.TeamId)
                 .NotNull()

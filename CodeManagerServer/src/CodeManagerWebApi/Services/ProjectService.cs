@@ -50,7 +50,6 @@ namespace CodeManagerWebApi.Services
                 Team = new Team { Id = createProjectDto.TeamId }, // wont create new team, just references the ID
                 IsPrivateProject = createProjectDto.IsPrivateProject,
                 IsPrivateRepository = createProjectDto.IsPrivateRepository,
-                IsSSH = createProjectDto.IsSSH
             });
         }
     }

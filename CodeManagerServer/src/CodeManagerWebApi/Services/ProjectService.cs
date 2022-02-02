@@ -39,7 +39,7 @@ namespace CodeManagerWebApi.Services
         {
             if (user.Teams.All(team => team.Id != createProjectDto.TeamId))
             {
-                throw new UnauthorizedAccessException("You are not a member of this team.");
+                throw new UnauthorizedAccessWebException("You are not a member of this team.");
             }
 
             await _projectRepository.CreateAsync(new Project

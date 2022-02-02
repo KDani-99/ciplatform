@@ -39,6 +39,7 @@ namespace CodeManagerWebApi
         public void ConfigureServices(IServiceCollection services)
         {
             services
+                .AddCors()
                 .AddFluentValidation()
                 .Configure<JwtConfiguration>(_configuration.GetSection("JwtConfiguration"))
                 .Configure<UserConfiguration>(_configuration.GetSection("UserConfiguration"))
@@ -64,9 +65,9 @@ namespace CodeManagerWebApi
 
             services
                 .AddTransient<IValidator<CreateProjectDto>, CreateProjectDtoValidator>()
-                .AddTransient<IValidator<CreateTeamDto>, CreateTeamDtoValidator>()
+                .AddTransient<IValidator<TeamDto>, TeamDtoValidator>()
                 .AddTransient<IValidator<LoginDto>, LoginDtoValidator>()
-                .AddTransient<IValidator<UserDto>, UserDtoValidator>()
+                .AddTransient<IValidator<CreateUserDto>, CreateUserDtoValidator>()
                 .AddTransient<IValidator<VariableDto>, VariableDtoValidator>();
             
             services.AddAuthentication("JwtAuthToken")
@@ -89,6 +90,12 @@ namespace CodeManagerWebApi
                 .UseExceptionHandler("/error")
                 .UseHttpsRedirection()
                 .UseRouting()
+                .UseCors(x => x
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .SetIsOriginAllowed(origin => true) // any
+                    //.WithOrigins("https://localhost:4000"));
+                    .AllowCredentials())
                 .UseAuthentication()
                 .UseAuthorization()
                 .UseEndpoints(endpoints =>

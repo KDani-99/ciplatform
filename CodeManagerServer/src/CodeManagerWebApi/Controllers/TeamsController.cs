@@ -13,7 +13,7 @@ using Microsoft.OpenApi.Extensions;
 namespace CodeManagerWebApi.Controllers
 {
     [ApiController]
-    [Authorize(Roles = "User,Admin")]
+   /* [Authorize(Roles = "User,Admin")]*/
     [Route("/api/teams")]
     [Produces("application/json")]
     public class TeamsController : ControllerBase
@@ -27,14 +27,39 @@ namespace CodeManagerWebApi.Controllers
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateTeamDto createTeamDto)
+        [HttpGet]
+        public async Task<IActionResult> Get()
+        {
+            var teams = await _teamService.GetTeamsAsync();
+            return Ok(teams);
+        }
+        
+        [HttpGet, Route("{id:long}", Name = nameof(Get))]
+        public async Task<IActionResult> Get([FromRoute] long id)
         {
             var user = HttpContext.Items["user"] as User;
-            await _teamService.CreateTeamAsync(createTeamDto, user);
-            _logger.LogInformation($"Team `{createTeamDto.Name}` created @ {DateTime.Now}");
-            
-            return StatusCode((int)HttpStatusCode.Created);
+            var team = await _teamService.GetTeamAsync(id, user);
+            return Ok(team);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Post([FromBody] TeamDto teamDto)
+        {
+            var user = HttpContext.Items["user"] as User;
+            var result = await _teamService.CreateTeamAsync(teamDto, user);
+            _logger.LogInformation($"Team `{teamDto.Name}` created @ {DateTime.Now}");
+
+            return CreatedAtRoute(nameof(Get), new {result.Id}, result);
+        }
+        
+        [HttpPut]
+        public async Task<IActionResult> Put([FromBody] TeamDto teamDto)
+        {
+            var user = HttpContext.Items["user"] as User;
+            await _teamService.UpdateTeamAsync(teamDto, user);
+            _logger.LogInformation($"Team `{teamDto.Name}` updated @ {DateTime.Now}");
+
+            return Ok();
         }
 
         [HttpDelete]

@@ -40,25 +40,24 @@ namespace CodeManagerWebApi.Services
             _userConfiguration = userConfiguration?.Value ?? throw new ArgumentNullException(nameof(userConfiguration));
         }
 
-        public async Task CreateUser(UserDto userDto)
+        public async Task CreateUser(CreateUserDto createUserDto)
         {
-            if (await _userRepository.GetByUsernameAsync(userDto.Username) is not null)
+            if (await _userRepository.GetByUsernameAsync(createUserDto.Username) is not null)
                 throw new UsernameTakenException();
 
-            if (await _userRepository.GetByEmailAsync(userDto.Email) is not null)
+            if (await _userRepository.GetByEmailAsync(createUserDto.Email) is not null)
                 throw new EmailAlreadyInUseException();
 
             var defaultPlan = (await _planRepository.GetAsync(plan => plan.Name == _userConfiguration.DefaultPlan)).FirstOrDefault();
 
             var user = new User
             {
-                Username = userDto.Username,
-                Name = userDto.Name,
-                Email = userDto.Email,
+                Username = createUserDto.Username,
+                Name = createUserDto.Name,
+                Email = createUserDto.Email,
                 Image = null,
-                Password = _credentialManagerService.CreateHashedPassword(userDto.Password),
+                Password = _credentialManagerService.CreateHashedPassword(createUserDto.Password),
                 Roles = new [] {Roles.User},
-                IsActive = false,
                 RegistrationTimestamp = DateTime.Now,
                 Plan = defaultPlan
             };
@@ -66,7 +65,7 @@ namespace CodeManagerWebApi.Services
             await _userRepository.CreateAsync(user);
         }
 
-        public async Task<UserDto> GetUserAsync(long id)
+        public async Task<CreateUserDto> GetUserAsync(long id)
         {
             // TODO: throw exception if it does not exist
             return (await _userRepository.GetAsync(id)).FromUser();
@@ -86,9 +85,6 @@ namespace CodeManagerWebApi.Services
 
             if (!_credentialManagerService.VerifyPassword(loginDto.Password, user.Password))
                 throw new InvalidCredentialException();
-
-            if (!user.IsActive)
-                throw new UserNotActivatedException();
 
             var accessToken = await _tokenService.CreateAccessToken(user);
             var refreshToken = await _tokenService.CreateRefreshToken(user);

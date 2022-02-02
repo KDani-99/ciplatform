@@ -6,9 +6,9 @@ namespace CodeManagerWebApi.Services
 {
     public interface IUserService
     {
-        public Task CreateUser(UserDto userDto);
+        public Task CreateUser(CreateUserDto createUserDto);
 
-        public Task<UserDto> GetUserAsync(long id);
+        public Task<CreateUserDto> GetUserAsync(long id);
 
         public Task<bool> ExistsAsync(long id);
 

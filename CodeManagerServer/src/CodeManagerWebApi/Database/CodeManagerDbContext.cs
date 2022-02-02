@@ -39,7 +39,6 @@ namespace CodeManagerWebApi.Database
                     .HasData(new User
                     {
                         Id = 1,
-                        IsActive = true,
                         Email = "admin.site@noreply",
                         Username = serviceAccountConfiguration.Username,
                         Password = credentialManagerService.CreateHashedPassword(serviceAccountConfiguration.Password),

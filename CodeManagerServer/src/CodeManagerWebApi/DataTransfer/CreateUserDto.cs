@@ -4,9 +4,8 @@ using FluentValidation;
 
 namespace CodeManagerWebApi.DataTransfer
 {
-    public class UserDto
+    public class CreateUserDto
     {
-        public string Id { get; init; }
         public string Username { get; init; }
         public string Name { get; init; }
         public string Email { get; init; }
@@ -14,12 +13,12 @@ namespace CodeManagerWebApi.DataTransfer
         
     }
     
-    public class UserDtoValidator : AbstractValidator<UserDto> {
-        public UserDtoValidator() {
+    public class CreateUserDtoValidator : AbstractValidator<CreateUserDto> {
+        public CreateUserDtoValidator() {
             RuleFor(x => x.Username)
                 .NotNull()
                 .Matches("(^[a-zA-Z0-9]{1}([a-zA-Z0-9-_]{2,48})[a-zA-Z0-9]{1}$)")
-                .WithMessage("Field `username` must be between 4 and 50 characters.");
+                .WithMessage("Field `username` must be between 4 and 50 characters, may only contain alphanumeric characters, hyphens and underscores.");
             RuleFor(x => x.Name)
                 .Length(1, 75)
                 .WithMessage("Field `name` must be between 1 and 75 characters.");

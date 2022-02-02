@@ -54,10 +54,10 @@ namespace CodeManagerWebApi.Controllers
         }
 
         [HttpPost, Route("register")]
-        public async Task<IActionResult> Register([FromBody] UserDto userDto)
+        public async Task<IActionResult> Register([FromBody] CreateUserDto createUserDto)
         {
-            await _userService.CreateUser(userDto);
-            _logger.LogInformation($"User `{userDto.Username}` created @ {DateTime.Now}");
+            await _userService.CreateUser(createUserDto);
+            _logger.LogInformation($"User `{createUserDto.Username}` created @ {DateTime.Now}");
 
             return StatusCode((int)HttpStatusCode.Created);
         }

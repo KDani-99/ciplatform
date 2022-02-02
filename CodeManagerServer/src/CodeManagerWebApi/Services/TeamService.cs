@@ -19,7 +19,51 @@ namespace CodeManagerWebApi.Services
             _teamRepository = teamRepository ?? throw new ArgumentNullException(nameof(teamRepository));
         }
 
-        public async Task CreateTeamAsync(CreateTeamDto createTeamDto, User user)
+        public async Task<IEnumerable<TeamDto>> GetTeamsAsync()
+        {
+            var teams = await _teamRepository.GetAsync((_ => true));
+
+            return teams.Select(team => new TeamDto
+            {
+                Name = team.Name,
+                Description = team.Description,
+                Id = team.Id,
+                Owner = team.Owner.Username,
+                Image = team.Image,
+                Members = team.Members?.Count ?? 0,
+                Projects = team.Projects?.Count ?? 0
+            });
+        }
+
+        public async Task<TeamDto> GetTeamAsync(long id, User user)
+        {
+            var team = await _teamRepository.GetAsync(id);
+
+            if (team == null)
+            {
+                throw new TeamDoesNotExistException();
+            }
+
+            if (team.Members.All(teamMember => teamMember.Id != user.Id))
+            {
+                throw new UnauthorizedAccessWebException(
+                    "The specified team does not exist or you are not allowed to view it.");
+            }
+            
+            return new TeamDto
+            {
+                Id = team.Id,
+                Name = team.Name,
+                Description = team.Description,
+                Image = team.Image,
+                IsPublic = team.IsPublic,
+                Owner = team.Owner.Username,
+                Members = team.Members?.Count ?? 0,
+                Projects = team.Projects?.Count ?? 0
+            };
+        }
+
+        public async Task<TeamDto> CreateTeamAsync(TeamDto teamDto, User user)
         {
             if (!user.Roles.Contains(Roles.Admin))
             {
@@ -34,15 +78,17 @@ namespace CodeManagerWebApi.Services
                 }
             }
 
-            if (await _teamRepository.ExistsAsync(teamEntity => teamEntity.Name == createTeamDto.Name))
+            if (await _teamRepository.ExistsAsync(teamEntity => teamEntity.Name == teamDto.Name))
             {
                 throw new TeamAlreadyExistsException();
             }
             
             var team = new Team
             {
-                Name = createTeamDto.Name,
-                Image = createTeamDto.Image,
+                Name = teamDto.Name,
+                Image = teamDto.Image,
+                Description = teamDto.Description,
+                IsPublic = teamDto.IsPublic,
                 Owner = user,
                 Members = new List<TeamMember>
                 {
@@ -54,7 +100,39 @@ namespace CodeManagerWebApi.Services
                 }
             };
 
-            await _teamRepository.CreateAsync(team);
+            var id = await _teamRepository.CreateAsync(team);
+
+            teamDto.Id = id;
+            teamDto.Owner = user.Username;
+
+            return teamDto;
+        }
+
+        public async Task UpdateTeamAsync(TeamDto teamDto, User user)
+        {
+            var team = await _teamRepository.GetAsync(teamDto.Id);
+
+            if (team == null)
+            {
+                throw new TeamDoesNotExistException();
+            }
+
+            if (team.Owner.Id != user.Id)
+            {
+                throw new UnauthorizedAccessWebException("Only the owner of the team can update the details.");
+            }
+
+            if (await _teamRepository.ExistsAsync(teamEntity => teamEntity.Name == teamDto.Name))
+            {
+                throw new TeamAlreadyExistsException();
+            }
+
+            team.Name = teamDto.Name;
+            team.Description = teamDto.Description;
+            team.Image = teamDto.Image;
+            team.IsPublic = teamDto.IsPublic;
+
+            await _teamRepository.UpdateAsync(team);
         }
 
         public async Task DeleteTeamAsync(long id)

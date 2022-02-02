@@ -12,7 +12,6 @@ namespace CodeManager.Data.Entities
         public string Image { get; set; }
         [Column(TypeName = "Roles[]")]
         public Roles [] Roles { get; set; }
-        public bool IsActive { get; set; }
         public string Password { get; set; }
 
         [ForeignKey(nameof(PlanId))]

@@ -15,10 +15,19 @@ namespace CodeManager.Data.Repositories
         {
         }
 
-        public override Task<Team> GetAsync(long id) => DbContext.Teams.FirstOrDefaultAsync(team => team.Id == id);
+        public override Task<Team> GetAsync(long id) => DbContext.Teams
+            .Include(team => team.Owner)
+            .Include(team => team.Projects)
+            .Include(team => team.Members)
+            .FirstOrDefaultAsync(team => team.Id == id);
 
         public override Task<List<Team>> GetAsync(Expression<Func<Team, bool>> expression) =>
-            DbContext.Teams.Where(expression).ToListAsync();
+            DbContext.Teams
+                .Include(team => team.Owner)
+                .Include(team => team.Projects)
+                .Include(team => team.Members)
+                .Where(expression)
+                .ToListAsync();
 
         public override Task<bool> ExistsAsync(Expression<Func<Team, bool>> expression) => DbContext.Teams.AnyAsync(expression);
 

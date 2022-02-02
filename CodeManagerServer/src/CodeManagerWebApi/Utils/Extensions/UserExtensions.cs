@@ -7,13 +7,13 @@ namespace CodeManagerWebApi.Utils.Extensions
     public static class UserExtensions
     {
 
-        public static User FromDto(this UserDto userDto) => new User
+        public static User FromDto(this CreateUserDto createUserDto) => new User
         {
-            Username = userDto.Username,
-            Password = userDto.Password
+            Username = createUserDto.Username,
+            Password = createUserDto.Password
         };
 
-        public static UserDto FromUser(this User user) => new UserDto
+        public static CreateUserDto FromUser(this User user) => new CreateUserDto
         {
             Username = user.Username,
             Password = user.Password,

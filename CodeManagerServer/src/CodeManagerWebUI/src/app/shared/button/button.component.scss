@@ -1,0 +1,25 @@
+.button-container {
+  border-radius: 4px;
+  text-align: center;
+  padding: 0.5em;
+  cursor: pointer;
+  font-family: Lato-Regular, serif;
+  font-size: 14px;
+  transition: all 0.25s linear;
+  &:hover {
+    transition: all 0.25s linear;
+    color: rgba(25, 118, 210, 1);
+  }
+}
+.button-container-default {
+  color: var(--default-accent-color);
+  border: 1px solid var(--default-accent-color);
+  font-size: 16px;
+  background-color: rgba(25, 118, 210, 0.15);
+  font-family: Lato-Bold, serif;
+  &:hover {
+    background-color: rgba(25, 118, 210, 0.3);
+    transition: all 0.25s linear;
+  }
+
+}

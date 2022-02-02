@@ -1,0 +1,35 @@
+<div [className]="'team-container'">
+  <div [className]="'top-container'">
+    <div [className]="'image-container'">
+      <img src='{{team.image}}'/>
+    </div>
+    <div [className]="'info-container'">
+      <h1>{{team.name}}</h1>
+      <h2>{{team.description}}</h2>
+    </div>
+  </div>
+  <div [className]="'bottom-container'">
+    <div>
+      <i class="eva eva-person-outline"></i>{{team.members}} member(s)
+    </div>
+    <div>
+      <i class="eva eva-clipboard-outline"></i>{{team.projects}} project(s)
+    </div>
+    <div>
+      <div *ngIf="!team.isPublic">
+        <i class="eva eva-shield-outline"></i>Private
+      </div>
+      <div *ngIf="team.isPublic">
+        <i class="eva eva-shield-off-outline"></i>Public
+      </div>
+    </div>
+  </div>
+  <div [className]="'button-container'">
+    <div [className]="'button'">
+      <p>Join</p>
+    </div>
+    <div [className]="'button'">
+      <p>Open</p>
+    </div>
+  </div>
+</div>

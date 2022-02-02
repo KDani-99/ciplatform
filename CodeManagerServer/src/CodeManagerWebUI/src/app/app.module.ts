@@ -1,0 +1,52 @@
+import { APP_INITIALIZER, ErrorHandler, NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+
+import { AppRoutingModule } from './app-routing.module';
+import { AppComponent } from './app.component';
+import { SharedModule } from './shared/shared.module';
+import { ToastrModule } from 'ngx-toastr';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
+import { ConfigService } from './config/config.service';
+import { HttpGlobalInterceptor } from './interceptors/http-global.interceptor';
+import { GlobalErrorHandler } from './error/global-error.handler';
+import { NavbarComponent } from './navbar/navbar.component';
+import { ButtonComponent } from './navbar/components/button/button.component';
+import { UserComponent } from './navbar/components/user/user.component';
+import { TeamComponent } from './modules/team/team.component';
+
+@NgModule({
+  declarations: [AppComponent, NavbarComponent, ButtonComponent, UserComponent, TeamComponent],
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    SharedModule,
+    BrowserAnimationsModule,
+    HttpClientModule,
+    ToastrModule.forRoot(),
+  ],
+  providers: [
+    {
+      provide: APP_INITIALIZER,
+      multi: true,
+      deps: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        return () => {
+          return configService.loadConfig();
+        };
+      },
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: HttpGlobalInterceptor,
+      multi: true,
+    },
+    {
+      provide: ErrorHandler,
+      useClass: GlobalErrorHandler,
+    },
+  ],
+  exports: [],
+  bootstrap: [AppComponent],
+})
+export class AppModule {}

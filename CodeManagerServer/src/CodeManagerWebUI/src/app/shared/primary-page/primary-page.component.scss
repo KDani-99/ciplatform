@@ -1,0 +1,14 @@
+.primary-page {
+  padding: 1.5em;
+
+  h1 {
+    display: inline-block;
+    font-size: 24px;
+    padding: 0.5em 1em;
+    border-radius: 4px;
+    border: 1px solid var(--default-border-color);
+    cursor: default;
+    user-select: none;
+  }
+
+}

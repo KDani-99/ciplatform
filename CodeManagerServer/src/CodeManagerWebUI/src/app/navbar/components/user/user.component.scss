@@ -1,0 +1,35 @@
+.nav-user-container {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+
+  .info {
+    text-align: right;
+    margin-right: 1em;
+    h1 {
+      font-size: 16px;
+      font-weight: normal;
+    }
+
+    h2 {
+      font-size: 14px;
+      font-weight: normal;
+    }
+
+  }
+  .image  {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 100px;
+    width: 45px;
+    height: 45px;
+    background-color: rgba(220, 220, 220, 0.25);
+    img {
+      width: 30px;
+      border-radius: 100px;
+    }
+  }
+}

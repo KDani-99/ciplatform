@@ -1,0 +1,16 @@
+<shared-primary-page [header]="'Teams'">
+  <div [className]="'action-container'">
+    <div [className]="'button'">
+      All
+    </div>
+    <div [className]="'button'">
+      My teams
+    </div>
+    <shared-button [text]="'Create'" theme="default"></shared-button>
+  </div>
+  <div [className]="'teams-container'">
+    <div [className]="'teams'" *ngFor="let team of teams">
+      <teams-team [team]="team"></teams-team>
+    </div>
+  </div>
+</shared-primary-page>

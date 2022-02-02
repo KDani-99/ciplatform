@@ -1,0 +1,11 @@
+{
+  "api": {
+    "baseUrl": "http://localhost:5100",
+    "endpoints": {
+      "login": "api/user/login",
+      "register": "api/user/register",
+      "getTeam": "api/teams",
+      "getTeams": "api/teams"
+    }
+  }
+}

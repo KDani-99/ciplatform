@@ -1,0 +1,12 @@
+.nav-button {
+  padding: 1em;
+  font-family: Lato-Regular, serif;
+  font-size: 16px;
+  cursor: pointer;
+  transition: color 0.3s ease-out;
+  &:hover {
+    color: var(--default-accent-color);
+    transition: color 0.3s ease-in-out;
+  }
+
+}

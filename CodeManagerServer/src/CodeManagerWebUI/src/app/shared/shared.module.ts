@@ -5,6 +5,8 @@ import { ButtonComponent } from './button/button.component';
 import { PageComponent } from './page/page.component';
 import { FormsModule } from '@angular/forms';
 import { PrimaryPageComponent } from './primary-page/primary-page.component';
+import { TopbarComponent } from './page/components/topbar/topbar.component';
+import { CheckboxComponent } from './checkbox/checkbox.component';
 
 @NgModule({
   declarations: [
@@ -12,12 +14,15 @@ import { PrimaryPageComponent } from './primary-page/primary-page.component';
     ButtonComponent,
     PageComponent,
     PrimaryPageComponent,
+    TopbarComponent,
+    CheckboxComponent,
   ],
   exports: [
     InputComponent,
     ButtonComponent,
     PageComponent,
     PrimaryPageComponent,
+    TopbarComponent,
   ],
   imports: [CommonModule, FormsModule],
 })

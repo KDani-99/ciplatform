@@ -1,0 +1,47 @@
+<shared-primary-page [disableHeader]="true">
+
+  <ng-template #buttonsTemplate>
+    <div [className]="'button-container'">
+      <shared-button [text]="'Stop'" theme="error"></shared-button>
+    </div>
+  </ng-template>
+  <ng-template #imageTemplate>
+    <i class="eva eva-cube-outline"></i>
+  </ng-template>
+
+  <shared-topbar [buttonsTemplate]="buttonsTemplate" [imageTemplate]="imageTemplate" [header]="'Run #1132'"></shared-topbar>
+
+  <table [className]="'run-table'">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Context</th>
+        <th>Image</th>
+        <th>Started</th>
+        <th>Overall time</th>
+        <th>Steps</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td>Windows</td>
+        <td>latest</td>
+        <td>2013.13.1</td>
+        <td>0:55</td>
+        <td>4/5</td>
+        <td [className]="'successful'"><i class="eva eva-checkmark-circle-outline"></i></td>
+      </tr>
+      <tr>
+        <td>1</td>
+        <td>Windows</td>
+        <td>latest</td>
+        <td>2013.13.1</td>
+        <td>0:55</td>
+        <td>4/5</td>
+        <td [className]="'successful'"><i class="eva eva-checkmark-circle-outline"></i></td>
+      </tr>
+    </tbody>
+  </table>
+</shared-primary-page>

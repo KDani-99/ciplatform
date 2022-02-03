@@ -1,8 +1,8 @@
 <div [className]="'navbar'">
-  <nav-button [text]="'Home'"></nav-button>
-  <nav-button [text]="'Teams'"></nav-button>
-  <nav-button [text]="'Projects'"></nav-button>
-  <nav-button [text]="'Agents'"></nav-button>
+  <nav-button [text]="'Home'" (click)="navigateTo('home')"></nav-button>
+  <nav-button [text]="'Teams'" (click)="navigateTo('teams')"></nav-button>
+  <nav-button [text]="'Projects'" (click)="navigateTo('projects')"></nav-button>
+  <nav-button [text]="'Agents'" (click)="navigateTo('agents')"></nav-button>
   <div [className]="'user-container'">
     <nav-user></nav-user>
   </div>

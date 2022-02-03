@@ -1,0 +1,66 @@
+.run-table {
+  width: 100%;
+  margin-top: 1em;
+  text-align: center;
+  border-collapse: collapse;
+  user-select: none;
+  table-layout: fixed;
+  thead {
+    border-bottom: 1px solid var(--default-border-color);
+    th {
+      font-weight: normal;
+      font-family: Lato-Bold, serif;
+    }
+  }
+  tbody tr {
+    &:hover {
+      background-color: rgba(200,200,200,0.1);
+    }
+  }
+  tr {
+    cursor: pointer;
+  }
+  td, th {
+    padding: 1em;
+  }
+  td:last-of-type {
+    i {
+      padding: 0.25em;
+      font-size: 18px;
+      border-radius: 100px;
+    }
+  }
+  .failed i {
+    background-color: rgba(231, 76, 60, 0.1);
+    border: 1px solid rgb(231, 76, 60);
+    color: rgb(231, 76, 60);
+  }
+  .successful i {
+    background-color: rgba(46, 204, 113, 0.15);
+    border: 1px solid rgb(46, 204, 113);
+    color: rgb(46, 204, 113);
+  }
+  .running {
+    i {
+      animation-name: rotate;
+      animation-duration: 2000ms;
+      animation-iteration-count: infinite;
+      animation-timing-function: linear;
+      background-color: rgba(52, 152, 219, 0.15);
+      border: 1px solid rgb(52, 152, 219);
+      color: rgb(52, 152, 219);
+    }
+  }
+}
+.steps-details {
+  display: flex;
+  background-color: red;
+}
+@keyframes rotate {
+  from {
+    transform:rotate(0deg);
+  }
+  to {
+    transform:rotate(360deg);
+  }
+}

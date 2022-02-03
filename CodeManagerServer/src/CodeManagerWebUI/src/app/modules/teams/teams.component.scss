@@ -4,13 +4,16 @@
 .teams {
   margin: 1em 0;
 }
-.action-container {
+.button-container {
   display: flex;
   align-items: center;
   justify-content: center;
   float: right;
-  margin-top: 0.75em;
+  gap: 10px;
   .button {
+    width: auto;
+    white-space: nowrap;
+    display: flex;
     font-size: 18px;
     padding: 0.35em 0.75em;
     cursor: pointer;
@@ -22,8 +25,5 @@
       background-color: rgba(0, 0, 0, 0.1);
       transition: background-color 0.3s ease-in-out;
     }
-  }
-  .create {
-
   }
 }

@@ -1,0 +1,66 @@
+<shared-primary-page [disableHeader]="true">
+
+  <ng-template #buttonsTemplate>
+    <div [className]="'button-container'">
+      <shared-button [text]="'Variables'" theme="default"></shared-button>
+      <shared-button [text]="'Edit details'" theme="default"></shared-button>
+      <shared-button [text]="'Edit details'" theme="default"></shared-button>
+    </div>
+  </ng-template>
+  <ng-template #imageTemplate>
+    <i class="eva eva-layers-outline"></i>
+  </ng-template>
+
+  <shared-topbar [buttonsTemplate]="buttonsTemplate" [imageTemplate]="imageTemplate"></shared-topbar>
+  <div [className]="'container'">
+    <div [className]="'content'">
+      <shared-data [header]="'Id'" [value]="project?.id?.toString() ?? 'N/A'"></shared-data>
+      <shared-data [header]="'Description'" [value]="project?.description?.toString() ?? 'N/A'"></shared-data>
+      <shared-data [header]="'Visibility'" [value]="project?.isPublic ? 'Public' : 'Private'"></shared-data>
+      <shared-data [header]="'Git user'" [value]="'*******'"></shared-data>
+      <shared-data [header]="'Git secret'" [value]="'**************'"></shared-data>
+    </div>
+  </div>
+
+  <div [className]="'topbar-container'">
+    <shared-topbar [header]="'Runs'" [secondary]="true"></shared-topbar>
+  </div>
+
+  <table [className]="'runs-table'">
+    <thead>
+    <tr>
+      <th>ID</th>
+      <th>Context</th>
+      <th>Started</th>
+      <th>Execution time</th>
+      <th>Jobs</th>
+      <th>Status</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+      <td>1</td>
+      <td>Windows</td>
+      <td>2013.13.1</td>
+      <td>0:55</td>
+      <td>4/5</td>
+      <td [className]="'successful'"><i class="eva eva-checkmark-circle-outline"></i></td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>Linux</td>
+      <td>2013.13.1</td>
+      <td>0:55</td>
+      <td>1/1</td>
+      <td [className]="'failed'"><i class="eva eva-alert-circle-outline"></i></td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>2013.13.1</td>
+      <td>0:55</td>
+      <td>Successful</td>
+    </tr>
+    </tbody>
+  </table>
+
+</shared-primary-page>

@@ -1,4 +1,4 @@
 <div [className]="'primary-page'">
-  <h1>{{ header }}</h1>
+  <h1 *ngIf="!disableHeader">{{ header }}</h1>
   <ng-content></ng-content>
 </div>

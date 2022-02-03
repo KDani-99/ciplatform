@@ -1,0 +1,5 @@
+<div [className]="'background'">
+  <div [className]="'container'" *ngIf="contentTemplate">
+    <ng-template *ngTemplateOutlet="contentTemplate"></ng-template>
+  </div>
+</div>

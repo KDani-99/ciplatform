@@ -1,0 +1,11 @@
+<div [className]="'topbar'">
+  <div [className]="'image'" *ngIf="imageTemplate">
+    <ng-template *ngTemplateOutlet="imageTemplate"></ng-template>
+  </div>
+  <div [className]="'header'">
+    <h1 [ngClass]="secondary ? 'secondary' : ''">{{header?.toString() ?? 'N/A'}}</h1>
+  </div>
+  <div [className]="'button-container'" *ngIf="buttonsTemplate">
+    <ng-container *ngTemplateOutlet="buttonsTemplate"></ng-container>
+  </div>
+</div>

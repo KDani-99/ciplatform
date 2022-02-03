@@ -1,0 +1,25 @@
+<shared-primary-page [disableHeader]="true">
+
+  <ng-template #buttonsTemplate>
+    <div [className]="'button-container'">
+        <shared-button [text]="'Create'" theme="default"></shared-button>
+    </div>
+  </ng-template>
+  <ng-template #imageTemplate>
+    <i class="eva eva-folder-outline"></i>
+  </ng-template>
+
+  <shared-topbar [buttonsTemplate]="buttonsTemplate" [imageTemplate]="imageTemplate" [header]="'Projects'"></shared-topbar>
+
+  <div [className]="'projects'">
+    <projects-project></projects-project>
+  </div>
+
+  <ng-template #contentTemplate>
+    <projects-create-project></projects-create-project>
+  </ng-template>
+
+  <shared-popup [contentTemplate]="contentTemplate">
+
+  </shared-popup>
+</shared-primary-page>

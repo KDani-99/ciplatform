@@ -6,6 +6,7 @@
   font-family: Lato-Regular, serif;
   font-size: 14px;
   transition: all 0.25s linear;
+  white-space: nowrap;
   &:hover {
     transition: all 0.25s linear;
     color: rgba(25, 118, 210, 1);
@@ -21,5 +22,28 @@
     background-color: rgba(25, 118, 210, 0.3);
     transition: all 0.25s linear;
   }
-
+}
+.button-container-error {
+  color: rgb(244, 67, 54);
+  border: 1px solid rgb(244, 67, 54);
+  font-size: 16px;
+  background-color: rgba(244, 67, 54, 0.15);
+  font-family: Lato-Bold, serif;
+  &:hover {
+    background-color: rgba(244, 67, 54, 0.3);
+    color: rgb(244, 67, 54);;
+    transition: all 0.25s linear;
+  }
+}
+.button-container-secondary {
+  color: rgb(155, 89, 182);
+  border: 1px solid rgb(155, 89, 182);
+  font-size: 16px;
+  background-color: rgba(155, 89, 182, 0.15);
+  font-family: Lato-Bold, serif;
+  &:hover {
+    background-color: rgba(155, 89, 182, 0.3);
+    color: rgb(155, 89, 182);
+    transition: all 0.25s linear;
+  }
 }

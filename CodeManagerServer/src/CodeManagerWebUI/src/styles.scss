@@ -14,7 +14,14 @@
   --default-accent-color: #1976D2;
   --default-border-color: rgb(225, 225, 225);
   --default-secondary-color: rgb(65, 75, 84);
+
+  --secondary-text-color: rgb(100, 115, 125);
+  --secondary-accent-color: rgb(155, 89, 182);
 }
 html, body {
   height: 100%;
+}
+/* GLOBAL STYLES */
+.topbar-container {
+  margin-top: 1.5em;
 }

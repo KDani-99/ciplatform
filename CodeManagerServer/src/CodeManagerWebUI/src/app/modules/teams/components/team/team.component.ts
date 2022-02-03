@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { Team } from './team.interface';
+import { TeamDto } from '../../../../team/team.interface';
 
 @Component({
   selector: 'teams-team',
@@ -7,7 +7,7 @@ import { Team } from './team.interface';
   styleUrls: ['./team.component.scss'],
 })
 export class TeamComponent implements OnInit {
-  @Input() team: Team = {
+  @Input() team: TeamDto = {
     name: '',
     description: '',
     id: NaN,
@@ -15,6 +15,7 @@ export class TeamComponent implements OnInit {
     isPublic: false,
     members: NaN,
     projects: NaN,
+    owner: '',
   };
 
   constructor() {}

@@ -1,0 +1,17 @@
+.create-button-container {
+  margin-top: 1em;
+}
+.exit-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 100px;
+  background-color: rgba(231, 76, 60, 0.15);
+  border: 1px solid rgb(231, 76, 60);
+  cursor: pointer;
+  i {
+    color: rgb(231, 76, 60)
+  }
+}

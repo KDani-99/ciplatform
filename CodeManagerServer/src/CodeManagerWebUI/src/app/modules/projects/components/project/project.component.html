@@ -1,0 +1,30 @@
+<div [className]="'project-container'">
+  <div [className]="'top-container'">
+    <div [className]="'image-container'">
+      <i class="eva eva-layers-outline"></i>
+    </div>
+    <div [className]="'info-container'">
+      <h1>{{project?.name ?? 'N/A'}}</h1>
+      <h2>{{project?.description ?? 'N/A'}}</h2>
+    </div>
+  </div>
+  <div [className]="'bottom-container'">
+    <div>
+      <i class="eva eva-people-outline"></i>{{project?.owner ?? 'N/A'}}
+    </div>
+    <div>
+      <i class="eva eva-person-outline"></i>{{project?.runs ?? 'N/A'}} run(s)
+    </div>
+    <div>
+      <div *ngIf="!project?.isPublic">
+        <i class="eva eva-shield-outline"></i>Private
+      </div>
+      <div *ngIf="project?.isPublic">
+        <i class="eva eva-shield-off-outline"></i>Public
+      </div>
+    </div>
+  </div>
+  <div [className]="'button-container'">
+    <shared-button [text]="'Open'" theme="secondary"></shared-button>
+  </div>
+</div>

@@ -14,9 +14,28 @@ import { NavbarComponent } from './navbar/navbar.component';
 import { ButtonComponent } from './navbar/components/button/button.component';
 import { UserComponent } from './navbar/components/user/user.component';
 import { TeamComponent } from './modules/team/team.component';
+import { TeamModule } from './modules/team/team.module';
+import { ProjectsComponent } from './modules/projects/projects.component';
+import { ProjectsModule } from './modules/projects/projects.module';
+import { ProjectComponent } from './modules/project/project.component';
+import { RunComponent } from './modules/run/run.component';
+import { RunModule } from './modules/run/run.module';
+import { JobComponent } from './modules/job/job.component';
+import { PopupComponent } from './shared/popup/popup.component';
 
 @NgModule({
-  declarations: [AppComponent, NavbarComponent, ButtonComponent, UserComponent, TeamComponent],
+  declarations: [
+    AppComponent,
+    NavbarComponent,
+    ButtonComponent,
+    UserComponent,
+    TeamComponent,
+    JobComponent,
+    ProjectsComponent,
+    ProjectComponent,
+    RunComponent,
+    PopupComponent,
+  ],
   imports: [
     BrowserModule,
     AppRoutingModule,
@@ -24,6 +43,9 @@ import { TeamComponent } from './modules/team/team.component';
     BrowserAnimationsModule,
     HttpClientModule,
     ToastrModule.forRoot(),
+    TeamModule,
+    ProjectsModule,
+    RunModule,
   ],
   providers: [
     {

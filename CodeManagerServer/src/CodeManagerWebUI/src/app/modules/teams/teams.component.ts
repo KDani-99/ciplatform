@@ -1,5 +1,4 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { Team } from './components/team/team.interface';
 import { TeamService } from '../../team/team.service';
 import { TeamDto } from '../../team/team.interface';
 

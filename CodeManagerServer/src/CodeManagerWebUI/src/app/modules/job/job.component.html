@@ -1,0 +1,40 @@
+<shared-primary-page [disableHeader]="true">
+
+  <ng-template #buttonsTemplate>
+    <div [className]="'button-container'">
+    </div>
+  </ng-template>
+  <ng-template #imageTemplate>
+    <i class="eva eva-cube-outline"></i>
+  </ng-template>
+
+  <shared-topbar [buttonsTemplate]="buttonsTemplate" [imageTemplate]="imageTemplate" [header]="'Job #1132'"></shared-topbar>
+
+  <table [className]="'run-table'">
+    <thead>
+    <tr>
+      <th>No.</th>
+      <th>Name</th>
+      <th>Started</th>
+      <th>Time</th>
+      <th>Status</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+      <td>#1</td>
+      <td>1</td>
+      <td>2013.13.1</td>
+      <td>0:55</td>
+      <td [className]="'running'"><i class="eva eva-refresh-outline"></i></td>
+    </tr>
+    <tr>
+      <td>#2</td>
+      <td>1</td>
+      <td>2013.13.1</td>
+      <td>0:55</td>
+      <td [className]="'running'"><i class="eva eva-refresh-outline"></i></td>
+    </tr>
+    </tbody>
+  </table>
+</shared-primary-page>

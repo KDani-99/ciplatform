@@ -1,0 +1,17 @@
+<div>
+  <ng-template #buttonsTemplate>
+      <div [className]="'exit-button'">
+        <i class="eva eva-close-outline"></i>
+      </div>
+  </ng-template>
+  <shared-topbar [buttonsTemplate]="buttonsTemplate" [header]="'Create project'"></shared-topbar>
+
+  <shared-input [header]="'Name'"></shared-input>
+  <shared-input [header]="'Description'"></shared-input>
+  <shared-input [header]="'Repository URL'"></shared-input>
+  <shared-input [header]="'Git username'"></shared-input>
+  <shared-input [type]="'password'" [header]="'Git secret'"></shared-input>
+  <div [className]="'create-button-container'">
+    <shared-button [text]="'Create'" theme="default"></shared-button>
+  </div>
+</div>

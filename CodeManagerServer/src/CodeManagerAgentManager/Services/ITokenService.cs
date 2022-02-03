@@ -7,9 +7,5 @@ namespace CodeManagerAgentManager.Services
     {
         public Task<T> CreateJobTokenAsync(long runId, long jobId);
         public Task<ClaimsPrincipal> VerifyJobTokenAsync(string token);
-
-        public Task<T> CreateJobRequestTokenAsync(long runId, long jobId);
-        
-        public Task<ClaimsPrincipal> VerifyJobRequestTokenAsync(string token);
     }
 }

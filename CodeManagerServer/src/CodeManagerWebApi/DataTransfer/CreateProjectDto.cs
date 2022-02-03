@@ -38,7 +38,7 @@ namespace CodeManagerWebApi.DataTransfer
                 RuleFor(x => x.Username)
                     .NotNull()
                     .Length(1, 255)
-                    .WithMessage("Field `Username` is required if not using ssh.");
+                    .WithMessage("Field `Username` is required.");
             });
             RuleFor(x => x.TeamId)
                 .NotNull()

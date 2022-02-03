@@ -31,16 +31,6 @@ namespace CodeManagerAgentManager.Services
             return VerifyTokenAsync(token, _tokenServiceConfiguration.JobTokenConfiguration.Secret);
         }
 
-        public Task<JwtSecurityToken> CreateJobRequestTokenAsync(long runId, long jobId)
-        {
-            return CreateJobTokenAsync(runId, jobId, _tokenServiceConfiguration.JobRequestTokenConfiguration);
-        }
-
-        public Task<ClaimsPrincipal> VerifyJobRequestTokenAsync(string token)
-        {
-            return VerifyTokenAsync(token, _tokenServiceConfiguration.JobRequestTokenConfiguration.Secret);
-        }
-
         private static Task<JwtSecurityToken> CreateJobTokenAsync(long runId, long jobId,
             TokenConfiguration tokenConfiguration)
         {

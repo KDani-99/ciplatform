@@ -24,6 +24,7 @@ namespace CodeManagerWebApi.DataTransfer
                 .WithMessage("Field `name` must be between 1 and 75 characters.");
             RuleFor(x => x.Email)
                 .EmailAddress()
+                .Length(1, 255)
                 .WithMessage("Field `email` is invalid.");
             RuleFor(x => x.Password)
                 .NotNull()

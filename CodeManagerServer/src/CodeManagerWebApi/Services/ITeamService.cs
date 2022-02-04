@@ -12,6 +12,6 @@ namespace CodeManagerWebApi.Services
         public Task<TeamDto> GetTeamAsync(long id, User user);
         public Task<TeamDto> CreateTeamAsync(TeamDto teamDto, User user);
         public Task UpdateTeamAsync(TeamDto teamDto, User user);
-        public Task DeleteTeamAsync(long id);
+        public Task DeleteTeamAsync(long id, User user);
     }
 }

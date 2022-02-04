@@ -3,6 +3,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CodeManager.Core.Services;
 using CodeManager.Data.Repositories;
 using CodeManagerWebApi.Database;
 using CodeManagerWebApi.Configuration;
@@ -44,13 +45,19 @@ namespace CodeManagerWebApi
                 .Configure<JwtConfiguration>(_configuration.GetSection("JwtConfiguration"))
                 .Configure<UserConfiguration>(_configuration.GetSection("UserConfiguration"))
                 .Configure<IConfiguration>(_configuration)
-                .AddDbContext<CodeManager.Data.Database.CodeManagerDbContext,CodeManagerDbContext>(options => options.UseNpgsql(_configuration.GetValue<string>("ConnectionString")))
+                .AddDbContext<CodeManager.Data.Database.CodeManagerDbContext, CodeManagerDbContext>(options =>
+                    options.UseNpgsql(_configuration.GetValue<string>("ConnectionString")))
                 .AddSingleton<ICredentialManagerService, CredentialManagerService>()
                 .AddSingleton<ITokenService<JwtSecurityToken>, TokenService>()
                 .AddScoped<IUserRepository, UserRepository>()
                 .AddScoped<IUserService, UserService>()
                 .AddScoped<ITeamRepository, TeamRepository>()
                 .AddScoped<ITeamService, TeamService>()
+                .AddScoped<IProjectRepository, ProjectRepository>()
+                .AddScoped<IProjectService, ProjectService>()
+                .AddScoped<IVariableRepository, VariableRepository>()
+                .AddScoped<IVariableService, VariableService>()
+                .AddScoped<IEncryptionService, EncryptionService>()
                 .AddScoped<IPlanRepository, PlanRepository>()
                 .AddScoped<IPlanService, PlanService>()
                 .AddAntiforgery()

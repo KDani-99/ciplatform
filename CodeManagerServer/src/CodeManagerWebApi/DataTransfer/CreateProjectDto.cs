@@ -8,6 +8,8 @@ namespace CodeManagerWebApi.DataTransfer
 {
     public class CreateProjectDto
     {
+        public string Name { get; set; }
+        public string Description { get; set; }
         public string RepositoryUrl { get; set; }
         public bool IsPrivateRepository { get; set; }
         public bool IsPrivateProject { get; set; }
@@ -18,6 +20,14 @@ namespace CodeManagerWebApi.DataTransfer
     
     public class CreateProjectDtoValidator : AbstractValidator<CreateProjectDto> {
         public CreateProjectDtoValidator() {
+            RuleFor(x => x.Name)
+                .NotNull()
+                .Length(1, 50)
+                .WithMessage("Field `Name` must be between 1 and 50 characters.");
+            RuleFor(x => x.Description)
+                .NotNull()
+                .Length(1, 150)
+                .WithMessage("Field `Description` must be between 1 and 150 characters.");
             RuleFor(x => x.RepositoryUrl)
                 .NotNull()
                 .Length(1, 255)
@@ -28,20 +38,21 @@ namespace CodeManagerWebApi.DataTransfer
             RuleFor(x => x.IsPrivateProject)
                 .NotNull()
                 .WithMessage("Field `IsPrivateProject` is invalid.");
-            When(x => x.IsPrivateProject, () =>
+            When(x => x.IsPrivateRepository, () =>
             {
                 RuleFor(x => x.SecretToken)
                     .NotNull()
                     .Length(1, 255)
-                    .WithMessage("Field `SecretToken` is required if the project is private.");
+                    .WithMessage("Field `SecretToken` is required if the repository is private.");
 
                 RuleFor(x => x.Username)
                     .NotNull()
-                    .Length(1, 255)
-                    .WithMessage("Field `Username` is required.");
+                    .Length(1, 100)
+                    .WithMessage("Field `Username` is required if the repository is private.");
             });
             RuleFor(x => x.TeamId)
                 .NotNull()
+                .NotEmpty()
                 .WithMessage("Field `TeamId` is invalid.");
         }
     }

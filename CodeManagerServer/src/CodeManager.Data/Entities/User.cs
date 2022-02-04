@@ -15,10 +15,10 @@ namespace CodeManager.Data.Entities
         public string Password { get; set; }
 
         [ForeignKey(nameof(PlanId))]
-        public long PlanId { get; set; }
+        public long PlanId { get; set; } // TODO: remove
         public Plan Plan { get; set; }
-        
-        public List<Team> Teams { get; set; }
+
+        public List<Team> Teams { get; set; } = new();
         public DateTime RegistrationTimestamp { get; set; }
         public string RefreshTokenSignature { get; set; }
         public List<LoginHistory> LoginHistory { get; set; } = new();

@@ -7,6 +7,7 @@ using CodeManager.Data.Repositories;
 using CodeManagerWebApi.DataTransfer;
 using CodeManagerWebApi.Entities;
 using CodeManagerWebApi.Exceptions;
+using CodeManagerWebApi.Extensions;
 
 namespace CodeManagerWebApi.Services
 {
@@ -44,7 +45,7 @@ namespace CodeManagerWebApi.Services
                 throw new TeamDoesNotExistException();
             }
 
-            if (team.Members.All(teamMember => teamMember.Id != user.Id))
+            if (team.Members.All(teamMember => teamMember.User.Id != user.Id) && !user.IsAdmin())
             {
                 throw new UnauthorizedAccessWebException(
                     "The specified team does not exist or you are not allowed to view it.");
@@ -117,7 +118,7 @@ namespace CodeManagerWebApi.Services
                 throw new TeamDoesNotExistException();
             }
 
-            if (team.Owner.Id != user.Id)
+            if (team.Owner.Id != user.Id && user.Roles.All(role => role != Roles.Admin))
             {
                 throw new UnauthorizedAccessWebException("Only the owner of the team can update the details.");
             }
@@ -135,11 +136,18 @@ namespace CodeManagerWebApi.Services
             await _teamRepository.UpdateAsync(team);
         }
 
-        public async Task DeleteTeamAsync(long id)
+        public async Task DeleteTeamAsync(long id, User user)
         {
-            if (await _teamRepository.ExistsAsync(team => team.Id == id))
+            var team = await _teamRepository.GetAsync(id);
+                
+            if (team == null)
             {
                 throw new TeamDoesNotExistException();
+            }
+
+            if (team.Owner.Id != user.Id && !user.IsAdmin())
+            {
+                throw new UnauthorizedAccessWebException("Only the owner can delete the team.");
             }
 
             await _teamRepository.DeleteAsync(id);

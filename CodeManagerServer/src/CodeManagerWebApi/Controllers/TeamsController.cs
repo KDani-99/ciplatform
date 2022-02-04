@@ -34,26 +34,27 @@ namespace CodeManagerWebApi.Controllers
             return Ok(teams);
         }
         
-        [HttpGet, Route("{id:long}", Name = nameof(Get))]
-        public async Task<IActionResult> Get([FromRoute] long id)
+        [HttpGet, Route("{id:long}", Name = nameof(GetTeam))]
+        public async Task<IActionResult> GetTeam([FromRoute] long id)
         {
             var user = HttpContext.Items["user"] as User;
             var team = await _teamService.GetTeamAsync(id, user);
+            
             return Ok(team);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] TeamDto teamDto)
+        public async Task<IActionResult> PostTeam([FromBody] TeamDto teamDto)
         {
             var user = HttpContext.Items["user"] as User;
             var result = await _teamService.CreateTeamAsync(teamDto, user);
             _logger.LogInformation($"Team `{teamDto.Name}` created @ {DateTime.Now}");
 
-            return CreatedAtRoute(nameof(Get), new {result.Id}, result);
+            return CreatedAtRoute(nameof(GetTeam), new {result.Id}, result);
         }
         
         [HttpPut]
-        public async Task<IActionResult> Put([FromBody] TeamDto teamDto)
+        public async Task<IActionResult> PutTeam([FromBody] TeamDto teamDto)
         {
             var user = HttpContext.Items["user"] as User;
             await _teamService.UpdateTeamAsync(teamDto, user);
@@ -62,13 +63,15 @@ namespace CodeManagerWebApi.Controllers
             return Ok();
         }
 
-        [HttpDelete]
-        public async Task<IActionResult> Delete([FromQuery] long id)
+        [HttpDelete, Route("{id:long}")]
+        public async Task<IActionResult> DeleteTeam([FromRoute] long id)
         {
-            await _teamService.DeleteTeamAsync(id);
-            _logger.LogInformation($"Team with id `{id}` deleted @ {DateTime.Now}");
+            var user = HttpContext.Items["user"] as User;
             
-            return StatusCode((int)HttpStatusCode.NoContent);
+            await _teamService.DeleteTeamAsync(id, user);
+            _logger.LogInformation($"Team with id `{id}` deleted @ {DateTime.Now}");
+
+            return NoContent();
         }
     }
 }

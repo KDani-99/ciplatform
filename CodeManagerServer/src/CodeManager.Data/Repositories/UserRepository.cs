@@ -17,22 +17,29 @@ namespace CodeManager.Data.Repositories
 
         public Task<User> GetByUsernameAsync(string username)
         {
-            return DbContext.Users.FirstOrDefaultAsync(user => user.Username == username);
+            return DbContext.Users
+                .Include(user => user.Teams)
+                .FirstOrDefaultAsync(user => user.Username == username);
         }
 
         public Task<User> GetByEmailAsync(string email)
         {
-            return DbContext.Users.FirstOrDefaultAsync(user => user.Email == email);
+            return DbContext.Users
+                .Include(user => user.Teams)
+                .FirstOrDefaultAsync(user => user.Email == email);
         }
 
         public override Task<User> GetAsync(long id)
         {
-            return DbContext.Users.FirstOrDefaultAsync(user => user.Id == id);
+            return DbContext.Users
+                .Include(user => user.Teams)
+                .FirstOrDefaultAsync(user => user.Id == id);
         }
 
         public override Task<List<User>> GetAsync(Expression<Func<User, bool>> expression)
         {
-            return DbContext.Users.Where(expression).ToListAsync();
+            return DbContext.Users
+                .Include(user => user.Teams).Where(expression).ToListAsync();
         }
 
         public override Task<bool> ExistsAsync(Expression<Func<User, bool>> expression)
@@ -58,7 +65,7 @@ namespace CodeManager.Data.Repositories
         {
             var entity = await DbContext.Users.Where(user => user.Id == id).FirstOrDefaultAsync();
             DbContext.Users.Remove(entity);
-            
+
             await DbContext.SaveChangesAsync();
         }
     }

@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using CodeManager.Data.Database;
 using CodeManager.Data.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace CodeManager.Data.Repositories
 {
@@ -15,32 +17,48 @@ namespace CodeManager.Data.Repositories
 
         public override Task<Project> GetAsync(long id)
         {
-            throw new NotImplementedException();
+            return DbContext
+                .Projects
+                .Include(x => x.Variables)
+                .Include(x => x.Team)
+                .FirstOrDefaultAsync(project => project.Id == id);
         }
 
         public override Task<List<Project>> GetAsync(Expression<Func<Project, bool>> expression)
         {
-            throw new NotImplementedException();
+            return DbContext
+                .Projects
+                .Include(x => x.Variables)
+                .Include(x => x.Team)
+                .Where(expression)
+                .ToListAsync();
         }
 
         public override Task<bool> ExistsAsync(Expression<Func<Project, bool>> expression)
         {
-            throw new NotImplementedException();
+            return DbContext.Projects.AnyAsync(expression);
         }
 
-        public override Task<long> CreateAsync(Project entity)
+        public override async Task<long> CreateAsync(Project entity)
         {
-            throw new NotImplementedException();
+            await DbContext.Projects.AddAsync(entity);
+            await DbContext.SaveChangesAsync();
+
+            return entity.Id;
         }
 
-        public override Task UpdateAsync(Project entity)
+        public override async Task UpdateAsync(Project entity)
         {
-            throw new NotImplementedException();
+            DbContext.Projects.Update(entity);
+            await DbContext.SaveChangesAsync();
         }
 
-        public override Task DeleteAsync(long id)
+        public override async Task DeleteAsync(long id)
         {
-            throw new NotImplementedException();
+            var entity = await DbContext.Projects.Where(project => project.Id == id).FirstOrDefaultAsync();
+            DbContext.Projects.Remove(entity);
+            
+            await DbContext.SaveChangesAsync();
         }
     }
 }

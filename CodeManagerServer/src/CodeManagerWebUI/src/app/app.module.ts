@@ -22,6 +22,11 @@ import { RunComponent } from './modules/run/run.component';
 import { RunModule } from './modules/run/run.module';
 import { JobComponent } from './modules/job/job.component';
 import { PopupComponent } from './shared/popup/popup.component';
+import { TeamsModule } from './modules/teams/teams.module';
+import { TeamsComponent } from './modules/teams/teams.component';
+import { ProjectModule } from './modules/project/project.module';
+import { UsersComponent } from './modules/users/users.component';
+import { UsersModule } from './modules/users/users.module';
 
 @NgModule({
   declarations: [
@@ -33,8 +38,10 @@ import { PopupComponent } from './shared/popup/popup.component';
     JobComponent,
     ProjectsComponent,
     ProjectComponent,
+    TeamsComponent,
     RunComponent,
     PopupComponent,
+    UsersComponent,
   ],
   imports: [
     BrowserModule,
@@ -45,7 +52,10 @@ import { PopupComponent } from './shared/popup/popup.component';
     ToastrModule.forRoot(),
     TeamModule,
     ProjectsModule,
+    TeamsModule,
     RunModule,
+    ProjectModule,
+    UsersModule,
   ],
   providers: [
     {
@@ -68,7 +78,7 @@ import { PopupComponent } from './shared/popup/popup.component';
       useClass: GlobalErrorHandler,
     },
   ],
-  exports: [],
+  exports: [PopupComponent],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

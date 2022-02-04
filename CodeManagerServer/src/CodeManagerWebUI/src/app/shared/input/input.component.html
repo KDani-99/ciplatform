@@ -1,4 +1,7 @@
 <div [className]="'input-container'">
-  <p>{{ header }}</p>
-  <input type="{{ type }}" placeholder="{{ placeholder }}" [className]="'input'" [(ngModel)]="value" />
+  <div [className]="'details'">
+    <p>{{ header }}</p>
+    <label *ngIf="maxLength">({{value.length}}/{{maxLength}})</label>
+  </div>
+  <input type="{{ type }}" placeholder="{{ placeholder }}" [className]="'input'" [(ngModel)]="value" [maxLength]="maxLength"/>
 </div>

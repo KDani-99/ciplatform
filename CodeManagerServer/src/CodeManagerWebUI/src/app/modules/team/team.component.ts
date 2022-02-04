@@ -10,6 +10,7 @@ import { ActivatedRoute } from '@angular/router';
 })
 export class TeamComponent implements OnInit {
   team?: TeamDto;
+  showEditWindow: boolean = false;
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -26,4 +27,8 @@ export class TeamComponent implements OnInit {
   }
 
   loadTeam(): void {}
+
+  toggleEditWindow(show: boolean): void {
+    this.showEditWindow = show;
+  }
 }

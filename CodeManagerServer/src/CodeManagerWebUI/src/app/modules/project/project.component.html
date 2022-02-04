@@ -1,15 +1,20 @@
 <shared-primary-page [disableHeader]="true">
 
   <ng-template #buttonsTemplate>
-    <div [className]="'button-container'">
+    <div [className]="'button-container-top'">
       <shared-button [text]="'Variables'" theme="default"></shared-button>
-      <shared-button [text]="'Edit details'" theme="default"></shared-button>
-      <shared-button [text]="'Edit details'" theme="default"></shared-button>
+      <shared-button [text]="'Edit details'" theme="default" (onClick)="toggleEditProjectWindow(true)"></shared-button>
     </div>
   </ng-template>
   <ng-template #imageTemplate>
     <i class="eva eva-layers-outline"></i>
   </ng-template>
+
+  <ng-template #contentTemplate>
+    <project-edit (onClose)="toggleEditProjectWindow(false)"></project-edit>
+  </ng-template>
+
+  <shared-popup *ngIf="showEditProjectWindow" [contentTemplate]="contentTemplate"></shared-popup>
 
   <shared-topbar [buttonsTemplate]="buttonsTemplate" [imageTemplate]="imageTemplate"></shared-topbar>
   <div [className]="'container'">
@@ -18,7 +23,7 @@
       <shared-data [header]="'Description'" [value]="project?.description?.toString() ?? 'N/A'"></shared-data>
       <shared-data [header]="'Visibility'" [value]="project?.isPublic ? 'Public' : 'Private'"></shared-data>
       <shared-data [header]="'Git user'" [value]="'*******'"></shared-data>
-      <shared-data [header]="'Git secret'" [value]="'**************'"></shared-data>
+      <shared-data [header]="'Git secret'" [value]="'*******'"></shared-data>
     </div>
   </div>
 
@@ -38,7 +43,7 @@
     </tr>
     </thead>
     <tbody>
-    <tr>
+    <tr (click)="openRun(1)">
       <td>1</td>
       <td>Windows</td>
       <td>2013.13.1</td>

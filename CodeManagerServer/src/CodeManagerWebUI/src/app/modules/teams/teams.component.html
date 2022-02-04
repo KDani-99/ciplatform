@@ -8,7 +8,7 @@
       <div [className]="'button'">
         My teams
       </div>
-      <shared-button [text]="'Create'" theme="default"></shared-button>
+      <shared-button [text]="'Create'" theme="default" (onClick)="toggleCreateProjectsWindow(true)"></shared-button>
     </div>
   </ng-template>
   <ng-template #imageTemplate>
@@ -22,4 +22,11 @@
       <teams-team [team]="team"></teams-team>
     </div>
   </div>
+
+  <ng-template #contentTemplate>
+    <teams-create-team (onClose)="toggleCreateProjectsWindow(false)"></teams-create-team>
+  </ng-template>
+
+  <shared-popup *ngIf="showCreateTeamsWindow" [contentTemplate]="contentTemplate"></shared-popup>
+
 </shared-primary-page>

@@ -14,12 +14,15 @@
   --default-accent-color: #1976D2;
   --default-border-color: rgb(225, 225, 225);
   --default-secondary-color: rgb(65, 75, 84);
-
+  --default-border-radius: 10px;
   --secondary-text-color: rgb(100, 115, 125);
-  --secondary-accent-color: rgb(155, 89, 182);
+  --secondary-accent-color: rgb(0, 171, 169);
 }
 html, body {
   height: 100%;
+}
+h1, h2 {
+  font-family: Lato-Bold, serif;
 }
 /* GLOBAL STYLES */
 .topbar-container {

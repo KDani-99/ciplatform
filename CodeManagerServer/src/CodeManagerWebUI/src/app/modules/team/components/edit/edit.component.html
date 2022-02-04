@@ -1,0 +1,18 @@
+<div>
+  <ng-template #buttonsTemplate>
+    <div [className]="'exit-button'" (click)="close()">
+      <i class="eva eva-close-outline"></i>
+    </div>
+  </ng-template>
+  <shared-topbar [buttonsTemplate]="buttonsTemplate" [header]="'Edit team'"></shared-topbar>
+
+  <shared-input [header]="'Name'" [maxLength]="50"></shared-input>
+  <shared-input [header]="'Description'" [maxLength]="150"></shared-input>
+  <shared-input [header]="'Image URL'" [maxLength]="255"></shared-input>
+  <div [className]="'wrapper'">
+    <shared-checkbox [id]="'is-private'" [value]="'Private'"></shared-checkbox>
+  </div>
+  <div [className]="'wrapper'">
+    <shared-button [text]="'Edit'" theme="default"></shared-button>
+  </div>
+</div>

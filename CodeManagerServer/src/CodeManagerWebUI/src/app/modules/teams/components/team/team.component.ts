@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { TeamDto } from '../../../../team/team.interface';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'teams-team',
@@ -7,18 +8,13 @@ import { TeamDto } from '../../../../team/team.interface';
   styleUrls: ['./team.component.scss'],
 })
 export class TeamComponent implements OnInit {
-  @Input() team: TeamDto = {
-    name: '',
-    description: '',
-    id: NaN,
-    image: '',
-    isPublic: false,
-    members: NaN,
-    projects: NaN,
-    owner: '',
-  };
+  @Input() team?: TeamDto;
 
-  constructor() {}
+  constructor(private readonly router: Router) {}
 
   ngOnInit(): void {}
+
+  async open(): Promise<void> {
+    await this.router.navigate([`teams/${this.team?.id}`]);
+  }
 }

@@ -13,4 +13,14 @@
     font-family: Lato-Bold, serif;
     font-size: 16px;
   }
+
+  .details {
+    display: flex;
+    align-items: center;
+    label {
+      font-size: 12px;
+      margin-left: auto;
+    }
+  }
+
 }

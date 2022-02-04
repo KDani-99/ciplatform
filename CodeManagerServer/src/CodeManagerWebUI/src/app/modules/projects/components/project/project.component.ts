@@ -1,5 +1,6 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { ProjectDto } from '../../../../project/project.interface';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'projects-project',
@@ -9,7 +10,11 @@ import { ProjectDto } from '../../../../project/project.interface';
 export class ProjectComponent implements OnInit {
   @Input() project?: ProjectDto;
 
-  constructor() {}
+  constructor(private readonly router: Router) {}
 
   ngOnInit(): void {}
+
+  async open(): Promise<void> {
+    await this.router.navigate([`projects/${this.project?.id}`]);
+  }
 }

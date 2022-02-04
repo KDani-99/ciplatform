@@ -4,7 +4,7 @@
   align-items: center;
   justify-content: center;
   border: 1px solid var(--default-border-color);
-  border-radius: 4px;
+  border-radius: var(--default-border-radius);
   padding: 1.5em;
   .image {
     border-radius: 4px;
@@ -26,7 +26,6 @@
       margin: 0.5em 0;
     }
     h1 {
-      font-family: Lato-Bold, serif;
       font-size: 14px;
       font-weight: normal;
     }

@@ -1,0 +1,17 @@
+.wrapper {
+  margin-top: 1em;
+}
+.exit-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 100px;
+  background-color: rgba(231, 76, 60, 0.15);
+  border: 1px solid rgb(231, 76, 60);
+  cursor: pointer;
+  i {
+    color: rgb(231, 76, 60)
+  }
+}

@@ -5,6 +5,7 @@ import { ProjectComponent } from './components/project/project.component';
 import { MemberComponent } from './components/member/member.component';
 import { ContentComponent } from '../../shared/content/content.component';
 import { SharedModule } from '../../shared/shared.module';
+import { EditComponent } from './components/edit/edit.component';
 
 @NgModule({
   declarations: [
@@ -12,8 +13,9 @@ import { SharedModule } from '../../shared/shared.module';
     ProjectComponent,
     MemberComponent,
     ContentComponent,
+    EditComponent,
   ],
-  exports: [DataComponent, MemberComponent, ContentComponent],
+  exports: [DataComponent, MemberComponent, ContentComponent, EditComponent],
   imports: [CommonModule, SharedModule],
 })
 export class TeamModule {}

@@ -1,0 +1,14 @@
+.checkbox-container {
+  display: flex;
+  align-items: center;
+
+  input[type=checkbox]{
+    width: 1.25em;
+    height: 1.25em;
+    font-size: inherit;
+  }
+  label {
+    margin-left: 0.5em;
+    font-family: Lato-Bold, serif;
+  }
+}

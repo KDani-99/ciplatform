@@ -8,6 +8,7 @@ import { ProjectsComponent } from './modules/projects/projects.component';
 import { ProjectComponent } from './modules/project/project.component';
 import { RunComponent } from './modules/run/run.component';
 import { JobComponent } from './modules/job/job.component';
+import { UsersComponent } from './modules/users/users.component';
 
 const routes: Routes = [
   {
@@ -29,6 +30,12 @@ const routes: Routes = [
     component: TeamsComponent,
     loadChildren: () =>
       import('./modules/teams/teams.module').then((m) => m.TeamsModule),
+  },
+  {
+    path: 'users',
+    component: UsersComponent,
+    loadChildren: () =>
+      import('./modules/users/users.module').then((m) => m.UsersModule),
   },
   {
     path: 'teams/:id',

@@ -1,30 +1,31 @@
 <div [className]="'team-container'">
   <div [className]="'top-container'">
     <div [className]="'image-container'">
-      <img src='{{team.image}}'/>
+      <img src='{{team?.image}}'/>
     </div>
     <div [className]="'info-container'">
-      <h1>{{team.name}}</h1>
-      <h2>{{team.description}}</h2>
+      <h1>{{team?.name ?? 'N/A'}}</h1>
+      <h2>{{team?.description ?? 'N/A'}}</h2>
     </div>
   </div>
   <div [className]="'bottom-container'">
     <div>
-      <i class="eva eva-person-outline"></i>{{team.members}} member(s)
+      <i class="eva eva-person-outline"></i>{{team?.members ?? 'N/A'}} member(s)
     </div>
     <div>
-      <i class="eva eva-clipboard-outline"></i>{{team.projects}} project(s)
+      <i class="eva eva-clipboard-outline"></i>{{team?.projects?? 'N/A'}} project(s)
     </div>
     <div>
-      <div *ngIf="!team.isPublic">
+      <div *ngIf="!team?.isPublic">
         <i class="eva eva-shield-outline"></i>Private
       </div>
-      <div *ngIf="team.isPublic">
+      <div *ngIf="team?.isPublic">
         <i class="eva eva-shield-off-outline"></i>Public
       </div>
     </div>
   </div>
   <div [className]="'button-container'">
-    <shared-button [text]="'Join'" theme="default"></shared-button>
+    <shared-button [text]="'Open'" theme="default" (onClick)="open()"></shared-button>
+    <shared-button [text]="'Join'" theme="default" (onClick)="open()"></shared-button>
   </div>
 </div>

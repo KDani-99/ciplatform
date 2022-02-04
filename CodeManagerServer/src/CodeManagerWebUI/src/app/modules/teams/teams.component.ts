@@ -32,6 +32,8 @@ export class TeamsComponent implements OnInit {
     },
   ];
 
+  showCreateTeamsWindow: boolean = false;
+
   constructor(private readonly teamService: TeamService) {}
 
   ngOnInit(): void {
@@ -40,5 +42,9 @@ export class TeamsComponent implements OnInit {
         this.teams = partialTeamDto;
       },
     });
+  }
+
+  toggleCreateProjectsWindow(show: boolean): void {
+    this.showCreateTeamsWindow = show;
   }
 }

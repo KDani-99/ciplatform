@@ -6,11 +6,12 @@ import { Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
   styleUrls: ['./input.component.scss'],
 })
 export class InputComponent implements OnInit {
-  public value: string = '';
+  value: string = '';
 
   @Input() type: 'text' | 'password' | 'email' = 'text';
   @Input() header: string = '';
   @Input() placeholder: string = '';
+  @Input() maxLength?: number;
 
   constructor() {}
 

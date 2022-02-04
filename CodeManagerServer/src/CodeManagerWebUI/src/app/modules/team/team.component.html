@@ -1,9 +1,7 @@
 <shared-primary-page [disableHeader]="true">
 
   <ng-template #buttonsTemplate>
-    <div [className]="'button-container'">
-      <shared-button [text]="'Edit'" theme="default"></shared-button>
-    </div>
+    <shared-button [text]="'Edit'" theme="default" (onClick)="toggleEditWindow(true)"></shared-button>
   </ng-template>
   <ng-template #imageTemplate>
     <img [className]="'team-image'" src="https://static.euronews.com/articles/stories/06/31/78/50/400x225_cmsv2_01a070e6-3194-5587-8267-772c9ace8dce-6317850.jpg"/>
@@ -33,4 +31,11 @@
   <div [className]="'topbar-container'">
     <shared-topbar [header]="'Projects'" [secondary]="true"></shared-topbar>
   </div>
+
+  <ng-template #contentTemplate>
+    <team-edit (onClose)="toggleEditWindow(false)"></team-edit>
+  </ng-template>
+
+  <shared-popup *ngIf="showEditWindow" [contentTemplate]="contentTemplate"></shared-popup>
+
 </shared-primary-page>

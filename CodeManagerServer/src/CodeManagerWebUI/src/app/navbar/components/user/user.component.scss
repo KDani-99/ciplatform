@@ -4,6 +4,21 @@
   align-items: center;
   justify-content: center;
 
+  .settings {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 0.75em;
+    padding: 0.25em;
+    border-radius: 100px;
+    background-color: rgba(220, 220, 220, 0.25);
+    border: 1px solid var(--default-border-color);
+    cursor: pointer;
+    i {
+      font-size: 18px;
+    }
+  }
+
   .info {
     text-align: right;
     margin-right: 1em;

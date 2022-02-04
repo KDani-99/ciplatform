@@ -2,7 +2,7 @@
 
   <ng-template #buttonsTemplate>
     <div [className]="'button-container'">
-        <shared-button [text]="'Create'" theme="default"></shared-button>
+        <shared-button [text]="'Create'" theme="default" (onClick)="toggleCreateProjectsWindow(true)"></shared-button>
     </div>
   </ng-template>
   <ng-template #imageTemplate>
@@ -16,10 +16,10 @@
   </div>
 
   <ng-template #contentTemplate>
-    <projects-create-project></projects-create-project>
+    <projects-create-project (onClose)="toggleCreateProjectsWindow(false)"></projects-create-project>
   </ng-template>
 
-  <shared-popup [contentTemplate]="contentTemplate">
+  <shared-popup *ngIf="showCreateProjectWindow" [contentTemplate]="contentTemplate">
 
   </shared-popup>
 </shared-primary-page>

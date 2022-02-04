@@ -7,6 +7,7 @@
   font-size: 14px;
   transition: all 0.25s linear;
   white-space: nowrap;
+  user-select: none;
   &:hover {
     transition: all 0.25s linear;
     color: rgba(25, 118, 210, 1);
@@ -36,14 +37,26 @@
   }
 }
 .button-container-secondary {
-  color: rgb(155, 89, 182);
-  border: 1px solid rgb(155, 89, 182);
+  color: var(--default-secondary-color);
+  border: 1px solid var(--default-secondary-color);
   font-size: 16px;
-  background-color: rgba(155, 89, 182, 0.15);
+  background-color: rgba(0, 171, 169, 0.15);
   font-family: Lato-Bold, serif;
   &:hover {
-    background-color: rgba(155, 89, 182, 0.3);
-    color: rgb(155, 89, 182);
+    background-color: rgba(0, 171, 169, 0.3);
+    color: var(--default-secondary-color);
+    transition: all 0.25s linear;
+  }
+}
+.button-container-dark {
+  color: rgb(52, 73, 94);
+  border: 1px solid rgb(52, 73, 94);
+  font-size: 16px;
+  background-color: rgba(52, 73, 94, 0.15);
+  font-family: Lato-Bold, serif;
+  &:hover {
+    background-color: rgba(52, 73, 94, 0.3);
+    color: rgb(52, 73, 94);
     transition: all 0.25s linear;
   }
 }

@@ -23,6 +23,7 @@ import { CheckboxComponent } from './checkbox/checkbox.component';
     PageComponent,
     PrimaryPageComponent,
     TopbarComponent,
+    CheckboxComponent,
   ],
   imports: [CommonModule, FormsModule],
 })

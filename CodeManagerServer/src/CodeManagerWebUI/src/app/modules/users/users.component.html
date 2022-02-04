@@ -1,0 +1,34 @@
+<shared-primary-page [disableHeader]="true">
+
+  <ng-template #imageTemplate>
+    <i class="eva eva-person-outline"></i>
+  </ng-template>
+
+  <shared-topbar [imageTemplate]="imageTemplate" [header]="'Users'"></shared-topbar>
+
+  <div class="users-container">
+    <users-user (onEdit)="onEdit($event)" (onResetPassword)="onResetPassword($event)" (onDelete)="onDelete($event)">
+    </users-user>
+    <users-user>
+    </users-user>
+    <users-user>
+    </users-user>
+    <users-user>
+    </users-user>
+  </div>
+
+  <ng-template #deleteTemplate>
+    <user-delete username="{{selectedUser?.username}}" (onCancel)="toggleWindow(false)"></user-delete>
+  </ng-template>
+
+  <ng-template #editTemplate>
+    <user-edit (onClose)="toggleWindow(false)"></user-edit>
+  </ng-template>
+
+  <ng-template #resetPasswordTemplate>
+    <user-reset-password username="{{selectedUser?.username}}" (onCancel)="toggleWindow(false)"></user-reset-password>
+  </ng-template>
+
+  <shared-popup *ngIf="showWindow" [contentTemplate]="currentTemplate"></shared-popup>
+
+</shared-primary-page>

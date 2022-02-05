@@ -11,6 +11,7 @@ using CodeManagerWebApi.DataTransfer;
 using CodeManagerWebApi.Entities;
 using CodeManagerWebApi.Configuration;
 using CodeManagerWebApi.Exceptions;
+using CodeManagerWebApi.Extensions;
 using CodeManagerWebApi.Utils.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
@@ -65,10 +66,43 @@ namespace CodeManagerWebApi.Services
             await _userRepository.CreateAsync(user);
         }
 
-        public async Task<CreateUserDto> GetUserAsync(long id)
+        public async Task<UserDto> GetUserAsync(long id, User user)
         {
-            // TODO: throw exception if it does not exist
-            return (await _userRepository.GetAsync(id)).FromUser();
+            if (user.Id != id && user.IsAdmin())
+            {
+                throw new UnauthorizedAccessWebException("You are not allowed to perform this action.");
+            }
+            
+            var selectedUser = await _userRepository.GetAsync(id);
+            
+            return new UserDto
+            {
+                Id = selectedUser.Id,
+                Username = selectedUser.Username,
+                Name = selectedUser.Name,
+                Email = selectedUser.Email,
+                Image = selectedUser.Image,
+                IsAdmin = selectedUser.IsAdmin(),
+                Teams = selectedUser.Teams.Count,
+                Registration = selectedUser.RegistrationTimestamp
+            };
+        }
+
+        public async Task<IEnumerable<UserDto>> GetUsersAsync(User user)
+        {
+            var users = await _userRepository.GetAsync((dbUser) => dbUser.Id != user.Id);
+
+            return users.Select(dbUser =>  new UserDto
+            {
+                Id = dbUser.Id,
+                Username = dbUser.Username,
+                Name = dbUser.Name,
+                Email = dbUser.Email,
+                Image = dbUser.Image,
+                IsAdmin = dbUser.IsAdmin(),
+                Teams = dbUser.Teams.Count,
+                Registration = dbUser.RegistrationTimestamp
+            });
         }
 
         public Task<bool> ExistsAsync(long id)
@@ -88,15 +122,7 @@ namespace CodeManagerWebApi.Services
 
             var accessToken = await _tokenService.CreateAccessToken(user);
             var refreshToken = await _tokenService.CreateRefreshToken(user);
-
-            user.LoginHistory ??= new List<LoginHistory>();
             
-            user.LoginHistory.Add(new LoginHistory
-            {
-                Timestamp = DateTime.Now,
-                UserAgent = httpContext.Request.Headers["User-Agent"],
-                IP = httpContext.Connection.RemoteIpAddress?.ToString()
-            });
             user.RefreshTokenSignature = refreshToken.Id;
 
             await _userRepository.UpdateAsync(user);

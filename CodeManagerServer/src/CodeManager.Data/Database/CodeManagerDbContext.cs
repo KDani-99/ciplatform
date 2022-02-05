@@ -29,7 +29,6 @@ namespace CodeManager.Data.Database
         public DbSet<Team> Teams { get; set; }
         public DbSet<TeamMember> TeamMembers { get; set; }
         public DbSet<Plan> Plans { get; set; }
-        public DbSet<LoginHistory> LoginHistories { get; set; }
         public DbSet<Project> Projects { get; set; }
         public DbSet<Run> Runs { get; set; }
         public DbSet<Job> Jobs { get; set; }
@@ -55,10 +54,6 @@ namespace CodeManager.Data.Database
             modelBuilder.Entity<Variable>()
                 .HasOne(variable => variable.Project)
                 .WithMany(project => project.Variables);
-
-            modelBuilder.Entity<LoginHistory>()
-                .HasOne(history => history.User)
-                .WithMany(user => user.LoginHistory);
 
             modelBuilder.Entity<Team>()
                 .HasMany(team => team.Projects)

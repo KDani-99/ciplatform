@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace CodeManagerWebApi.Controllers
 {
     [ApiController]
-   /* [Authorize(Roles = "User,Admin")]*/
+    [Authorize(Roles = "User,Admin")]
     [Route("/api/projects")]
     [Produces("application/json")]
     public class ProjectController : ControllerBase
@@ -24,6 +24,13 @@ namespace CodeManagerWebApi.Controllers
         {
             _projectService = projectService ?? throw new ArgumentNullException(nameof(projectService));
             _variableService = variableService ?? throw new ArgumentNullException(nameof(variableService));
+        }
+        
+        [HttpGet]
+        public async Task<IActionResult> GetProjects()
+        {
+            var project = await _projectService.GetProjectsAsync();
+            return Ok(project);
         }
         
         [HttpGet, Route("{id:long}", Name = nameof(GetProject))]

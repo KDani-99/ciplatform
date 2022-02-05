@@ -20,7 +20,7 @@ namespace CodeManagerWebApi.Services
             _teamRepository = teamRepository ?? throw new ArgumentNullException(nameof(teamRepository));
         }
 
-        public async Task<IEnumerable<TeamDto>> GetTeamsAsync()
+        public async Task<IEnumerable<TeamDto>> GetTeamsAsync(User user)
         {
             var teams = await _teamRepository.GetAsync((_ => true));
 
@@ -30,6 +30,7 @@ namespace CodeManagerWebApi.Services
                 Description = team.Description,
                 Id = team.Id,
                 Owner = team.Owner.Username,
+                IsMember = team.Members.Any(member => member.User.Id == user.Id),
                 Image = team.Image,
                 Members = team.Members?.Count ?? 0,
                 Projects = team.Projects?.Count ?? 0
@@ -58,6 +59,7 @@ namespace CodeManagerWebApi.Services
                 Description = team.Description,
                 Image = team.Image,
                 IsPublic = team.IsPublic,
+                IsMember = team.Members.Any(member => member.User.Id == user.Id),
                 Owner = team.Owner.Username,
                 Members = team.Members?.Count ?? 0,
                 Projects = team.Projects?.Count ?? 0
@@ -105,6 +107,7 @@ namespace CodeManagerWebApi.Services
 
             teamDto.Id = id;
             teamDto.Owner = user.Username;
+            teamDto.IsMember = true;
 
             return teamDto;
         }

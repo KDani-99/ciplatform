@@ -11,6 +11,7 @@ namespace CodeManagerWebApi.DataTransfer
         public string Description { get; set; }
         public string Image { get; set; }
         public bool IsPublic { get; set; }
+        public bool IsMember { get; set; } // is the current user a member of the team?
         public string Owner { get; set; }
     }
     

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CodeManager.Data.Entities;
@@ -46,6 +47,22 @@ namespace CodeManagerWebApi.Services
             return projectDto;
         }
 
+        public async Task<IEnumerable<ProjectDto>> GetProjectsAsync()
+        {
+            var projects = await _projectRepository.GetAsync((_) => true);
+            
+            return projects.Select(project => new ProjectDto
+            {
+                Id = project.Id,
+                Name = project.Name,
+                Description = project.Description,
+                IsPrivateProject = project.IsPrivateProject,
+                IsPrivateRepository = project.IsPrivateProject,
+                TeamId = project.Team.Id,
+                RepositoryUrl = project.RepositoryUrl
+            });
+        }
+
         public async Task<ProjectDto> CreateProjectAsync(CreateProjectDto createProjectDto, User user)
         {
             if (await _projectRepository.ExistsAsync(projectEntity => projectEntity.Name == createProjectDto.Name && projectEntity.Team.Id == createProjectDto.TeamId))
@@ -66,6 +83,7 @@ namespace CodeManagerWebApi.Services
                 RepositoryUrl = createProjectDto.RepositoryUrl,
                 SecretToken = createProjectDto.SecretToken, // TODO: encrypt
                 Username = user.Username,
+                Description = createProjectDto.Description,
                 Team = team, // wont create new team, just references the ID
                 IsPrivateProject = createProjectDto.IsPrivateProject,
                 IsPrivateRepository = createProjectDto.IsPrivateRepository,
@@ -83,4 +101,6 @@ namespace CodeManagerWebApi.Services
             };
         }
     }
+    
+    
 }

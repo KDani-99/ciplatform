@@ -4,10 +4,12 @@ using System.Net;
 using System.Threading.Tasks;
 using CodeManager.Data.Commands;
 using CodeManager.Data.Configuration;
+using CodeManager.Data.Entities;
 using CodeManagerWebApi.DataTransfer;
 using CodeManagerWebApi.Services;
 using CodeManagerWebApi.WebSocket;
 using MassTransit;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -51,6 +53,37 @@ namespace CodeManagerWebApi.Controllers
             //var response = await _webApiClient.HubConnection.InvokeAsync<long?>(CommonManagerMethods.QueueRun);
            
             return Ok(response);
+        }
+
+        [Authorize(Roles = "User,Admin")]
+        [HttpGet, Route("{id:long}")]
+        public async Task<IActionResult> GetUserById([FromRoute] long id )
+        {
+            var user = HttpContext.Items["user"] as User;
+
+            var userDto = await _userService.GetUserAsync(id, user);
+
+            return Ok(userDto);
+        }
+        
+        [Authorize(Roles = "User,Admin")]
+        [HttpGet]
+        public async Task<IActionResult> GetUser()
+        {
+            var user = HttpContext.Items["user"] as User;
+            var userDto = await _userService.GetUserAsync(user.Id, user);
+
+            return Ok(userDto);
+        }
+        
+        [Authorize(Roles = "Admin")]
+        [HttpGet, Route("/api/users")]
+        public async Task<IActionResult> GetUsers()
+        {
+            var user = HttpContext.Items["user"] as User;
+            var usersDto = await _userService.GetUsersAsync(user);
+
+            return Ok(usersDto);
         }
 
         [HttpPost, Route("register")]

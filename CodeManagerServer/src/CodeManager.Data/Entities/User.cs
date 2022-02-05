@@ -21,6 +21,5 @@ namespace CodeManager.Data.Entities
         public List<Team> Teams { get; set; } = new();
         public DateTime RegistrationTimestamp { get; set; }
         public string RefreshTokenSignature { get; set; }
-        public List<LoginHistory> LoginHistory { get; set; } = new();
     }
 }

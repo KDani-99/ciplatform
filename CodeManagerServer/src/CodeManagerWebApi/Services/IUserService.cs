@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using CodeManager.Data.Entities;
 using CodeManagerWebApi.DataTransfer;
 using Microsoft.AspNetCore.Http;
 
@@ -8,7 +10,8 @@ namespace CodeManagerWebApi.Services
     {
         public Task CreateUser(CreateUserDto createUserDto);
 
-        public Task<CreateUserDto> GetUserAsync(long id);
+        public Task<UserDto> GetUserAsync(long id, User user);
+        public Task<IEnumerable<UserDto>> GetUsersAsync(User user);
 
         public Task<bool> ExistsAsync(long id);
 

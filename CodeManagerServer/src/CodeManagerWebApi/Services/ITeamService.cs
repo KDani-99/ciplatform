@@ -8,7 +8,7 @@ namespace CodeManagerWebApi.Services
 {
     public interface ITeamService
     {
-        public Task<IEnumerable<TeamDto>> GetTeamsAsync();
+        public Task<IEnumerable<TeamDto>> GetTeamsAsync(User user);
         public Task<TeamDto> GetTeamAsync(long id, User user);
         public Task<TeamDto> CreateTeamAsync(TeamDto teamDto, User user);
         public Task UpdateTeamAsync(TeamDto teamDto, User user);

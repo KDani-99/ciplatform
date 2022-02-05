@@ -1,0 +1,19 @@
+.login-container h1 {
+  font-size: 24px;
+  font-family: Lato-Bold, serif;
+  margin: 0.75em 0;
+  text-align: center;
+}
+.login-container {
+  width: 325px;
+  padding: 1em 2em;
+  float: left;
+  flex-direction: column;
+  border-radius: var(--default-border-radius);
+  box-shadow: 0 4px 30px rgb(0 0 0 / 10%);
+  .button {
+    margin-top: 1em;
+    margin-bottom: 1em;
+    display: block;
+  }
+}

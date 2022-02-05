@@ -1,6 +1,11 @@
+interface ApiEndpoint {
+  url: string;
+  authRequired: boolean;
+}
+
 export interface Config {
   api: {
     baseUrl: string;
-    endpoints: any;
+    endpoints: Record<string, ApiEndpoint>;
   };
 }

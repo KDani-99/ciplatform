@@ -17,6 +17,6 @@ export class ConfigService {
   }
 
   getFullUrl(key: string) {
-    return `${this.appConfig?.api.baseUrl}/${this.appConfig?.api.endpoints[key]}`;
+    return `${this.appConfig?.api.baseUrl}/${this.appConfig?.api.endpoints[key]?.url}`;
   }
 }

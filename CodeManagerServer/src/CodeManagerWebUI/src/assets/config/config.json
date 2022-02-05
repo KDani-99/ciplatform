@@ -2,10 +2,34 @@
   "api": {
     "baseUrl": "http://localhost:5100",
     "endpoints": {
-      "login": "api/user/login",
-      "register": "api/user/register",
-      "getTeam": "api/teams",
-      "getTeams": "api/teams"
+      "login": {
+        "url": "api/user/login",
+        "authRequired": false
+      },
+      "logout": {
+        "url": "api/user/logout",
+        "authRequired": false
+      },
+      "register": {
+        "url": "api/user/register",
+        "authRequired": false
+      },
+      "teams": {
+        "url": "api/teams",
+        "authRequired": true
+      },
+      "projects": {
+        "url": "api/projects",
+        "authRequired": true
+      },
+      "getUser": {
+        "url": "api/user",
+        "authRequired": true
+      },
+      "getUsers": {
+        "url": "api/users",
+        "authRequired": true
+      }
     }
   }
 }

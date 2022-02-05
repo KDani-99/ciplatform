@@ -1,0 +1,58 @@
+<shared-primary-page [disableHeader]="true">
+
+  <ng-template #buttonsTemplate>
+    <div class="button-container">
+    <shared-button [text]="'Edit'" theme="default" (onClick)="openEditWindow()"></shared-button>
+    </div>
+  </ng-template>
+  <ng-template #imageTemplate>
+    <img [className]="'team-image'" [src]="team?.image"/>
+  </ng-template>
+
+  <shared-topbar [buttonsTemplate]="buttonsTemplate" [imageTemplate]="imageTemplate" [header]="team?.name ?? 'N/A'"></shared-topbar>
+
+  <div [className]="'container'">
+    <div [className]="'content'">
+      <shared-data [header]="'Id'" [value]="team?.id?.toString() ?? 'N/A'"></shared-data>
+      <shared-data [header]="'Description'" [value]="team?.description?.toString() ?? 'N/A'"></shared-data>
+      <shared-data [header]="'Visibility'" [value]="team?.isPublic ? 'Public' : 'Private'"></shared-data>
+    </div>
+  </div>
+
+  <ng-template #addMemberButtonTemplate>
+    <div class="button-container">
+      <shared-button [text]="'Add member'" theme="default" (onClick)="openEditWindow()"></shared-button>
+    </div>
+  </ng-template>
+
+  <div [className]="'topbar-container'">
+    <shared-topbar [buttonsTemplate]="addMemberButtonTemplate" [header]="'Members'" [secondary]="true"></shared-topbar>
+  </div>
+
+  <div [className]="'members-container'">
+    <team-member></team-member>
+    <team-member></team-member>
+    <team-member></team-member>
+  </div>
+
+  <ng-template #projectButtonsTemplate>
+    <div class="button-container">
+    <shared-button [text]="'Create'" theme="default" (onClick)="openCreateProjectWindow()"></shared-button>
+    </div>
+  </ng-template>
+
+  <div [className]="'topbar-container'">
+    <shared-topbar [buttonsTemplate]="projectButtonsTemplate" [header]="'Projects'" [secondary]="true"></shared-topbar>
+  </div>
+
+  <ng-template #createProjectTemplate>
+    <team-create-project (onClose)="toggleWindow(false)" (onCreate)="onCreateProject($event)"></team-create-project>
+  </ng-template>
+
+  <ng-template #editTeamTemplate>
+    <team-edit (onClose)="toggleWindow(false)" [team]="team"></team-edit>
+  </ng-template>
+
+  <shared-popup *ngIf="showWindow" [contentTemplate]="currentTemplate"></shared-popup>
+
+</shared-primary-page>

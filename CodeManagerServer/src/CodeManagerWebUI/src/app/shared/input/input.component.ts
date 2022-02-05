@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 
 @Component({
   selector: 'shared-input',
@@ -6,7 +6,7 @@ import { Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
   styleUrls: ['./input.component.scss'],
 })
 export class InputComponent implements OnInit {
-  value: string = '';
+  @Input() value: string = '';
 
   @Input() type: 'text' | 'password' | 'email' = 'text';
   @Input() header: string = '';

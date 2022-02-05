@@ -1,0 +1,25 @@
+<div>
+  <ng-template #buttonsTemplate>
+      <div [className]="'exit-button'" (click)="close()">
+        <i class="eva eva-close-outline"></i>
+      </div>
+  </ng-template>
+  <shared-topbar [buttonsTemplate]="buttonsTemplate" [header]="'Create a project'"></shared-topbar>
+
+  <shared-input [header]="'Name'" [maxLength]="50" #name></shared-input>
+  <shared-input [header]="'Description'" [maxLength]="150" #description></shared-input>
+  <shared-input [header]="'Repository URL'" [maxLength]="255" #repositoryUrl></shared-input>
+  <div [className]="'wrapper'">
+    <shared-checkbox [id]="'is-private'" [value]="'Private'" #isPrivateProject></shared-checkbox>
+  </div>
+  <div [className]="'wrapper'">
+    <shared-checkbox [id]="'is-private-repo'" [value]="'Private repository'" #isPrivateRepository></shared-checkbox>
+  </div>
+  <div *ngIf="isPrivateRepository.isChecked">
+    <shared-input [header]="'Git username'" [maxLength]="100" #username></shared-input>
+    <shared-input [type]="'password'" [header]="'Git secret'" [maxLength]="255" #secretToken></shared-input>
+  </div>
+  <div [className]="'wrapper'">
+    <shared-button [text]="'Create'" theme="default" (onClick)="create()"></shared-button>
+  </div>
+</div>

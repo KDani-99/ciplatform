@@ -1,0 +1,26 @@
+<div class="user-container">
+  <div class="id-container">ID: {{member?.id ?? 'N/A'}}</div>
+  <div class="image">
+    <img [src]="member?.image"/>
+  </div>
+  <div class="info">
+    <h1>{{member?.name ?? 'N/A'}}</h1>
+    <h2>{{member?.username ?? 'N/A'}}</h2>
+  </div>
+  <div class="account-info">
+    <div class="data">
+      <h1>Role</h1>
+      <h2></h2>
+    </div>
+    <div class="data">
+      <h1>Join date</h1>
+      <h2>{{member?.joinTime ?? 'N/A'}}</h2>
+    </div>
+  </div>
+  <div class="button-container" *ngIf="!isUser">
+    <div class="button" *ngIf="true" (click)="kick()">
+      <i class="eva eva-person-delete-outline"></i>
+      <p>Kick</p>
+    </div>
+  </div>
+</div>

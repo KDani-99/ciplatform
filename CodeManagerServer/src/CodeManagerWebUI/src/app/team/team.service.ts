@@ -9,6 +9,7 @@ import { ConfigService } from '../config/config.service';
 export class TeamService {
   httpOptions = {
     headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
+    withCredentials: true,
   };
 
   constructor(
@@ -18,7 +19,7 @@ export class TeamService {
 
   getTeams(): Observable<TeamDto[]> {
     return this.httpClient
-      .get<TeamDto[]>(this.configService.getFullUrl('getTeams'))
+      .get<TeamDto[]>(this.configService.getFullUrl('teams'), this.httpOptions)
       .pipe(
         tap((teams) => TeamService.log(`Fetched ${teams.length} teams`)),
         catchError(this.handleError<TeamDto[]>()),
@@ -26,8 +27,8 @@ export class TeamService {
   }
 
   getTeam(id: number): Observable<TeamDto> {
-    const url = `${this.configService.getFullUrl('getTeam')}/${id}`;
-    return this.httpClient.get<TeamDto>(url).pipe(
+    const url = `${this.configService.getFullUrl('teams')}/${id}`;
+    return this.httpClient.get<TeamDto>(url, this.httpOptions).pipe(
       tap((team) => TeamService.log(`Fetched team with id ${team.id}`)),
       catchError(this.handleError<TeamDto>()),
     );
@@ -35,13 +36,13 @@ export class TeamService {
 
   createTeam(createTeamDto: CreateTeamDto): Observable<TeamDto> {
     return this.httpClient
-      .post<CreateTeamDto>(
-        this.configService.getFullUrl('createTeam'),
+      .post<TeamDto>(
+        this.configService.getFullUrl('teams'),
         createTeamDto,
         this.httpOptions,
       )
       .pipe(
-        tap((team: any) =>
+        tap((team: TeamDto) =>
           TeamService.log(`Team with id ${team.id} has been created`),
         ),
         catchError(this.handleError<TeamDto>()),
@@ -49,7 +50,7 @@ export class TeamService {
   }
 
   deleteTeam(id: number): Observable<void> {
-    const url = `${this.configService.getFullUrl('deleteTeam')}/${id}`;
+    const url = `${this.configService.getFullUrl('teams')}/${id}`;
 
     return this.httpClient.delete(url, this.httpOptions).pipe(
       tap((_) => TeamService.log(`Team with id ${id} has been deleted`)),
@@ -58,7 +59,7 @@ export class TeamService {
   }
 
   updateTeam(team: CreateTeamDto, id: number): Observable<void> {
-    const url = `${this.configService.getFullUrl('updateTeam')}/${id}`;
+    const url = `${this.configService.getFullUrl('teams')}/${id}`;
     return this.httpClient.put(url, team, this.httpOptions).pipe(
       tap((_) => TeamService.log(`Team with id ${team} has been updated`)),
       catchError(this.handleError<any>()),

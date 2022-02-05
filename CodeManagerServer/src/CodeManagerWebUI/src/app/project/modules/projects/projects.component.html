@@ -1,0 +1,13 @@
+<shared-primary-page [disableHeader]="true">
+
+  <ng-template #imageTemplate>
+    <i class="eva eva-folder-outline"></i>
+  </ng-template>
+
+  <shared-topbar [imageTemplate]="imageTemplate" [header]="'Projects'"></shared-topbar>
+
+  <div [className]="'projects'" *ngFor="let project of projects">
+    <projects-project [project]="project"></projects-project>
+  </div>
+
+</shared-primary-page>

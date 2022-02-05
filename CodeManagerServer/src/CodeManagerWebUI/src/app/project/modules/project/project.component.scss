@@ -1,0 +1,53 @@
+@import "../../../shared/page/styles/page";
+.button-container-top {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: row;
+    gap: 10px;
+}
+.content {
+  display: flex;
+}
+.runs-table {
+  width: 100%;
+  margin-top: 1em;
+  text-align: center;
+  border-collapse: collapse;
+  user-select: none;
+  thead {
+    border-bottom: 1px solid var(--default-border-color);
+    th {
+      font-weight: normal;
+      font-family: Lato-Bold, serif;
+    }
+  }
+  tbody tr {
+    &:hover {
+      background-color: rgba(200,200,200,0.1);
+    }
+  }
+  tr {
+    cursor: pointer;
+  }
+  td, th {
+    padding: 1em;
+  }
+  td:last-of-type {
+    i {
+      padding: 0.25em;
+      font-size: 18px;
+      border-radius: 100px;
+    }
+  }
+  .failed i {
+    background-color: rgba(231, 76, 60, 0.1);
+    border: 1px solid rgb(231, 76, 60);
+    color: rgb(231, 76, 60);
+  }
+  .successful i {
+    background-color: rgba(46, 204, 113, 0.15);
+    border: 1px solid rgb(46, 204, 113);
+    color: rgb(46, 204, 113);
+  }
+}

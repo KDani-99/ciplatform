@@ -1,0 +1,50 @@
+import { Injectable } from '@angular/core';
+import {
+  HttpRequest,
+  HttpHandler,
+  HttpEvent,
+  HttpInterceptor,
+} from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { Store } from '@ngxs/store';
+import { ConfigService } from '../config/config.service';
+
+@Injectable()
+export class JwtAuthInterceptor implements HttpInterceptor {
+  constructor(
+    private readonly store: Store,
+    private readonly configService: ConfigService,
+  ) {}
+
+  intercept(
+    request: HttpRequest<any>,
+    next: HttpHandler,
+  ): Observable<HttpEvent<any>> {
+    if (request.url === '/assets/config/config.json') {
+      return next.handle(request);
+    }
+
+    /* if (
+      !this.noAuthRoutes.some((route) => request.url.endsWith(route)) &&
+      this.isAuthRequired(request.url)
+    ) {
+      const accessToken = this.store.selectSnapshot<string | undefined>(
+        (state) => state.app.user.accessToken,
+      );
+      request = request.clone({
+        setHeaders: { Authorization: `Bearer ${accessToken}` },
+      });
+    }*/
+    console.log(request);
+    if (request.withCredentials) {
+      const accessToken = this.store.selectSnapshot<string | undefined>(
+        (state) => state.app.user.accessToken,
+      );
+      request = request.clone({
+        setHeaders: { Authorization: `Bearer ${accessToken}` },
+      });
+    }
+
+    return next.handle(request);
+  }
+}

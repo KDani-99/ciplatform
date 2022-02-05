@@ -1,12 +1,12 @@
 <div [className]="'nav-user-container'">
   <div [className]="'info'">
-    <h1>Username</h1>
-    <h2>Role</h2>
+    <h1>{{(user$ | async)?.username}}</h1>
+    <h2>{{(user$ | async)?.isAdmin ? 'Admin' : 'User'}}</h2>
   </div>
   <div [className]="'image'">
-    <img src=""/>
+    <img [src]="(user$ | async)?.image"/>
   </div>
-  <div [className]="'settings'">
-    <i class="eva eva-settings-outline"></i>
+  <div [className]="'logout'" (click)="logout()">
+    <i class="eva eva-log-out-outline"></i>
   </div>
 </div>

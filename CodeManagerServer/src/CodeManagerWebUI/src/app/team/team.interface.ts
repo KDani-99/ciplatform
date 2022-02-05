@@ -1,6 +1,14 @@
+export interface MemberDto {
+  id: number;
+  name: string;
+  username: string;
+  image: string;
+  joinTime: string;
+}
 export interface TeamDto {
   id: number;
   isPublic: boolean;
+  isMember: boolean;
   name: string;
   description: string;
   image: string;
@@ -8,4 +16,9 @@ export interface TeamDto {
   projects: number;
   owner: string;
 }
-export interface CreateTeamDto {}
+export interface CreateTeamDto {
+  name: string;
+  description: string;
+  image: string;
+  isPublic: boolean;
+}

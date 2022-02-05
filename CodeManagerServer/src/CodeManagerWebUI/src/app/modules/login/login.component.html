@@ -1,9 +1,0 @@
-<shared-page>
-  <div [className]="'login-container'">
-    <h1>Login</h1>
-    <shared-input type="text" header="Username" placeholder="" #usernameInput></shared-input>
-    <shared-input type="password" header="Password" placeholder="" #passwordInput></shared-input>
-    <shared-button text="Enter" [className]="'button'" theme="default" (click)="login(usernameInput.value, passwordInput.value)"></shared-button>
-    <shared-button text="Create an account" [className]="'button'" theme="none" (click)="navigateToRegistration()"></shared-button>
-  </div>
-</shared-page>

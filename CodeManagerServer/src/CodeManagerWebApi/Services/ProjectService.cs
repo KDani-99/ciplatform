@@ -6,6 +6,7 @@ using CodeManager.Data.Entities;
 using CodeManager.Data.Repositories;
 using CodeManagerWebApi.DataTransfer;
 using CodeManagerWebApi.Exceptions;
+using CodeManagerWebApi.Extensions;
 
 namespace CodeManagerWebApi.Services
 {
@@ -18,20 +19,37 @@ namespace CodeManagerWebApi.Services
             _projectRepository = projectRepository ?? throw new ArgumentNullException(nameof(projectRepository));
         }
         
-        public async Task<ProjectDto> GetProjectAsync(long id, User user)
+        public async Task<ProjectDataDto> GetProjectAsync(long id, User user)
         {
             // check whether user is in the project
             var project = (await _projectRepository.GetAsync(id)) ?? throw new ProjectDoesNotExistException();
 
-            var projectDto = new ProjectDto
+            var member = project.Team.Members.FirstOrDefault(teamMember => teamMember.User.Id == user.Id);
+
+            if (member == default)
             {
-                Id = project.Id,
-                Name = project.Name,
-                Description = project.Description,
-                IsPrivateProject = project.IsPrivateProject,
-                IsPrivateRepository = project.IsPrivateProject,
+                throw new UnauthorizedAccessWebException("The specified project does not exist or you are not allowed to view it.");
+            }
+            
+            var projectDto = new ProjectDataDto
+            {
+                Project = new ProjectDto
+                {
+                    Id = project.Id,
+                    Name = project.Name,
+                    Description = project.Description,
+                    IsPrivateProject = project.IsPrivateProject,
+                },
                 TeamId = project.Team.Id,
-                RepositoryUrl = project.RepositoryUrl
+                IsPrivateRepository = project.IsPrivateRepository,
+                UserPermission = member.Permission,
+                RepositoryUrl = project.RepositoryUrl,
+                Variables = project.Variables.Select(variable => new VariableDto
+                {
+                    Name = variable.Name,
+                    Value = variable.IsSecret ? "******" : variable.Value,
+                    IsSecret = variable.IsSecret
+                })
             };
 
             if (!project.IsPrivateProject)
@@ -57,9 +75,8 @@ namespace CodeManagerWebApi.Services
                 Name = project.Name,
                 Description = project.Description,
                 IsPrivateProject = project.IsPrivateProject,
-                IsPrivateRepository = project.IsPrivateProject,
-                TeamId = project.Team.Id,
-                RepositoryUrl = project.RepositoryUrl
+                TeamName = project.Team.Name,
+                Owner = project.Team.Name,
             });
         }
 
@@ -77,6 +94,13 @@ namespace CodeManagerWebApi.Services
                 throw new UnauthorizedAccessWebException("You are not a member of this team.");
             }
 
+            var member = team.Members.FirstOrDefault(teamMember => teamMember.User.Id == user.Id);
+
+            if (!member.CanUpdateProjects() && !user.IsAdmin())
+            {
+                throw new UnauthorizedAccessWebException("You are not allowed to create projects.");
+            }
+
             var id = await _projectRepository.CreateAsync(new Project
             {
                 Name = createProjectDto.Name,
@@ -84,7 +108,7 @@ namespace CodeManagerWebApi.Services
                 SecretToken = createProjectDto.SecretToken, // TODO: encrypt
                 Username = user.Username,
                 Description = createProjectDto.Description,
-                Team = team, // wont create new team, just references the ID
+                Team = team,
                 IsPrivateProject = createProjectDto.IsPrivateProject,
                 IsPrivateRepository = createProjectDto.IsPrivateRepository,
             });
@@ -95,12 +119,67 @@ namespace CodeManagerWebApi.Services
                 Name = createProjectDto.Name,
                 Description = createProjectDto.Description,
                 IsPrivateProject = createProjectDto.IsPrivateProject,
-                IsPrivateRepository = createProjectDto.IsPrivateProject,
-                TeamId = createProjectDto.TeamId,
-                RepositoryUrl = createProjectDto.RepositoryUrl
+                TeamName = team.Name,
+                Owner = team.Name,
+                Runs = 0,
             };
         }
+        
+        public async Task UpdateProjectAsync(long id, CreateProjectDto createProjectDto, User user)
+        {
+            var project = await _projectRepository.GetAsync(id);
+
+            if (project == null)
+            {
+                throw new ProjectDoesNotExistException();
+            }
+
+            var member = project.Team.Members.FirstOrDefault(teamMember => teamMember.User.Id == user.Id);
+
+            if (member == default)
+            {
+                throw new UnauthorizedAccessWebException("Only team members can update the project.");
+            }
+
+            if (!member.CanUpdateProjects() && !user.IsAdmin())
+            {
+                throw new UnauthorizedAccessWebException("You are not allowed to update the project.");
+            }
+
+            if (createProjectDto.Name != project.Name && await _projectRepository.ExistsAsync(projectEntity => projectEntity.Name == createProjectDto.Name && projectEntity.Team.Id == createProjectDto.TeamId))
+            {
+                throw new ProjectAlreadyExistsException();
+            }
+
+            project.Name = createProjectDto.Name;
+            project.Description = createProjectDto.Description;
+            project.IsPrivateProject = createProjectDto.IsPrivateProject;
+            project.IsPrivateRepository = createProjectDto.IsPrivateRepository;
+            project.Username = createProjectDto.Username;
+            project.SecretToken = createProjectDto.SecretToken;
+
+            await _projectRepository.UpdateAsync(project);
+        }
+        
+        public async Task DeleteProjectAsync(long id, User user)
+        {
+            var project = await _projectRepository.GetAsync(id);
+                
+            if (project == null)
+            {
+                throw new TeamDoesNotExistException();
+            }
+            
+            var member = project.Team.Members.FirstOrDefault(teamMember => teamMember.User.Id == user.Id);
+
+            if (!member.CanUpdateProjects() && !user.IsAdmin())
+            {
+                throw new UnauthorizedAccessWebException("You are not allowed to delete the project.");
+            }
+
+            // TODO: remove runs/jobs/steps
+
+            await _projectRepository.DeleteAsync(id);
+        }
     }
-    
-    
 }

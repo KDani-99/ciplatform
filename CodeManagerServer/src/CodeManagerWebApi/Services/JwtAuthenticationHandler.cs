@@ -37,7 +37,7 @@ namespace CodeManagerWebApi.Services
             {
                 var token = Request.Headers["Authorization"].FirstOrDefault()?.Split(" ")[1];
                 
-                var claimsPrincipal = await _tokenService.VerifyAccessToken(token);
+                var claimsPrincipal = await _tokenService.VerifyAccessTokenAsync(token);
                 var username = claimsPrincipal.Claims.First(claim => claim.Type == JwtRegisteredClaimNames.Sub).Value;
 
                 var user = await _userRepository.GetByUsernameAsync(username) ?? throw new InvalidCredentialsException();

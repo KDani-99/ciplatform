@@ -7,7 +7,7 @@
   <shared-topbar [imageTemplate]="imageTemplate" [header]="'Projects'"></shared-topbar>
 
   <div [className]="'projects'" *ngFor="let project of projects">
-    <projects-project [project]="project"></projects-project>
+    <shared-project [project]="project"></shared-project>
   </div>
 
 </shared-primary-page>

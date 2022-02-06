@@ -6,6 +6,6 @@ namespace CodeManagerWebApi.Services
 {
     public interface IVariableService
     {
-        public Task CreateOrUpdateVariableAsync(ProjectDto project,VariableDto variableDto);
+        public Task CreateOrUpdateVariableAsync(long projectId, VariableDto variableDto, User user);
     }
 }

@@ -19,6 +19,7 @@ namespace CodeManager.Data.Repositories
             .Include(team => team.Owner)
             .Include(team => team.Projects)
             .Include(team => team.Members)
+            .ThenInclude(member => member.User)
             .FirstOrDefaultAsync(team => team.Id == id);
 
         public override Task<List<Team>> GetAsync(Expression<Func<Team, bool>> expression) =>

@@ -55,9 +55,11 @@ namespace CodeManagerWebApi.Controllers
             return CreatedAtRoute(nameof(Get), new {result.Id}, result);
         }
         
-        [HttpPut]
-        public async Task<IActionResult> Put([FromBody] TeamDto teamDto)
+        [HttpPut, Route("{id:long}")]
+        public async Task<IActionResult> Put([FromRoute] long id, [FromBody] TeamDto teamDto)
         {
+            teamDto.Id = id;
+            
             var user = HttpContext.Items["user"] as User;
             await _teamService.UpdateTeamAsync(teamDto, user);
             _logger.LogInformation($"Team `{teamDto.Name}` updated @ {DateTime.Now}");
@@ -72,6 +74,28 @@ namespace CodeManagerWebApi.Controllers
             
             await _teamService.DeleteTeamAsync(id, user);
             _logger.LogInformation($"Team with id `{id}` deleted @ {DateTime.Now}");
+
+            return NoContent();
+        }
+        
+        [HttpPost, Route("{id:long}/join")]
+        public async Task<IActionResult> Join([FromRoute] long id)
+        {
+            var user = HttpContext.Items["user"] as User;
+            
+            await _teamService.JoinAsync(id, user);
+            _logger.LogInformation($"User `{user.Name}` has joined team id `{id}` @ {DateTime.Now}");
+
+            return NoContent();
+        }
+        
+        [HttpPost, Route("{id:long}/kick")]
+        public async Task<IActionResult> Kick([FromRoute] long id, [FromBody] KickMemberDto kickMemberDto)
+        {
+            var user = HttpContext.Items["user"] as User;
+            
+            await _teamService.KickMemberAsync(id, kickMemberDto.MemberId, user);
+            _logger.LogInformation($"User id `{kickMemberDto.MemberId}` has been kicked from team id `{id}` @ {DateTime.Now}");
 
             return NoContent();
         }

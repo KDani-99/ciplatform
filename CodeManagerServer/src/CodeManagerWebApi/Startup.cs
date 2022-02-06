@@ -2,14 +2,18 @@ using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using CodeManager.Core.Services;
 using CodeManager.Data.Repositories;
+using CodeManagerWebApi.Cache;
 using CodeManagerWebApi.Database;
 using CodeManagerWebApi.Configuration;
 using CodeManagerWebApi.DataTransfer;
 using CodeManagerWebApi.Extensions;
 using CodeManagerWebApi.Hubs;
+using CodeManagerWebApi.Repositories;
 using CodeManagerWebApi.Services;
 using CodeManagerWebApi.Utils.Extensions;
 using FluentValidation;
@@ -44,11 +48,20 @@ namespace CodeManagerWebApi
                 .AddFluentValidation()
                 .Configure<JwtConfiguration>(_configuration.GetSection("JwtConfiguration"))
                 .Configure<UserConfiguration>(_configuration.GetSection("UserConfiguration"))
+                .Configure<RedisConfiguration>(_configuration.GetSection("RedisConfiguration"))
                 .Configure<IConfiguration>(_configuration)
                 .AddDbContext<CodeManager.Data.Database.CodeManagerDbContext, CodeManagerDbContext>(options =>
                     options.UseNpgsql(_configuration.GetValue<string>("ConnectionString")))
                 .AddSingleton<ICredentialManagerService, CredentialManagerService>()
-                .AddSingleton<ITokenService<JwtSecurityToken>, TokenService>()
+                .AddSingleton(new JsonSerializerOptions
+                {
+                    Converters =
+                    {
+                        new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)
+                    }
+                })
+                .AddScoped<ITokenService<JwtSecurityToken>, TokenService>()
+                .AddSingleton<ITokenCache, RedisTokenCache>()
                 .AddScoped<IUserRepository, UserRepository>()
                 .AddScoped<IUserService, UserService>()
                 .AddScoped<ITeamRepository, TeamRepository>()
@@ -60,6 +73,7 @@ namespace CodeManagerWebApi
                 .AddScoped<IEncryptionService, EncryptionService>()
                 .AddScoped<IPlanRepository, PlanRepository>()
                 .AddScoped<IPlanService, PlanService>()
+                .AddScoped<ITokenRepository, TokenRepository>()
                 .AddAntiforgery()
                 .AddRabbitMq(_configuration)
                 .AddControllers().Services

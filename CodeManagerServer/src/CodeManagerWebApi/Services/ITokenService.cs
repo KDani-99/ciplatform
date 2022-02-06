@@ -8,10 +8,12 @@ namespace CodeManagerWebApi.Services
 {
     public interface ITokenService<T>
     {
-        public Task<T> CreateAccessToken(User user);
-        public Task<T> CreateRefreshToken(User user);
-        public Task CreateVerificationToken();
+        public Task<T> CreateAccessTokenAsync(User user);
+        public Task<T> CreateRefreshTokenAsync(User user);
+        public Task InvalidateAccessTokenAsync(string username);
+        public Task InvalidRefreshTokenAsync(string username);
+        public Task<ClaimsPrincipal> VerifyRefreshTokenAsync(string token);
 
-        public Task<ClaimsPrincipal> VerifyAccessToken(string token);
+        public Task<ClaimsPrincipal> VerifyAccessTokenAsync(string token);
     }
 }

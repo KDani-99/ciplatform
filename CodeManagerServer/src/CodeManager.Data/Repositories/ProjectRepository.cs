@@ -21,6 +21,8 @@ namespace CodeManager.Data.Repositories
                 .Projects
                 .Include(x => x.Variables)
                 .Include(x => x.Team)
+                .ThenInclude(x => x.Members)
+                .ThenInclude(x => x.User)
                 .FirstOrDefaultAsync(project => project.Id == id);
         }
 
@@ -30,6 +32,7 @@ namespace CodeManager.Data.Repositories
                 .Projects
                 .Include(x => x.Variables)
                 .Include(x => x.Team)
+                .ThenInclude(x => x.Members)
                 .Where(expression)
                 .ToListAsync();
         }

@@ -45,6 +45,10 @@
     <shared-topbar [buttonsTemplate]="projectButtonsTemplate" [header]="'Projects'" [secondary]="true"></shared-topbar>
   </div>
 
+  <div [className]="'project-container'">
+    <shared-project></shared-project>
+  </div>
+
   <ng-template #createProjectTemplate>
     <team-create-project (onClose)="toggleWindow(false)" (onCreate)="onCreateProject($event)"></team-create-project>
   </ng-template>

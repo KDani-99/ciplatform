@@ -1,10 +1,11 @@
-﻿namespace CodeManager.Data.Entities
+﻿using System.Runtime.Serialization;
+
+namespace CodeManager.Data.Entities
 {
     public enum Permissions
     {
-        NoAccess,
         Read,
-        Write,
+        ReadWrite,
         Admin
     }
 }

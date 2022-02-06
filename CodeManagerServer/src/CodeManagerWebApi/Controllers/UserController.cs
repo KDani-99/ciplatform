@@ -94,8 +94,8 @@ namespace CodeManagerWebApi.Controllers
 
             return StatusCode((int)HttpStatusCode.Created);
         }
-        
-        [HttpPost, Route("login")]
+
+        [HttpPost, Route("/api/refresh")]
         public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
             var authTokens = await _userService.LoginAsync(loginDto, HttpContext);

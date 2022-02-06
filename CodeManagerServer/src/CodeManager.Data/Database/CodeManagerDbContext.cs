@@ -17,6 +17,7 @@ namespace CodeManager.Data.Database
         {
             NpgsqlConnection.GlobalTypeMapper.MapEnum<Roles>();
             NpgsqlConnection.GlobalTypeMapper.MapEnum<JobContext>();
+            NpgsqlConnection.GlobalTypeMapper.MapEnum<Permissions>();
         }
 
         public CodeManagerDbContext(DbContextOptions<CodeManagerDbContext> dbContextOptions) : base(dbContextOptions)
@@ -39,13 +40,15 @@ namespace CodeManager.Data.Database
         {
             modelBuilder.HasPostgresEnum<Roles>();
             modelBuilder.HasPostgresEnum<JobContext>();
+            modelBuilder.HasPostgresEnum<Permissions>();
             
             modelBuilder.Entity<User>()
                 .HasOne(user => user.Plan);
             
             modelBuilder.Entity<Project>()
                 .HasMany(project => project.Runs)
-                .WithOne(run => run.Project);
+                .WithOne(run => run.Project)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<TeamMember>()
                 .HasOne(teamMember => teamMember.Team)
@@ -57,15 +60,18 @@ namespace CodeManager.Data.Database
 
             modelBuilder.Entity<Team>()
                 .HasMany(team => team.Projects)
-                .WithOne(project => project.Team);
+                .WithOne(project => project.Team)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Run>()
                 .HasMany(run => run.Jobs)
-                .WithOne(job => job.Run);
+                .WithOne(job => job.Run)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Job>()
                 .HasMany(job => job.Steps)
-                .WithOne(step => step.Job);
+                .WithOne(step => step.Job)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

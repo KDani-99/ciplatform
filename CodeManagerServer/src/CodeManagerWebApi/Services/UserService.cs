@@ -120,13 +120,29 @@ namespace CodeManagerWebApi.Services
             if (!_credentialManagerService.VerifyPassword(loginDto.Password, user.Password))
                 throw new InvalidCredentialException();
 
-            var accessToken = await _tokenService.CreateAccessToken(user);
-            var refreshToken = await _tokenService.CreateRefreshToken(user);
+            var accessToken = await _tokenService.CreateAccessTokenAsync(user);
+            var refreshToken = await _tokenService.CreateRefreshTokenAsync(user);
             
-            user.RefreshTokenSignature = refreshToken.Id;
+            user.RefreshTokenSignature = refreshToken.Id; // TODO -> remove from database
 
             await _userRepository.UpdateAsync(user);
 
+            return new AuthTokenDto
+            {
+                AccessToken = accessToken.ToBase64String(),
+                RefreshToken = refreshToken.ToBase64String()
+            };
+        }
+
+        public async Task<AuthTokenDto> GenerateAuthTokensAsync(string username)
+        {
+            var user = await _userRepository.GetByUsernameAsync(username);
+
+            if (user is null) throw new UserDoesNotExistException();
+            
+            var accessToken = await _tokenService.CreateAccessTokenAsync(user);
+            var refreshToken = await _tokenService.CreateRefreshTokenAsync(user);
+            
             return new AuthTokenDto
             {
                 AccessToken = accessToken.ToBase64String(),

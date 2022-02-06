@@ -11,7 +11,7 @@ import { AppState } from '../store/app/app.state';
 import { Observable } from 'rxjs';
 
 @Injectable()
-export class LoginGuard implements CanActivate {
+export class AuthenticatedGuard implements CanActivate {
   @Select(AppState.isLoggedIn) isLoggedIn$?: Observable<boolean>;
 
   constructor(private router: Router) {}

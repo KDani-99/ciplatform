@@ -14,6 +14,6 @@ namespace CodeManager.Data.Entities
         public string SecretToken { get; set; } // Either SSH or access token
         public Team Team { get; set; }
         public List<Variable> Variables { get; set; }
-        public List<Run> Runs { get; set; }
+        public List<Run> Runs { get; set; } = new();
     }
 }

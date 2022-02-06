@@ -6,6 +6,7 @@ using CodeManager.Data.Entities;
 using CodeManager.Data.Repositories;
 using CodeManagerWebApi.DataTransfer;
 using CodeManagerWebApi.Exceptions;
+using CodeManagerWebApi.Extensions;
 
 namespace CodeManagerWebApi.Services
 {
@@ -22,13 +23,20 @@ namespace CodeManagerWebApi.Services
             _projectRepository = projectRepository ?? throw new ArgumentNullException(nameof(projectRepository));
         }
         
-        public async Task CreateOrUpdateVariableAsync(ProjectDto projectDto, VariableDto variableDto)
+        public async Task CreateOrUpdateVariableAsync(long projectId, VariableDto variableDto, User user)
         {
-            var project = await _projectRepository.GetAsync(projectDto.Id);
+            var project = await _projectRepository.GetAsync(projectId) ?? throw new ProjectDoesNotExistException();;
+            
+            var member = project.Team.Members.FirstOrDefault(teamMember => teamMember.User.Id == user.Id);
 
-            if (project == default)
+            if (member == default)
             {
-                throw new ProjectDoesNotExistException();
+                throw new UnauthorizedAccessWebException("The specified project does not exist or you are not allowed to view it.");
+            }
+            
+            if (!member.CanUpdateProjects() && !user.IsAdmin())
+            {
+                throw new UnauthorizedAccessWebException("You are not allowed to update the project variables.");
             }
             
             var variable = project.Variables.FirstOrDefault(var => var.Name == variableDto.Name);

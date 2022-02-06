@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Select, Store } from '@ngxs/store';
-import { UserDto } from '../../../../pages/user/user.interface';
+import { UserDto } from '../../../../services/user/user.interface';
 import { Observable } from 'rxjs';
-import { AuthService } from '../../../../pages/auth/auth.service';
+import { AuthService } from '../../../../services/auth/auth.service';
 
 @Component({
   selector: 'nav-user',

@@ -4,9 +4,9 @@ import { ToastrService } from 'ngx-toastr';
 import { HttpClient } from '@angular/common/http';
 import { ConfigService } from '../../../../config/config.service';
 import { InputComponent } from '../../../../shared/input/input.component';
-import { LoginResponseDto } from '../../login.interface';
-import { UserDto } from '../../../user/user.interface';
-import { AuthService } from '../../auth.service';
+import { LoginResponseDto } from '../../../../services/auth/login.interface';
+import { UserDto } from '../../../../services/user/user.interface';
+import { AuthService } from '../../../../services/auth/auth.service';
 
 @Component({
   selector: 'app-login',

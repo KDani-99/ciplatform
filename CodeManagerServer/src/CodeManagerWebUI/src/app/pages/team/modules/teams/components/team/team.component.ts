@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { TeamDto } from '../../../../team.interface';
+import { TeamDto } from '../../../../../../services/team/team.interface';
 import { Router } from '@angular/router';
 
 @Component({

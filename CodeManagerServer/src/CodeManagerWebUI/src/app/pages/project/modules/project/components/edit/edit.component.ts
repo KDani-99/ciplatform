@@ -10,7 +10,7 @@ import {
   CreateProjectDto,
   ProjectDataDto,
   ProjectDto,
-} from '../../../../project.interface';
+} from '../../../../../../services/project/project.interface';
 import { CheckboxComponent } from '../../../../../../shared/checkbox/checkbox.component';
 import { InputComponent } from '../../../../../../shared/input/input.component';
 

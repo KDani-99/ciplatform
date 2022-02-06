@@ -1,6 +1,6 @@
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { UserService } from '../../user.service';
-import { UserDto } from '../../user.interface';
+import { UserService } from '../../../../services/user/user.service';
+import { UserDto } from '../../../../services/user/user.interface';
 
 @Component({
   selector: 'app-users',

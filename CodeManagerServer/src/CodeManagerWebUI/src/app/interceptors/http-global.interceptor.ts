@@ -11,7 +11,7 @@ import {
 import { ToastrService } from 'ngx-toastr';
 import { catchError, concatMap } from 'rxjs/operators';
 import { Observable, throwError } from 'rxjs';
-import { AuthService } from '../pages/auth/auth.service';
+import { AuthService } from '../services/auth/auth.service';
 
 @Injectable()
 export class HttpGlobalInterceptor implements HttpInterceptor {

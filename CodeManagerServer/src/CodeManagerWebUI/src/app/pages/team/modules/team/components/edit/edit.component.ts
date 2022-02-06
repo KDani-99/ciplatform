@@ -6,7 +6,10 @@ import {
   Output,
   ViewChild,
 } from '@angular/core';
-import { CreateTeamDto, TeamDataDto } from '../../../../team.interface';
+import {
+  CreateTeamDto,
+  TeamDataDto,
+} from '../../../../../../services/team/team.interface';
 import { CheckboxComponent } from '../../../../../../shared/checkbox/checkbox.component';
 import { InputComponent } from '../../../../../../shared/input/input.component';
 

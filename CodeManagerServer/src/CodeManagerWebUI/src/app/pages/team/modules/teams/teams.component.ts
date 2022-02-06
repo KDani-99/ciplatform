@@ -1,6 +1,9 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { TeamService } from '../../team.service';
-import { CreateTeamDto, TeamDto } from '../../team.interface';
+import { TeamService } from '../../../../services/team/team.service';
+import {
+  CreateTeamDto,
+  TeamDto,
+} from '../../../../services/team/team.interface';
 import { Router } from '@angular/router';
 
 @Component({

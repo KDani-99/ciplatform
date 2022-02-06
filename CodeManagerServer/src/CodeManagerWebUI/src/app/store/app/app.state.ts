@@ -1,6 +1,6 @@
 import { Action, Selector, State, StateContext } from '@ngxs/store';
 import { SetAuthTokens, SetUser } from './app.actions';
-import { UserDto } from '../../pages/user/user.interface';
+import { UserDto } from '../../services/user/user.interface';
 import { Injectable } from '@angular/core';
 
 export interface LoggedUser {

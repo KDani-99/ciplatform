@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { MemberDto } from '../../../../team.interface';
+import { MemberDto } from '../../../../../../services/team/team.interface';
 
 @Component({
   selector: 'team-kick',

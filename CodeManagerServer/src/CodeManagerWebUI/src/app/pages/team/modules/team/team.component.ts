@@ -1,17 +1,17 @@
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { TeamService } from '../../team.service';
+import { TeamService } from '../../../../services/team/team.service';
 import {
   CreateTeamDto,
   MemberDto,
   MemberPermission,
   TeamDataDto,
-} from '../../team.interface';
+} from '../../../../services/team/team.interface';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   CreateProjectDto,
   ProjectDto,
-} from '../../../project/project.interface';
-import { ProjectService } from '../../../project/project.service';
+} from '../../../../services/project/project.interface';
+import { ProjectService } from '../../../../services/project/project.service';
 import { Select } from '@ngxs/store';
 import { Observable } from 'rxjs';
 

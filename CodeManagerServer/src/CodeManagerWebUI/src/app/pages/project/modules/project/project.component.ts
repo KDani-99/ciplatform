@@ -5,10 +5,13 @@ import {
   TemplateRef,
   ViewChild,
 } from '@angular/core';
-import { CreateProjectDto, ProjectDataDto } from '../../project.interface';
+import {
+  CreateProjectDto,
+  ProjectDataDto,
+} from '../../../../services/project/project.interface';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ProjectService } from '../../project.service';
-import { MemberPermission } from '../../../team/team.interface';
+import { ProjectService } from '../../../../services/project/project.service';
+import { MemberPermission } from '../../../../services/team/team.interface';
 import { Select } from '@ngxs/store';
 import { Observable } from 'rxjs';
 

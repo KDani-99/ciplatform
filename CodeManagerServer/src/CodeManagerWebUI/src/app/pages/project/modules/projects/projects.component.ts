@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { ProjectService } from '../../project.service';
-import { CreateProjectDto, ProjectDto } from '../../project.interface';
+import { ProjectService } from '../../../../services/project/project.service';
+import {
+  CreateProjectDto,
+  ProjectDto,
+} from '../../../../services/project/project.interface';
 import { Select } from '@ngxs/store';
 import { Observable } from 'rxjs';
 

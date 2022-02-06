@@ -6,7 +6,7 @@ import {
   Output,
   ViewChild,
 } from '@angular/core';
-import { UserDto } from '../../../../user.interface';
+import { UserDto } from '../../../../../../services/user/user.interface';
 import { CheckboxComponent } from '../../../../../../shared/checkbox/checkbox.component';
 
 @Component({

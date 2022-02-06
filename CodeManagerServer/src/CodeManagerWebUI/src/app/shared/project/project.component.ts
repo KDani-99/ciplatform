@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { ProjectDto } from '../../pages/project/project.interface';
+import { ProjectDto } from '../../services/project/project.interface';
 import { Router } from '@angular/router';
 
 @Component({

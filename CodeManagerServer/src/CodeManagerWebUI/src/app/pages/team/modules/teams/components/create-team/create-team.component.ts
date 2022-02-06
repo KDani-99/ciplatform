@@ -1,5 +1,8 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
-import { CreateTeamDto, TeamDto } from '../../../../team.interface';
+import {
+  CreateTeamDto,
+  TeamDto,
+} from '../../../../../../services/team/team.interface';
 
 @Component({
   selector: 'teams-create-team',

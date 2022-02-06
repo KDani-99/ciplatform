@@ -7,7 +7,7 @@ import {
   TemplateRef,
   ViewChild,
 } from '@angular/core';
-import { CreateProjectDto } from '../../../../../project/project.interface';
+import { CreateProjectDto } from '../../../../../../services/project/project.interface';
 import { InputComponent } from '../../../../../../shared/input/input.component';
 import { CheckboxComponent } from '../../../../../../shared/checkbox/checkbox.component';
 

@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { UserDto } from '../../../../user.interface';
+import { UserDto } from '../../../../../../services/user/user.interface';
 
 @Component({
   selector: 'users-user',

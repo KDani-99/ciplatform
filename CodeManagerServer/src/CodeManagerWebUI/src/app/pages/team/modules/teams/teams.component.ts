@@ -1,6 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { TeamService } from '../../team.service';
 import { CreateTeamDto, TeamDto } from '../../team.interface';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-teams',
@@ -8,17 +9,18 @@ import { CreateTeamDto, TeamDto } from '../../team.interface';
   styleUrls: ['./teams.component.scss'],
 })
 export class TeamsComponent implements OnInit {
-  @Input() teams?: TeamDto[];
+  @Input() teams: TeamDto[] = [];
 
   showCreateTeamsWindow: boolean = false;
 
-  constructor(private readonly teamService: TeamService) {}
+  constructor(
+    private readonly router: Router,
+    private readonly teamService: TeamService,
+  ) {}
 
   ngOnInit(): void {
-    this.teamService.getTeams().subscribe({
-      next: (partialTeamDto: TeamDto[]) => {
-        this.teams = partialTeamDto;
-      },
+    this.teamService.getTeams().subscribe((partialTeamDto: TeamDto[]) => {
+      this.teams = partialTeamDto;
     });
   }
 
@@ -26,12 +28,16 @@ export class TeamsComponent implements OnInit {
     this.showCreateTeamsWindow = show;
   }
 
-  async createTeam(createTeamDto: CreateTeamDto): Promise<void> {
-    this.teamService.createTeam(createTeamDto).subscribe({
-      next: (team: TeamDto) => {
-        this.teams?.push(team);
-        this.showCreateTeamsWindow = false;
-      },
+  createTeam(createTeamDto: CreateTeamDto): void {
+    this.teamService.createTeam(createTeamDto).subscribe((team: TeamDto) => {
+      this.teams.push(team);
+      this.showCreateTeamsWindow = false;
     });
+  }
+
+  joinTeam(id: number): void {
+    this.teamService
+      .joinTeam(id)
+      .subscribe(() => this.router.navigate([`teams/${id}`]));
   }
 }

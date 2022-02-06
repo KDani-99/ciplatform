@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Select, Store } from '@ngxs/store';
-import { UserDto } from '../../../pages/user/user.interface';
+import { UserDto } from '../../../../pages/user/user.interface';
 import { Observable } from 'rxjs';
-import { AuthService } from '../../../pages/auth/auth.service';
+import { AuthService } from '../../../../pages/auth/auth.service';
 
 @Component({
   selector: 'nav-user',
@@ -24,7 +24,7 @@ export class UserComponent implements OnInit {
 
   ngOnInit(): void {}
 
-  logout(): Promise<void> {
+  logout(): Promise<any> {
     return this.loginService.logout();
   }
 }

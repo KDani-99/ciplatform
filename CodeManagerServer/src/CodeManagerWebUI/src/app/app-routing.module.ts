@@ -1,73 +1,82 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { LoginComponent } from './auth/modules/login/login.component';
-import { RegisterComponent } from './auth/modules/register/register.component';
-import { TeamsComponent } from './team/modules/teams/teams.component';
-import { TeamComponent } from './team/modules/team/team.component';
-import { ProjectsComponent } from './project/modules/projects/projects.component';
-import { ProjectComponent } from './project/modules/project/project.component';
-import { RunComponent } from './run/modules/run/run.component';
-import { JobComponent } from './job/modules/job/job.component';
-import { UsersComponent } from './user/modules/users/users.component';
-import { LoginGuard } from './guards/LoginGuard';
+import { LoginComponent } from './pages/auth/modules/login/login.component';
+import { RegisterComponent } from './pages/auth/modules/register/register.component';
+import { TeamsComponent } from './pages/team/modules/teams/teams.component';
+import { TeamComponent } from './pages/team/modules/team/team.component';
+import { ProjectsComponent } from './pages/project/modules/projects/projects.component';
+import { ProjectComponent } from './pages/project/modules/project/project.component';
+import { RunComponent } from './pages/run/modules/run/run.component';
+import { JobComponent } from './pages/job/modules/job/job.component';
+import { UsersComponent } from './pages/user/modules/users/users.component';
+import { AuthenticatedGuard } from './guards/authenticated.guard';
+import { LoginGuard } from './guards/login.guard';
 
 const routes: Routes = [
   {
     path: 'login',
     component: LoginComponent,
     loadChildren: () =>
-      import('./auth/modules/login/login.module').then((m) => m.LoginModule),
+      import('./pages/auth/modules/login/login.module').then(
+        (m) => m.LoginModule,
+      ),
+    canActivate: [LoginGuard],
   },
   {
     path: 'register',
     component: RegisterComponent,
     loadChildren: () =>
-      import('./auth/modules/register/register.module').then(
+      import('./pages/auth/modules/register/register.module').then(
         (m) => m.RegisterModule,
       ),
+    canActivate: [LoginGuard],
   },
   {
     path: 'teams',
     component: TeamsComponent,
     loadChildren: () =>
-      import('./team/modules/teams/teams.module').then((m) => m.TeamsModule),
-    canActivate: [LoginGuard],
+      import('./pages/team/modules/teams/teams.module').then(
+        (m) => m.TeamsModule,
+      ),
+    canActivate: [AuthenticatedGuard],
   },
   {
     path: 'users',
     component: UsersComponent,
     loadChildren: () =>
-      import('./user/modules/users/users.module').then((m) => m.UsersModule),
-    canActivate: [LoginGuard],
+      import('./pages/user/modules/users/users.module').then(
+        (m) => m.UsersModule,
+      ),
+    canActivate: [AuthenticatedGuard],
   },
   {
     path: 'teams/:id',
     component: TeamComponent,
-    canActivate: [LoginGuard],
+    canActivate: [AuthenticatedGuard],
   },
   {
     path: 'projects',
     component: ProjectsComponent,
     loadChildren: () =>
-      import('./project/modules/projects/projects.module').then(
+      import('./pages/project/modules/projects/projects.module').then(
         (m) => m.ProjectsModule,
       ),
-    canActivate: [LoginGuard],
+    canActivate: [AuthenticatedGuard],
   },
   {
     path: 'projects/:id',
     component: ProjectComponent,
-    canActivate: [LoginGuard],
+    canActivate: [AuthenticatedGuard],
   },
   {
     path: 'runs/:id',
     component: RunComponent,
-    canActivate: [LoginGuard],
+    canActivate: [AuthenticatedGuard],
   },
   {
     path: 'jobs/:id',
     component: JobComponent,
-    canActivate: [LoginGuard],
+    canActivate: [AuthenticatedGuard],
   },
 ];
 

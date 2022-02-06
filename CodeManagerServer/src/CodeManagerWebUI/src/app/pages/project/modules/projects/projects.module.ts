@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ProjectComponent } from '../../../shared/project/project.component';
-import { SharedModule } from '../../../shared/shared.module';
+import { ProjectComponent } from '../../../../shared/project/project.component';
+import { SharedModule } from '../../../../shared/shared.module';
 import { CreateProjectComponent } from '../../../team/modules/team/components/create-project/create-project.component';
 
 @NgModule({

@@ -2,11 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 
-interface Entity {
-  id: number;
-}
-
-export abstract class BaseDataService<T, TResult extends Entity> {
+export abstract class BaseDataService {
   httpOptions = {
     headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
     withCredentials: true,
@@ -14,7 +10,7 @@ export abstract class BaseDataService<T, TResult extends Entity> {
 
   protected constructor(private readonly httpClient: HttpClient) {}
 
-  protected getAll(url: string): Observable<TResult[]> {
+  protected getAll<TResult>(url: string): Observable<TResult[]> {
     return this.httpClient.get<TResult[]>(url, this.httpOptions).pipe(
       tap((entities: TResult[]) =>
         BaseDataService.log(`Fetched ${entities.length} entities`),
@@ -23,20 +19,23 @@ export abstract class BaseDataService<T, TResult extends Entity> {
     );
   }
 
-  protected get(url: string): Observable<TResult> {
+  protected get<TResult>(url: string): Observable<TResult> {
     return this.httpClient.get<TResult>(url, this.httpOptions).pipe(
-      tap((entity: TResult) =>
-        BaseDataService.log(`Fetched entity with id ${entity.id}`),
+      tap((entity: any) =>
+        BaseDataService.log(`Fetched entity with id ${entity?.id}`),
       ),
       catchError(this.handleError<TResult>()),
     );
   }
 
-  protected create(createEntityDto: T, url: string): Observable<TResult> {
+  protected create<T, TResult>(
+    createEntityDto: T,
+    url: string,
+  ): Observable<TResult> {
     return this.httpClient
       .post<TResult>(url, createEntityDto, this.httpOptions)
       .pipe(
-        tap((entity: TResult) =>
+        tap((entity: any) =>
           BaseDataService.log(`Entity with id ${entity.id} has been created`),
         ),
         catchError(this.handleError<TResult>()),
@@ -50,7 +49,7 @@ export abstract class BaseDataService<T, TResult extends Entity> {
     );
   }
 
-  protected update(id: number, entity: T, url: string): Observable<void> {
+  protected update<T>(id: number, entity: T, url: string): Observable<void> {
     return this.httpClient.put(url, entity, this.httpOptions).pipe(
       tap((_) => BaseDataService.log(`Entity with id ${id} has been updated`)),
       catchError(this.handleError<any>()),

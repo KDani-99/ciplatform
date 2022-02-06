@@ -1,7 +1,7 @@
 <div class="container">
-  <p>Are you sure that you want to delete team <span>{{teamName ?? 'N/A'}}</span>? All team projects will also be deleted.</p>
+  <p>Are you sure that you want to kick user <span>{{member?.username ?? 'N/A'}}</span>?</p>
   <div [className]="'wrapper'">
-    <shared-button [text]="'Delete'" theme="dark" (onClick)="delete()"></shared-button>
+    <shared-button [text]="'Kick'" theme="dark" (onClick)="kick()"></shared-button>
     <shared-button [text]="'Cancel'" theme="error" (onClick)="cancel()"></shared-button>
   </div>
 </div>

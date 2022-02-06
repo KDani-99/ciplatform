@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { TeamDto } from '../../../../team.interface';
 import { Router } from '@angular/router';
 
@@ -10,11 +10,17 @@ import { Router } from '@angular/router';
 export class TeamComponent implements OnInit {
   @Input() team?: TeamDto;
 
+  @Output() onJoin: EventEmitter<number> = new EventEmitter<number>();
+
   constructor(private readonly router: Router) {}
 
   ngOnInit(): void {}
 
-  async open(): Promise<void> {
-    await this.router.navigate([`teams/${this.team?.id}`]);
+  open(): void {
+    this.router.navigate([`teams/${this.team?.id}`]);
+  }
+
+  join(): void {
+    this.onJoin.emit(this.team?.id ?? -1);
   }
 }

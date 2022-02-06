@@ -1,14 +1,15 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { MemberDto } from '../../../../team.interface';
 
 @Component({
-  selector: 'team-delete',
-  templateUrl: './delete.component.html',
-  styleUrls: ['./delete.component.scss'],
+  selector: 'team-kick',
+  templateUrl: './kick.component.html',
+  styleUrls: ['./kick.component.scss'],
 })
-export class DeleteComponent implements OnInit {
-  @Input() teamName?: string;
+export class KickComponent implements OnInit {
+  @Input() member?: MemberDto;
   @Output() onCancel: EventEmitter<any> = new EventEmitter<any>();
-  @Output() onDelete: EventEmitter<any> = new EventEmitter<any>();
+  @Output() onKick: EventEmitter<number> = new EventEmitter<number>();
 
   constructor() {}
 
@@ -18,7 +19,7 @@ export class DeleteComponent implements OnInit {
     this.onCancel.emit();
   }
 
-  delete(): void {
-    this.onDelete.emit();
+  kick(): void {
+    this.onKick.emit(this.member?.id ?? -1);
   }
 }

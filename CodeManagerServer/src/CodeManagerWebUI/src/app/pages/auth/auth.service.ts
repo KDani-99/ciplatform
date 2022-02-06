@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
-import { ConfigService } from '../config/config.service';
+import { ConfigService } from '../../config/config.service';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { LoginResponseDto } from './login.interface';
 import { UserDto } from '../user/user.interface';
 import { Router } from '@angular/router';
-import { Select, Store } from '@ngxs/store';
-import { SetUser } from '../store/app/app.actions';
-import { AppState, AppStateData } from '../store/app/app.state';
-import { Observable } from 'rxjs';
+import { Store } from '@ngxs/store';
+import { SetAuthTokens, SetUser } from '../../store/app/app.actions';
+import { AppStateData } from '../../store/app/app.state';
+import { Observable, firstValueFrom } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -29,44 +29,50 @@ export class AuthService {
     this.appState$ = store.select((state) => state.app);
   }
 
-  async logout(): Promise<void> {
-    this.appState$?.subscribe({
-      next: async (data: AppStateData) => {
-        this.httpOptions.headers = this.httpOptions.headers.set(
-          'Authorization',
-          `Bearer ${data.user?.refreshToken}`,
-        );
-        await this.httpClient
-          .post(this.configService.getFullUrl('logout'), this.httpOptions)
-          .toPromise();
+  async logout(): Promise<any> {
+    const appState = await firstValueFrom(this.appState$!);
 
-        this.store.dispatch(new SetUser(undefined));
-        this.router.navigate(['login']);
-      },
-    });
+    this.httpOptions.headers = this.httpOptions.headers.set(
+      'Authorization',
+      `Bearer ${appState.user?.refreshToken}`,
+    );
+
+    await firstValueFrom(
+      this.httpClient.post(
+        this.configService.getFullUrl('logout'),
+        {},
+        this.httpOptions,
+      ),
+    );
+
+    await this.store.dispatch(new SetUser(undefined));
+    this.router.navigate(['login']);
   }
 
   async login(username: string, password: string): Promise<void> {
-    this.store.dispatch(new SetUser(undefined)); // remove user
+    await firstValueFrom(this.store.dispatch(new SetUser(undefined))); // remove user
 
-    const loginResponse = await this.httpClient
-      .post<LoginResponseDto>(this.configService.getFullUrl('login'), {
-        username,
-        password,
-      })
-      .toPromise();
+    const loginResponse = await firstValueFrom(
+      this.httpClient.post<LoginResponseDto>(
+        this.configService.getFullUrl('login'),
+        {
+          username,
+          password,
+        },
+      ),
+    );
 
     this.httpOptions.headers = this.httpOptions.headers.set(
       'Authorization',
       `Bearer ${loginResponse.accessToken}`,
     );
 
-    const user = await this.httpClient
-      .get<UserDto>(
+    const user = await firstValueFrom(
+      this.httpClient.get<UserDto>(
         this.configService.getFullUrl('getUser'),
-        this.httpOptions, // TODO: add access token
-      )
-      .toPromise();
+        this.httpOptions,
+      ),
+    );
 
     this.store.dispatch([
       new SetUser({
@@ -75,5 +81,38 @@ export class AuthService {
         user,
       }),
     ]);
+  }
+
+  async refreshToken(): Promise<string> {
+    const refreshToken = this.store.selectSnapshot<string | undefined>(
+      (state) => state.app.user.refreshToken,
+    );
+    this.httpOptions.headers = this.httpOptions.headers.set(
+      'Authorization',
+      `Bearer ${refreshToken}`,
+    );
+
+    try {
+      const response = await firstValueFrom(
+        this.httpClient.post<LoginResponseDto>(
+          this.configService.getFullUrl('refreshToken'),
+          {},
+          this.httpOptions,
+        ),
+      );
+
+      await firstValueFrom(
+        this.store.dispatch(
+          new SetAuthTokens(response.accessToken, response.refreshToken),
+        ),
+      );
+
+      return response.accessToken;
+    } catch (error: any) {
+      this.store
+        .dispatch(new SetUser(undefined))
+        .subscribe(() => this.router.navigate(['login']));
+      throw error;
+    }
   }
 }

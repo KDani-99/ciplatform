@@ -1,9 +1,9 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { ProjectDto } from '../../../../project.interface';
+import { ProjectDto } from '../../pages/project/project.interface';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'projects-project',
+  selector: 'shared-project',
   templateUrl: './project.component.html',
   styleUrls: ['./project.component.scss'],
 })

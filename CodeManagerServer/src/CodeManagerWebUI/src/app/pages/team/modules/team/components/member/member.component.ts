@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { MemberDto } from '../../../../team.interface';
 
 @Component({
@@ -8,11 +8,15 @@ import { MemberDto } from '../../../../team.interface';
 })
 export class MemberComponent implements OnInit {
   @Input() member?: MemberDto;
-  @Input() isUser?: boolean;
+  @Input() showKickButton: boolean = false;
+
+  @Output() onKick: EventEmitter<MemberDto> = new EventEmitter<MemberDto>();
 
   constructor() {}
 
   ngOnInit(): void {}
 
-  kick(): void {}
+  kick(): void {
+    this.onKick.emit(this.member);
+  }
 }

@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
-import { CreateTeamDto, TeamDto } from './team.interface';
-import { ConfigService } from '../config/config.service';
+import { CreateTeamDto, TeamDataDto, TeamDto } from './team.interface';
+import { ConfigService } from '../../config/config.service';
 
 @Injectable({ providedIn: 'root' })
 export class TeamService {
@@ -26,11 +26,11 @@ export class TeamService {
       );
   }
 
-  getTeam(id: number): Observable<TeamDto> {
+  getTeam(id: number): Observable<TeamDataDto> {
     const url = `${this.configService.getFullUrl('teams')}/${id}`;
-    return this.httpClient.get<TeamDto>(url, this.httpOptions).pipe(
+    return this.httpClient.get<TeamDataDto>(url, this.httpOptions).pipe(
       tap((team) => TeamService.log(`Fetched team with id ${team.id}`)),
-      catchError(this.handleError<TeamDto>()),
+      catchError(this.handleError<TeamDataDto>()),
     );
   }
 
@@ -47,6 +47,28 @@ export class TeamService {
         ),
         catchError(this.handleError<TeamDto>()),
       );
+  }
+
+  joinTeam(id: number): Observable<void> {
+    const url = `${this.configService
+      .getFullUrl('joinTeam')
+      .replace('{0}', id.toString())}`;
+
+    return this.httpClient.post(url, {}, this.httpOptions).pipe(
+      tap((_) => TeamService.log(`You have entered team ${id}`)),
+      catchError(this.handleError<any>()),
+    );
+  }
+
+  kickmember(id: number, memberId: number): Observable<void> {
+    const url = `${this.configService
+      .getFullUrl('kickMember')
+      .replace('{0}', id.toString())}`;
+
+    return this.httpClient.post(url, { memberId }, this.httpOptions).pipe(
+      tap((_) => TeamService.log(`You have entered team ${id}`)),
+      catchError(this.handleError<any>()),
+    );
   }
 
   deleteTeam(id: number): Observable<void> {

@@ -10,14 +10,14 @@
   <div class="account-info">
     <div class="data">
       <h1>Role</h1>
-      <h2></h2>
+      <h2>{{member?.permission}}</h2>
     </div>
     <div class="data">
       <h1>Join date</h1>
       <h2>{{member?.joinTime ?? 'N/A'}}</h2>
     </div>
   </div>
-  <div class="button-container" *ngIf="!isUser">
+  <div class="button-container" *ngIf="showKickButton">
     <div class="button" *ngIf="true" (click)="kick()">
       <i class="eva eva-person-delete-outline"></i>
       <p>Kick</p>

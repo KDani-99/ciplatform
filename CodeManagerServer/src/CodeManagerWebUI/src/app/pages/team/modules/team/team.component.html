@@ -1,8 +1,9 @@
 <shared-primary-page [disableHeader]="true">
 
   <ng-template #buttonsTemplate>
-    <div class="button-container">
-    <shared-button [text]="'Edit'" theme="default" (onClick)="openEditWindow()"></shared-button>
+    <div class="button-container" *ngIf="(isUserAdmin() | async)">
+      <shared-button [text]="'Edit'" theme="default" (onClick)="openEditWindow()"></shared-button>
+      <shared-button [text]="'Delete'" theme="error" (onClick)="openDeleteWindow()"></shared-button>
     </div>
   </ng-template>
   <ng-template #imageTemplate>
@@ -20,7 +21,7 @@
   </div>
 
   <ng-template #addMemberButtonTemplate>
-    <div class="button-container">
+    <div class="button-container" *ngIf="team?.isPublic || (isUserAdmin() | async)">
       <shared-button [text]="'Add member'" theme="default" (onClick)="openEditWindow()"></shared-button>
     </div>
   </ng-template>
@@ -29,14 +30,12 @@
     <shared-topbar [buttonsTemplate]="addMemberButtonTemplate" [header]="'Members'" [secondary]="true"></shared-topbar>
   </div>
 
-  <div [className]="'members-container'">
-    <team-member></team-member>
-    <team-member></team-member>
-    <team-member></team-member>
+  <div [className]="'members-container'" >
+    <team-member *ngFor="let member of team?.members" [member]="member" [showKickButton]="(showKickButton(member) | async) ?? false" (onKick)="openKickMemberWindow($event)"></team-member>
   </div>
 
   <ng-template #projectButtonsTemplate>
-    <div class="button-container">
+    <div class="button-container" *ngIf="canUserModify() | async">
     <shared-button [text]="'Create'" theme="default" (onClick)="openCreateProjectWindow()"></shared-button>
     </div>
   </ng-template>
@@ -45,8 +44,8 @@
     <shared-topbar [buttonsTemplate]="projectButtonsTemplate" [header]="'Projects'" [secondary]="true"></shared-topbar>
   </div>
 
-  <div [className]="'project-container'">
-    <shared-project></shared-project>
+  <div [className]="'project-container'" *ngFor="let project of team?.projects">
+    <shared-project [project]="project"></shared-project>
   </div>
 
   <ng-template #createProjectTemplate>
@@ -54,7 +53,15 @@
   </ng-template>
 
   <ng-template #editTeamTemplate>
-    <team-edit (onClose)="toggleWindow(false)" [team]="team"></team-edit>
+    <team-edit (onClose)="toggleWindow(false)" [team]="team" (onEdit)="onEdit($event)"></team-edit>
+  </ng-template>
+
+  <ng-template #kickMemberTemplate>
+    <team-kick (onCancel)="toggleWindow(false)" [member]="selectedMember" (onKick)="onKick($event)"></team-kick>
+  </ng-template>
+
+  <ng-template #deleteTeamTemplate>
+    <team-delete (onCancel)="toggleWindow(false)" [teamName]="team?.name" (onDelete)="onDelete()"></team-delete>
   </ng-template>
 
   <shared-popup *ngIf="showWindow" [contentTemplate]="currentTemplate"></shared-popup>

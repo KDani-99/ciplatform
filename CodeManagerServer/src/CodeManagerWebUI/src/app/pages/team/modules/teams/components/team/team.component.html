@@ -26,6 +26,6 @@
   </div>
   <div [className]="'button-container'">
     <shared-button *ngIf="team?.isMember" [text]="'Open'" theme="default" (onClick)="open()"></shared-button>
-    <shared-button *ngIf="!team?.isMember && team?.isPublic" [text]="'Join'" theme="default" (onClick)="open()"></shared-button>
+    <shared-button *ngIf="!team?.isMember && team?.isPublic" [text]="'Join'" theme="default" (onClick)="join()"></shared-button>
   </div>
 </div>

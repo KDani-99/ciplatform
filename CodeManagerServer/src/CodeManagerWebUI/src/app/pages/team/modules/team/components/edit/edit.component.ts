@@ -6,8 +6,9 @@ import {
   Output,
   ViewChild,
 } from '@angular/core';
-import { TeamDto } from '../../../../team.interface';
-import { CheckboxComponent } from '../../../../../shared/checkbox/checkbox.component';
+import { CreateTeamDto, TeamDataDto } from '../../../../team.interface';
+import { CheckboxComponent } from '../../../../../../shared/checkbox/checkbox.component';
+import { InputComponent } from '../../../../../../shared/input/input.component';
 
 @Component({
   selector: 'team-edit',
@@ -15,20 +16,34 @@ import { CheckboxComponent } from '../../../../../shared/checkbox/checkbox.compo
   styleUrls: ['./edit.component.scss'],
 })
 export class EditComponent implements OnInit {
-  @ViewChild('isPrivate', { static: false }) isPrivateRef?: CheckboxComponent;
-  @Input() team?: TeamDto;
+  @ViewChild('isPrivate', { static: true }) isPrivateRef?: CheckboxComponent;
+  @ViewChild('name') nameRef?: InputComponent;
+  @ViewChild('description') descriptionRef?: InputComponent;
+  @ViewChild('image') imageRef?: InputComponent;
+
+  @Input() team?: TeamDataDto;
 
   @Output() onClose: EventEmitter<any> = new EventEmitter<any>();
+  @Output() onEdit: EventEmitter<CreateTeamDto> =
+    new EventEmitter<CreateTeamDto>();
   constructor() {}
 
   ngOnInit(): void {
     if (this.isPrivateRef && this.team) {
-      console.log('asd');
       this.isPrivateRef.isChecked = !this.team.isPublic;
     }
   }
 
   close(): void {
     this.onClose.emit();
+  }
+
+  edit(): void {
+    this.onEdit.emit({
+      name: this.nameRef?.value ?? '',
+      description: this.descriptionRef?.value ?? '',
+      image: this.imageRef?.value ?? '',
+      isPublic: !this.isPrivateRef?.isChecked,
+    });
   }
 }

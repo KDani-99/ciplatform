@@ -8,8 +8,8 @@ import {
   ViewChild,
 } from '@angular/core';
 import { CreateProjectDto } from '../../../../../project/project.interface';
-import { InputComponent } from '../../../../../shared/input/input.component';
-import { CheckboxComponent } from '../../../../../shared/checkbox/checkbox.component';
+import { InputComponent } from '../../../../../../shared/input/input.component';
+import { CheckboxComponent } from '../../../../../../shared/checkbox/checkbox.component';
 
 @Component({
   selector: 'team-create-project',

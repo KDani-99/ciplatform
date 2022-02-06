@@ -1,29 +1,34 @@
 <shared-primary-page [disableHeader]="true">
 
   <ng-template #buttonsTemplate>
-    <div [className]="'button-container-top'">
+    <div [className]="'button-container-top'" *ngIf="(showActions() | async)">
       <shared-button [text]="'Variables'" theme="default"></shared-button>
-      <shared-button [text]="'Edit details'" theme="default" (onClick)="toggleEditProjectWindow(true)"></shared-button>
+      <shared-button [text]="'Edit details'" theme="default" (onClick)="openEditWindow()"></shared-button>
+      <shared-button [text]="'Delete'" theme="error" (onClick)="openDeleteWindow()"></shared-button>
     </div>
   </ng-template>
   <ng-template #imageTemplate>
     <i class="eva eva-layers-outline"></i>
   </ng-template>
 
-  <ng-template #contentTemplate>
-    <project-edit (onClose)="toggleEditProjectWindow(false)"></project-edit>
+  <ng-template #editProjectTemplate>
+    <project-edit (onClose)="toggleWindow(false)" (onEdit)="onEdit($event)" [project]="projectData"></project-edit>
   </ng-template>
 
-  <shared-popup *ngIf="showEditProjectWindow" [contentTemplate]="contentTemplate"></shared-popup>
+  <ng-template #deleteProjectTemplate>
+    <project-delete (onCancel)="toggleWindow(false)" [projectName]="projectData?.project?.name" (onDelete)="onDelete()"></project-delete>
+  </ng-template>
 
-  <shared-topbar [buttonsTemplate]="buttonsTemplate" [imageTemplate]="imageTemplate"></shared-topbar>
+  <shared-popup *ngIf="showWindow" [contentTemplate]="currentTemplate"></shared-popup>
+
+  <shared-topbar [buttonsTemplate]="buttonsTemplate" [imageTemplate]="imageTemplate" [header]="projectData?.project?.name ?? 'N/A'"></shared-topbar>
   <div [className]="'container'">
     <div [className]="'content'">
-      <shared-data [header]="'Id'" [value]="project?.id?.toString() ?? 'N/A'"></shared-data>
-      <shared-data [header]="'Description'" [value]="project?.description?.toString() ?? 'N/A'"></shared-data>
-      <shared-data [header]="'Visibility'" [value]="project?.isPrivateProject ? 'Public' : 'Private'"></shared-data>
-      <shared-data [header]="'Git user'" [value]="'*******'"></shared-data>
-      <shared-data [header]="'Git secret'" [value]="'*******'"></shared-data>
+      <shared-data [header]="'Id'" [value]="projectData?.project?.id?.toString() ?? 'N/A'"></shared-data>
+      <shared-data [header]="'Description'" [value]="projectData?.project?.description?.toString() ?? 'N/A'"></shared-data>
+      <shared-data [header]="'Visibility'" [value]="projectData?.project?.isPrivateProject ? 'Private' : 'Public'"></shared-data>
+      <shared-data *ngIf="projectData?.isPrivateRepository" [header]="'Git user'" [value]="'*******'"></shared-data>
+      <shared-data *ngIf="projectData?.isPrivateRepository" [header]="'Git secret'" [value]="'*******'"></shared-data>
     </div>
   </div>
 

@@ -7,7 +7,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { UserDto } from '../../../../user.interface';
-import { CheckboxComponent } from '../../../../../shared/checkbox/checkbox.component';
+import { CheckboxComponent } from '../../../../../../shared/checkbox/checkbox.component';
 
 @Component({
   selector: 'user-edit',

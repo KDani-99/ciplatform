@@ -1,6 +1,6 @@
 import { Action, Selector, State, StateContext } from '@ngxs/store';
-import { SetUser } from './app.actions';
-import { UserDto } from '../../user/user.interface';
+import { SetAuthTokens, SetUser } from './app.actions';
+import { UserDto } from '../../pages/user/user.interface';
 import { Injectable } from '@angular/core';
 
 export interface LoggedUser {
@@ -24,6 +24,15 @@ export class AppState {
   @Action(SetUser)
   setUser({ patchState }: StateContext<AppStateData>, { user }: SetUser) {
     patchState({ user });
+  }
+  @Action(SetAuthTokens)
+  setAuthTokens(
+    ctx: StateContext<AppStateData>,
+    { accessToken, refreshToken }: SetAuthTokens,
+  ) {
+    ctx.patchState({
+      user: { ...ctx.getState().user, accessToken, refreshToken } as any,
+    });
   }
   @Selector()
   static isAdmin(state: AppStateData) {

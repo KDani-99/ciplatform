@@ -13,7 +13,7 @@
 
   <div [className]="'teams-container'">
     <div [className]="'teams'" *ngFor="let team of teams">
-      <teams-team [team]="team"></teams-team>
+      <teams-team [team]="team" (onJoin)="joinTeam($event)"></teams-team>
     </div>
   </div>
 

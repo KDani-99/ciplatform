@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { ConfigService } from '../../../config/config.service';
+import { ConfigService } from '../../../../config/config.service';
 import { PasswordMismatchError } from '../login/errors/password-mismatch.error';
 import { ToastrService } from 'ngx-toastr';
 

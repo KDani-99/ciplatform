@@ -24,18 +24,6 @@ export class JwtAuthInterceptor implements HttpInterceptor {
       return next.handle(request);
     }
 
-    /* if (
-      !this.noAuthRoutes.some((route) => request.url.endsWith(route)) &&
-      this.isAuthRequired(request.url)
-    ) {
-      const accessToken = this.store.selectSnapshot<string | undefined>(
-        (state) => state.app.user.accessToken,
-      );
-      request = request.clone({
-        setHeaders: { Authorization: `Bearer ${accessToken}` },
-      });
-    }*/
-    console.log(request);
     if (request.withCredentials) {
       const accessToken = this.store.selectSnapshot<string | undefined>(
         (state) => state.app.user.accessToken,

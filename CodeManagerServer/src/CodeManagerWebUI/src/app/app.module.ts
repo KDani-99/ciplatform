@@ -10,28 +10,29 @@ import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { ConfigService } from './config/config.service';
 import { HttpGlobalInterceptor } from './interceptors/http-global.interceptor';
 import { GlobalErrorHandler } from './error/global-error.handler';
-import { NavbarComponent } from './navbar/navbar.component';
-import { ButtonComponent } from './navbar/components/button/button.component';
-import { UserComponent } from './navbar/components/user/user.component';
-import { TeamComponent } from './team/modules/team/team.component';
-import { TeamModule } from './team/modules/team/team.module';
-import { ProjectsComponent } from './project/modules/projects/projects.component';
-import { ProjectsModule } from './project/modules/projects/projects.module';
-import { ProjectComponent } from './project/modules/project/project.component';
-import { RunComponent } from './run/modules/run/run.component';
-import { RunModule } from './run/modules/run/run.module';
-import { JobComponent } from './job/modules/job/job.component';
+import { NavbarComponent } from './components/navbar/navbar.component';
+import { ButtonComponent } from './components/navbar/components/button/button.component';
+import { UserComponent } from './components/navbar/components/user/user.component';
+import { TeamComponent } from './pages/team/modules/team/team.component';
+import { TeamModule } from './pages/team/modules/team/team.module';
+import { ProjectsComponent } from './pages/project/modules/projects/projects.component';
+import { ProjectsModule } from './pages/project/modules/projects/projects.module';
+import { ProjectComponent } from './pages/project/modules/project/project.component';
+import { RunComponent } from './pages/run/modules/run/run.component';
+import { RunModule } from './pages/run/modules/run/run.module';
+import { JobComponent } from './pages/job/modules/job/job.component';
 import { PopupComponent } from './shared/popup/popup.component';
-import { TeamsModule } from './team/modules/teams/teams.module';
-import { TeamsComponent } from './team/modules/teams/teams.component';
-import { ProjectModule } from './project/modules/project/project.module';
-import { UsersComponent } from './user/modules/users/users.component';
-import { UsersModule } from './user/modules/users/users.module';
+import { TeamsModule } from './pages/team/modules/teams/teams.module';
+import { TeamsComponent } from './pages/team/modules/teams/teams.component';
+import { ProjectModule } from './pages/project/modules/project/project.module';
+import { UsersComponent } from './pages/user/modules/users/users.component';
+import { UsersModule } from './pages/user/modules/users/users.module';
 import { NgxsModule } from '@ngxs/store';
 import { NgxsStoragePluginModule } from '@ngxs/storage-plugin';
 import { AppState } from './store/app/app.state';
-import { LoginGuard } from './guards/LoginGuard';
+import { AuthenticatedGuard } from './guards/authenticated.guard';
 import { JwtAuthInterceptor } from './interceptors/jwt-http-auth.inteceptor';
+import { LoginGuard } from './guards/login.guard';
 
 @NgModule({
   declarations: [
@@ -67,6 +68,7 @@ import { JwtAuthInterceptor } from './interceptors/jwt-http-auth.inteceptor';
     }),
   ],
   providers: [
+    AuthenticatedGuard,
     LoginGuard,
     {
       provide: APP_INITIALIZER,

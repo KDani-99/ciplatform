@@ -1,15 +1,16 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
-import { ConfigService } from '../config/config.service';
-import { CreateProjectDto, ProjectDto } from './project.interface';
-import { BaseDataService } from '../shared/services/base-data.service';
+import { ConfigService } from '../../config/config.service';
+import {
+  CreateProjectDto,
+  ProjectDataDto,
+  ProjectDto,
+} from './project.interface';
+import { BaseDataService } from '../../shared/services/base-data.service';
 
 @Injectable({ providedIn: 'root' })
-export class ProjectService extends BaseDataService<
-  CreateProjectDto,
-  ProjectDto
-> {
+export class ProjectService extends BaseDataService {
   constructor(
     httpClient: HttpClient,
     private readonly configService: ConfigService,
@@ -18,30 +19,30 @@ export class ProjectService extends BaseDataService<
   }
 
   getProjects(): Observable<ProjectDto[]> {
-    return this.getAll(this.configService.getFullUrl('projects'));
+    return super.getAll<ProjectDto>(this.configService.getFullUrl('projects'));
   }
 
-  getProject(id: number): Observable<ProjectDto> {
+  getProject(id: number): Observable<ProjectDataDto> {
     const url = `${this.configService.getFullUrl('projects')}/${id}`;
-    return this.get(url);
+    return super.get<ProjectDataDto>(url);
   }
 
   createProject(createProjectDto: CreateProjectDto): Observable<ProjectDto> {
-    return this.create(
+    return super.create<CreateProjectDto, ProjectDto>(
       createProjectDto,
       this.configService.getFullUrl('projects'),
     );
   }
 
   deleteProject(id: number): Observable<void> {
-    return this.delete(
+    return super.delete(
       id,
       `${this.configService.getFullUrl('projects')}/${id}`,
     );
   }
 
   updateProject(project: CreateProjectDto, id: number): Observable<void> {
-    return this.update(
+    return super.update(
       id,
       project,
       `${this.configService.getFullUrl('projects')}/${id}`,

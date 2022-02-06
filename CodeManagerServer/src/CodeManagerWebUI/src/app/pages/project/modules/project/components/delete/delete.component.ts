@@ -1,12 +1,12 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 
 @Component({
-  selector: 'team-delete',
+  selector: 'project-delete',
   templateUrl: './delete.component.html',
   styleUrls: ['./delete.component.scss'],
 })
 export class DeleteComponent implements OnInit {
-  @Input() teamName?: string;
+  @Input() projectName?: string;
   @Output() onCancel: EventEmitter<any> = new EventEmitter<any>();
   @Output() onDelete: EventEmitter<any> = new EventEmitter<any>();
 

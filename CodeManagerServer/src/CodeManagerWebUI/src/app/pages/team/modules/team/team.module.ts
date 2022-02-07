@@ -7,6 +7,9 @@ import { SharedModule } from '../../../../shared/shared.module';
 import { EditComponent } from './components/edit/edit.component';
 import { DeleteComponent } from './components/delete/delete.component';
 import { KickComponent } from './components/kick/kick.component';
+import { UpdateRoleComponent } from './components/update-role/update-role.component';
+import { FormsModule } from '@angular/forms';
+import { AddMemberComponent } from './components/add-member/add-member.component';
 
 @NgModule({
   declarations: [
@@ -16,6 +19,8 @@ import { KickComponent } from './components/kick/kick.component';
     EditComponent,
     DeleteComponent,
     KickComponent,
+    UpdateRoleComponent,
+    AddMemberComponent,
   ],
   exports: [
     DataComponent,
@@ -24,7 +29,9 @@ import { KickComponent } from './components/kick/kick.component';
     EditComponent,
     DeleteComponent,
     KickComponent,
+    UpdateRoleComponent,
+    AddMemberComponent,
   ],
-  imports: [CommonModule, SharedModule],
+  imports: [CommonModule, SharedModule, FormsModule],
 })
 export class TeamModule {}

@@ -16,7 +16,11 @@ export class ConfigService {
       .toPromise()) as Config;
   }
 
-  getFullUrl(key: string) {
+  getFullUrl(key: string): string {
     return `${this.appConfig?.api.baseUrl}/${this.appConfig?.api.endpoints[key]?.url}`;
+  }
+
+  getWsAddress(): string | undefined {
+    return this.appConfig?.hub;
   }
 }

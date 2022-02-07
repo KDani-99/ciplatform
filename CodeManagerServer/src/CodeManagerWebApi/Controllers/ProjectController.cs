@@ -50,7 +50,7 @@ namespace CodeManagerWebApi.Controllers
         {
             var user = HttpContext.Items["user"] as User;
             var result = await _projectService.CreateProjectAsync(createProjectDto, user);
-            _logger.LogInformation($"Project `{createProjectDto.Name}` created @ {DateTime.Now}");
+            _logger.LogInformation($"Project `{createProjectDto.Name}` has been created @ {DateTime.Now}");
 
             return CreatedAtRoute( nameof(GetProject), new {result.Id}, result);
         }
@@ -60,7 +60,7 @@ namespace CodeManagerWebApi.Controllers
         {
             var user = HttpContext.Items["user"] as User;
             await _projectService.UpdateProjectAsync(id, projectDto, user);
-            _logger.LogInformation($"Project `{projectDto.Name}` updated @ {DateTime.Now}");
+            _logger.LogInformation($"Project `{projectDto.Name}` has been updated @ {DateTime.Now}");
 
             return Ok();
         }
@@ -71,7 +71,7 @@ namespace CodeManagerWebApi.Controllers
             var user = HttpContext.Items["user"] as User;
             
             await _projectService.DeleteProjectAsync(id, user);
-            _logger.LogInformation($"Project with id `{id}` deleted @ {DateTime.Now}");
+            _logger.LogInformation($"Project with id `{id}` has been deleted @ {DateTime.Now}");
 
             return NoContent();
         }

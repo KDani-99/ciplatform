@@ -2,7 +2,12 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
-import { CreateTeamDto, TeamDataDto, TeamDto } from './team.interface';
+import {
+  CreateTeamDto,
+  TeamDataDto,
+  TeamDto,
+  UpdateRoleDto,
+} from './team.interface';
 import { ConfigService } from '../../config/config.service';
 
 @Injectable({ providedIn: 'root' })
@@ -18,84 +23,65 @@ export class TeamService {
   ) {}
 
   getTeams(): Observable<TeamDto[]> {
-    return this.httpClient
-      .get<TeamDto[]>(this.configService.getFullUrl('teams'), this.httpOptions)
-      .pipe(
-        tap((teams) => TeamService.log(`Fetched ${teams.length} teams`)),
-        catchError(this.handleError<TeamDto[]>()),
-      );
+    return this.httpClient.get<TeamDto[]>(
+      this.configService.getFullUrl('teams'),
+      this.httpOptions,
+    );
   }
 
   getTeam(id: number): Observable<TeamDataDto> {
     const url = `${this.configService.getFullUrl('teams')}/${id}`;
-    return this.httpClient.get<TeamDataDto>(url, this.httpOptions).pipe(
-      tap((team) => TeamService.log(`Fetched team with id ${team.id}`)),
-      catchError(this.handleError<TeamDataDto>()),
-    );
+    return this.httpClient.get<TeamDataDto>(url, this.httpOptions);
   }
 
   createTeam(createTeamDto: CreateTeamDto): Observable<TeamDto> {
-    return this.httpClient
-      .post<TeamDto>(
-        this.configService.getFullUrl('teams'),
-        createTeamDto,
-        this.httpOptions,
-      )
-      .pipe(
-        tap((team: TeamDto) =>
-          TeamService.log(`Team with id ${team.id} has been created`),
-        ),
-        catchError(this.handleError<TeamDto>()),
-      );
+    return this.httpClient.post<TeamDto>(
+      this.configService.getFullUrl('teams'),
+      createTeamDto,
+      this.httpOptions,
+    );
   }
 
-  joinTeam(id: number): Observable<void> {
+  joinTeam(id: number): Observable<any> {
     const url = `${this.configService
       .getFullUrl('joinTeam')
       .replace('{0}', id.toString())}`;
 
-    return this.httpClient.post(url, {}, this.httpOptions).pipe(
-      tap((_) => TeamService.log(`You have entered team ${id}`)),
-      catchError(this.handleError<any>()),
-    );
+    return this.httpClient.post(url, {}, this.httpOptions);
   }
 
-  kickmember(id: number, memberId: number): Observable<void> {
+  kickMember(id: number, memberId: number): Observable<any> {
     const url = `${this.configService
       .getFullUrl('kickMember')
       .replace('{0}', id.toString())}`;
 
-    return this.httpClient.post(url, { memberId }, this.httpOptions).pipe(
-      tap((_) => TeamService.log(`You have entered team ${id}`)),
-      catchError(this.handleError<any>()),
-    );
+    return this.httpClient.post(url, { memberId }, this.httpOptions);
   }
 
-  deleteTeam(id: number): Observable<void> {
+  addMember(id: number, username: string): Observable<any> {
+    const url = `${this.configService
+      .getFullUrl('addMember')
+      .replace('{0}', id.toString())}`;
+
+    return this.httpClient.post(url, { username }, this.httpOptions);
+  }
+
+  updateMemberRole(id: number, updateRoleDto: UpdateRoleDto): Observable<any> {
+    const url = `${this.configService
+      .getFullUrl('updateRole')
+      .replace('{0}', id.toString())}`;
+
+    return this.httpClient.post(url, updateRoleDto, this.httpOptions);
+  }
+
+  deleteTeam(id: number): Observable<any> {
     const url = `${this.configService.getFullUrl('teams')}/${id}`;
 
-    return this.httpClient.delete(url, this.httpOptions).pipe(
-      tap((_) => TeamService.log(`Team with id ${id} has been deleted`)),
-      catchError(this.handleError<any>()),
-    );
+    return this.httpClient.delete(url, this.httpOptions);
   }
 
-  updateTeam(team: CreateTeamDto, id: number): Observable<void> {
+  updateTeam(team: CreateTeamDto, id: number): Observable<any> {
     const url = `${this.configService.getFullUrl('teams')}/${id}`;
-    return this.httpClient.put(url, team, this.httpOptions).pipe(
-      tap((_) => TeamService.log(`Team with id ${team} has been updated`)),
-      catchError(this.handleError<any>()),
-    );
-  }
-
-  private handleError<T>(result?: T) {
-    return (error: any): Observable<T> => {
-      console.error(error);
-      return of(result as T);
-    };
-  }
-
-  private static log(message: string) {
-    console.error(message);
+    return this.httpClient.put(url, team, this.httpOptions);
   }
 }

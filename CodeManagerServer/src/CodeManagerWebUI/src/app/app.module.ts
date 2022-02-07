@@ -29,7 +29,7 @@ import { UsersComponent } from './pages/user/modules/users/users.component';
 import { UsersModule } from './pages/user/modules/users/users.module';
 import { NgxsModule } from '@ngxs/store';
 import { NgxsStoragePluginModule } from '@ngxs/storage-plugin';
-import { AppState } from './store/app/app.state';
+import { AppState } from './state/app/app.state';
 import { AuthenticatedGuard } from './guards/authenticated.guard';
 import { JwtAuthInterceptor } from './interceptors/jwt-http-auth.inteceptor';
 import { LoginGuard } from './guards/login.guard';

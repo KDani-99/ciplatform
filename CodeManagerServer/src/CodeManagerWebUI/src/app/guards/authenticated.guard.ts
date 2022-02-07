@@ -7,7 +7,7 @@ import {
 } from '@angular/router';
 import { Injectable } from '@angular/core';
 import { Select } from '@ngxs/store';
-import { AppState } from '../store/app/app.state';
+import { AppState } from '../state/app/app.state';
 import { Observable } from 'rxjs';
 
 @Injectable()

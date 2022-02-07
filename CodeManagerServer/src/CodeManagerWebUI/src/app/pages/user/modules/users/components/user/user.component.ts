@@ -10,8 +10,6 @@ export class UserComponent implements OnInit {
   @Input() user?: UserDto;
 
   @Output() onEdit: EventEmitter<UserDto> = new EventEmitter<UserDto>();
-  @Output() onResetPassword: EventEmitter<UserDto> =
-    new EventEmitter<UserDto>();
   @Output() onDelete: EventEmitter<UserDto> = new EventEmitter<UserDto>();
 
   constructor() {}
@@ -24,9 +22,5 @@ export class UserComponent implements OnInit {
 
   edit(): void {
     this.onEdit.emit(this.user);
-  }
-
-  resetPassword(): void {
-    this.onResetPassword.emit(this.user);
   }
 }

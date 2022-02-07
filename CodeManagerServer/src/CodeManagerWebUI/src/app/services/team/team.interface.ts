@@ -4,6 +4,28 @@ export enum MemberPermission {
   READ_WRITE = 1,
   ADMIN = 2,
 }
+export interface Permission {
+  value: number;
+  name: string;
+}
+export const availablePermissions: Permission[] = [
+  {
+    name: 'Read',
+    value: MemberPermission.READ,
+  },
+  {
+    name: 'ReadWrite',
+    value: MemberPermission.READ_WRITE,
+  },
+  {
+    name: 'Admin',
+    value: MemberPermission.ADMIN,
+  },
+];
+export interface UpdateRoleDto {
+  userId: number;
+  role: number;
+}
 export interface MemberDto {
   id: number;
   name: string;

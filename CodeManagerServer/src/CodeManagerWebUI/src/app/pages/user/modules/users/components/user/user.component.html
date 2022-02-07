@@ -31,10 +31,6 @@
     </div>
   </div>
   <div class="button-container">
-    <div class="button reset" *ngIf="!user?.isAdmin" (click)="resetPassword()">
-      <i class="eva eva-refresh-outline"></i>
-      <p>Reset password</p>
-    </div>
     <div class="button" *ngIf="!user?.isAdmin" (click)="delete()">
       <i class="eva eva-person-delete-outline"></i>
       <p>Delete</p>

@@ -13,10 +13,12 @@ namespace CodeManagerWebApi.Services
     public class ProjectService : IProjectService
     {
         private readonly IProjectRepository _projectRepository;
+        private readonly ITeamRepository _teamRepository;
 
-        public ProjectService(IProjectRepository projectRepository)
+        public ProjectService(IProjectRepository projectRepository, ITeamRepository teamRepository)
         {
             _projectRepository = projectRepository ?? throw new ArgumentNullException(nameof(projectRepository));
+            _teamRepository = teamRepository ?? throw new ArgumentNullException(nameof(teamRepository));
         }
         
         public async Task<ProjectDataDto> GetProjectAsync(long id, User user)
@@ -24,13 +26,8 @@ namespace CodeManagerWebApi.Services
             // check whether user is in the project
             var project = (await _projectRepository.GetAsync(id)) ?? throw new ProjectDoesNotExistException();
 
-            var member = project.Team.Members.FirstOrDefault(teamMember => teamMember.User.Id == user.Id);
+            var member = project.Team.Members.FirstOrDefault(teamMember => teamMember.User.Id == user.Id) ?? throw new UnauthorizedAccessWebException("The specified project does not exist or you are not allowed to view it.");;
 
-            if (member == default)
-            {
-                throw new UnauthorizedAccessWebException("The specified project does not exist or you are not allowed to view it.");
-            }
-            
             var projectDto = new ProjectDataDto
             {
                 Project = new ProjectDto
@@ -86,15 +83,10 @@ namespace CodeManagerWebApi.Services
             {
                 throw new ProjectAlreadyExistsException();
             }
-            
-            var team = user.Teams.FirstOrDefault(t => t.Id == createProjectDto.TeamId);
-            
-            if (team == default)
-            {
-                throw new UnauthorizedAccessWebException("You are not a member of this team.");
-            }
 
-            var member = team.Members.FirstOrDefault(teamMember => teamMember.User.Id == user.Id);
+            var team = (await _teamRepository.GetAsync(t => t.Id == createProjectDto.TeamId)).FirstOrDefault() ??
+                       throw new TeamDoesNotExistException();
+            var member = team.Members.FirstOrDefault(teamMember => teamMember.User.Id == user.Id ) ?? throw new UnauthorizedAccessWebException("You are not a member of this team.");;;
 
             if (!member.CanUpdateProjects() && !user.IsAdmin())
             {
@@ -127,20 +119,10 @@ namespace CodeManagerWebApi.Services
         
         public async Task UpdateProjectAsync(long id, CreateProjectDto createProjectDto, User user)
         {
-            var project = await _projectRepository.GetAsync(id);
+            var project = await _projectRepository.GetAsync(id) ?? throw new ProjectDoesNotExistException();
 
-            if (project == null)
-            {
-                throw new ProjectDoesNotExistException();
-            }
-
-            var member = project.Team.Members.FirstOrDefault(teamMember => teamMember.User.Id == user.Id);
-
-            if (member == default)
-            {
-                throw new UnauthorizedAccessWebException("Only team members can update the project.");
-            }
-
+            var member = project.Team.Members.FirstOrDefault(teamMember => teamMember.User.Id == user.Id) ?? throw new UnauthorizedAccessWebException("Only team members can update the project.");
+            
             if (!member.CanUpdateProjects() && !user.IsAdmin())
             {
                 throw new UnauthorizedAccessWebException("You are not allowed to update the project.");
@@ -163,14 +145,9 @@ namespace CodeManagerWebApi.Services
         
         public async Task DeleteProjectAsync(long id, User user)
         {
-            var project = await _projectRepository.GetAsync(id);
-                
-            if (project == null)
-            {
-                throw new TeamDoesNotExistException();
-            }
-            
-            var member = project.Team.Members.FirstOrDefault(teamMember => teamMember.User.Id == user.Id);
+            var project = await _projectRepository.GetAsync(id) ??  throw new TeamDoesNotExistException();;
+
+            var member = project.Team.Members.FirstOrDefault(teamMember => teamMember.User.Id == user.Id) ?? throw new UnauthorizedAccessWebException("Only team members can delete the project.");;
 
             if (!member.CanUpdateProjects() && !user.IsAdmin())
             {

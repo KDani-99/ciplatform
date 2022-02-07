@@ -27,6 +27,7 @@ namespace CodeManager.Data.Repositories
                 .Include(team => team.Owner)
                 .Include(team => team.Projects)
                 .Include(team => team.Members)
+                .ThenInclude(member => member.User)
                 .Where(expression)
                 .ToListAsync();
 

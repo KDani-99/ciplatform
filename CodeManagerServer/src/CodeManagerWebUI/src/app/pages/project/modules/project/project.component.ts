@@ -25,6 +25,7 @@ export class ProjectComponent implements OnInit {
 
   @ViewChild('editProjectTemplate') editProjectTemplate?: TemplateRef<any>;
   @ViewChild('deleteProjectTemplate') deleteProjectTemplate?: TemplateRef<any>;
+  @ViewChild('variablesTemplate') variablesTemplate?: TemplateRef<any>;
 
   @Input() projectData?: ProjectDataDto;
   showWindow: boolean = false;
@@ -53,6 +54,10 @@ export class ProjectComponent implements OnInit {
 
   openEditWindow(): void {
     this.toggleWindow(true, this.editProjectTemplate);
+  }
+
+  openVariablesWindow(): void {
+    this.toggleWindow(true, this.variablesTemplate);
   }
 
   onEdit(createProjectDto: CreateProjectDto): void {

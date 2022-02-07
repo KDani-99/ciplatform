@@ -6,8 +6,12 @@ import {
   Output,
   ViewChild,
 } from '@angular/core';
-import { UserDto } from '../../../../../../services/user/user.interface';
+import {
+  UpdateUserDto,
+  UserDto,
+} from '../../../../../../services/user/user.interface';
 import { CheckboxComponent } from '../../../../../../shared/checkbox/checkbox.component';
+import { InputComponent } from '../../../../../../shared/input/input.component';
 
 @Component({
   selector: 'user-edit',
@@ -15,18 +19,32 @@ import { CheckboxComponent } from '../../../../../../shared/checkbox/checkbox.co
   styleUrls: ['./edit.component.scss'],
 })
 export class EditComponent implements OnInit {
-  @ViewChild('isAdmin') isAdminRef?: CheckboxComponent;
+  @ViewChild('username') usernameRef?: InputComponent;
+  @ViewChild('name') nameRef?: InputComponent;
+  @ViewChild('email') emailRef?: InputComponent;
+  @ViewChild('imageUrl') imageUrlRef?: InputComponent;
+  @ViewChild('isAdmin', { static: true }) isAdminRef?: CheckboxComponent;
 
   @Input() user?: UserDto;
   @Output() onClose: EventEmitter<any> = new EventEmitter<any>();
+  @Output() onEdit: EventEmitter<UpdateUserDto> =
+    new EventEmitter<UpdateUserDto>();
   constructor() {}
 
   ngOnInit(): void {
-    console.log(this.user, this.isAdminRef);
     if (this.isAdminRef) {
-      console.log(this.user);
       this.isAdminRef.isChecked = this.user!.isAdmin;
     }
+  }
+
+  edit(): void {
+    this.onEdit.emit({
+      username: this.usernameRef!.value,
+      name: this.nameRef!.value,
+      email: this.emailRef!.value,
+      imageUrl: this.imageUrlRef!.value,
+      isAdmin: this.isAdminRef!.isChecked,
+    });
   }
 
   close(): void {

@@ -22,7 +22,7 @@
 
   <ng-template #addMemberButtonTemplate>
     <div class="button-container" *ngIf="team?.isPublic || (isUserAdmin() | async)">
-      <shared-button [text]="'Add member'" theme="default" (onClick)="openEditWindow()"></shared-button>
+      <shared-button [text]="'Add member'" theme="default" (onClick)="openAddMemberWindow()"></shared-button>
     </div>
   </ng-template>
 
@@ -31,7 +31,7 @@
   </div>
 
   <div [className]="'members-container'" >
-    <team-member *ngFor="let member of team?.members" [member]="member" [showKickButton]="(showKickButton(member) | async) ?? false" (onKick)="openKickMemberWindow($event)"></team-member>
+    <team-member *ngFor="let member of team?.members" [member]="member" [showKickButton]="(showKickButton(member) | async) ?? false" (onUpdateRole)="openUpdateRoleWindow($event)" (onKick)="openKickMemberWindow($event)"></team-member>
   </div>
 
   <ng-template #projectButtonsTemplate>
@@ -58,6 +58,14 @@
 
   <ng-template #kickMemberTemplate>
     <team-kick (onCancel)="toggleWindow(false)" [member]="selectedMember" (onKick)="onKick($event)"></team-kick>
+  </ng-template>
+
+  <ng-template #updateRoleTemplate>
+    <team-update-role (onCancel)="toggleWindow(false)" [member]="selectedMember!" (onUpdate)="onUpdateRole($event)"></team-update-role>
+  </ng-template>
+
+  <ng-template #addMemberTemplate>
+    <team-add-member (onCancel)="toggleWindow(false)" (onAdd)="onAddMember($event)"></team-add-member>
   </ng-template>
 
   <ng-template #deleteTeamTemplate>

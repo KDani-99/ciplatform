@@ -20,7 +20,7 @@ export class JwtAuthInterceptor implements HttpInterceptor {
     request: HttpRequest<any>,
     next: HttpHandler,
   ): Observable<HttpEvent<any>> {
-    if (request.url === '/assets/config/config.json') {
+    if (request?.url === '/assets/config/config.json') {
       return next.handle(request);
     }
 

@@ -35,7 +35,7 @@ export class RegisterComponent implements OnInit {
       this.toastrService.error('Different passwords provided!');
       return;
     }
-    console.log(this.configService.getFullUrl('register'));
+
     const response = await this.httpClient
       .post(this.configService.getFullUrl('register'), {
         username,
@@ -44,7 +44,5 @@ export class RegisterComponent implements OnInit {
         password,
       })
       .toPromise();
-
-    console.log(response);
   }
 }

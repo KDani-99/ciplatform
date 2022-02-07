@@ -1,0 +1,30 @@
+<div>
+  <ng-template #buttonsTemplate>
+    <div [className]="'exit-button'" (click)="close()">
+      <i class="eva eva-close-outline"></i>
+    </div>
+  </ng-template>
+  <shared-topbar [buttonsTemplate]="buttonsTemplate" [header]="'Variables'"></shared-topbar>
+  <div class="variables">
+    <div class="header">
+      <div class="key"><h1>Key</h1></div>
+      <div class="value"><h1>Value</h1></div>
+      <div class="secret"><h1>Secret</h1></div>
+    </div>
+    <div class="values">
+      <div class="row">
+        <div class="key"><h2>Key</h2></div>
+        <div class="value"><h2>Value</h2></div>
+        <div class="secret"><h2>Secret</h2></div>
+      </div>
+      <div class="row">
+        <div class="key"><h2>KeyKeyKeyKeyKeyKeyKeyKeyKeyKeyKeyKeyKeyKeyKeyKeyKeyKey</h2></div>
+        <div class="value"><h2>Value</h2></div>
+        <div class="secret"><h2>Secret</h2></div>
+      </div>
+    </div>
+  </div>
+  <div [className]="'wrapper'">
+    <shared-button [text]="'Edit'" theme="default"></shared-button>
+  </div>
+</div>

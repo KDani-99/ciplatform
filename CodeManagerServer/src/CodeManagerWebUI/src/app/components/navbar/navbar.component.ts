@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Select } from '@ngxs/store';
-import { AppState } from '../../store/app/app.state';
+import { AppState } from '../../state/app/app.state';
 import { Observable } from 'rxjs';
 
 @Component({

@@ -1,0 +1,12 @@
+@import "src/app/shared/page/styles/confirmation-window";
+.container {
+  select {
+    margin-top: 0.5em;
+    width: calc(100% - 2px);
+    padding: 0.5em;
+    outline: none;
+    border: 1px solid var(--default-border-color);
+    border-radius: 4px;
+    font-size: 18px;
+  }
+}

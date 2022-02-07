@@ -2,7 +2,7 @@
 
   <ng-template #buttonsTemplate>
     <div [className]="'button-container-top'" *ngIf="(showActions() | async)">
-      <shared-button [text]="'Variables'" theme="default"></shared-button>
+      <shared-button [text]="'Variables'" theme="default" (onClick)="openVariablesWindow()"></shared-button>
       <shared-button [text]="'Edit details'" theme="default" (onClick)="openEditWindow()"></shared-button>
       <shared-button [text]="'Delete'" theme="error" (onClick)="openDeleteWindow()"></shared-button>
     </div>
@@ -17,6 +17,10 @@
 
   <ng-template #deleteProjectTemplate>
     <project-delete (onCancel)="toggleWindow(false)" [projectName]="projectData?.project?.name" (onDelete)="onDelete()"></project-delete>
+  </ng-template>
+
+  <ng-template #variablesTemplate>
+    <project-variables (onClose)="toggleWindow(false)"></project-variables>
   </ng-template>
 
   <shared-popup *ngIf="showWindow" [contentTemplate]="currentTemplate"></shared-popup>

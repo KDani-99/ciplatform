@@ -5,8 +5,8 @@ import { LoginResponseDto } from './login.interface';
 import { UserDto } from '../user/user.interface';
 import { Router } from '@angular/router';
 import { Store } from '@ngxs/store';
-import { SetAuthTokens, SetUser } from '../../store/app/app.actions';
-import { AppStateData } from '../../store/app/app.state';
+import { SetAuthTokens, SetUser } from '../../state/app/app.actions';
+import { AppStateData } from '../../state/app/app.state';
 import { Observable, firstValueFrom } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })

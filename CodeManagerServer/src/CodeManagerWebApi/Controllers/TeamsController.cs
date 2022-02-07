@@ -50,7 +50,7 @@ namespace CodeManagerWebApi.Controllers
         {
             var user = HttpContext.Items["user"] as User;
             var result = await _teamService.CreateTeamAsync(teamDto, user);
-            _logger.LogInformation($"Team `{teamDto.Name}` created @ {DateTime.Now}");
+            _logger.LogInformation($"Team `{teamDto.Name}` has been created @ {DateTime.Now}");
 
             return CreatedAtRoute(nameof(Get), new {result.Id}, result);
         }
@@ -62,7 +62,7 @@ namespace CodeManagerWebApi.Controllers
             
             var user = HttpContext.Items["user"] as User;
             await _teamService.UpdateTeamAsync(teamDto, user);
-            _logger.LogInformation($"Team `{teamDto.Name}` updated @ {DateTime.Now}");
+            _logger.LogInformation($"Team `{teamDto.Name}` has been updated @ {DateTime.Now}");
 
             return Ok();
         }
@@ -71,9 +71,8 @@ namespace CodeManagerWebApi.Controllers
         public async Task<IActionResult> Delete([FromRoute] long id)
         {
             var user = HttpContext.Items["user"] as User;
-            
             await _teamService.DeleteTeamAsync(id, user);
-            _logger.LogInformation($"Team with id `{id}` deleted @ {DateTime.Now}");
+            _logger.LogInformation($"Team with id `{id}` has been deleted @ {DateTime.Now}");
 
             return NoContent();
         }
@@ -82,21 +81,38 @@ namespace CodeManagerWebApi.Controllers
         public async Task<IActionResult> Join([FromRoute] long id)
         {
             var user = HttpContext.Items["user"] as User;
-            
             await _teamService.JoinAsync(id, user);
             _logger.LogInformation($"User `{user.Name}` has joined team id `{id}` @ {DateTime.Now}");
 
             return NoContent();
         }
         
-        [HttpPost, Route("{id:long}/kick")]
+        [HttpPost, Route("{id:long}/members/kick")]
         public async Task<IActionResult> Kick([FromRoute] long id, [FromBody] KickMemberDto kickMemberDto)
         {
             var user = HttpContext.Items["user"] as User;
-            
             await _teamService.KickMemberAsync(id, kickMemberDto.MemberId, user);
             _logger.LogInformation($"User id `{kickMemberDto.MemberId}` has been kicked from team id `{id}` @ {DateTime.Now}");
 
+            return NoContent();
+        }
+        
+        [HttpPost, Route("{id:long}/members/role")]
+        public async Task<IActionResult> UpdateRole([FromRoute] long id, [FromBody] UpdateRoleDto updateRoleDto)
+        {
+            var user = HttpContext.Items["user"] as User;
+            await _teamService.UpdateRoleAsync(id, updateRoleDto, user);
+            _logger.LogInformation($"User id `{updateRoleDto.UserId}` role has been updated to {updateRoleDto.Role} @ {DateTime.Now}");
+
+            return NoContent();
+        }
+        
+        [HttpPost, Route("{id:long}/members/add")]
+        public async Task<IActionResult> AddMember([FromRoute] long id, [FromBody] AddMemberDto addMemberDto)
+        {
+            var user = HttpContext.Items["user"] as User;
+            await _teamService.AddMemberAsync(id, addMemberDto, user);
+            
             return NoContent();
         }
     }

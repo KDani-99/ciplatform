@@ -1,6 +1,9 @@
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { UserService } from '../../../../services/user/user.service';
-import { UserDto } from '../../../../services/user/user.interface';
+import {
+  UpdateUserDto,
+  UserDto,
+} from '../../../../services/user/user.interface';
 
 @Component({
   selector: 'app-users',
@@ -15,7 +18,6 @@ export class UsersComponent implements OnInit {
   currentTemplate?: TemplateRef<any>;
 
   @ViewChild('editTemplate') editTemplate?: TemplateRef<any>;
-  @ViewChild('resetPasswordTemplate') resetPasswordTemplate?: TemplateRef<any>;
   @ViewChild('deleteTemplate') deleteTemplate?: TemplateRef<any>;
 
   constructor(private readonly userService: UserService) {}
@@ -28,14 +30,9 @@ export class UsersComponent implements OnInit {
     });
   }
 
-  onEdit(userDto: UserDto): void {
+  onEditClick(userDto: UserDto): void {
     this.selectedUser = userDto;
     this.toggleWindow(true, this.editTemplate);
-  }
-
-  onResetPasswordClick(userDto: UserDto): void {
-    this.selectedUser = userDto;
-    this.toggleWindow(true, this.resetPasswordTemplate);
   }
 
   onDeleteClick(userDto: UserDto): void {
@@ -45,14 +42,33 @@ export class UsersComponent implements OnInit {
 
   onDelete(): void {
     if (this.selectedUser) {
-      this.userService.deleteUser(this.selectedUser.id).subscribe({
-        next: () => {
-          this.users = this.users?.filter(
-            (user) => user.id !== this.selectedUser?.id,
-          ); // removes the user = returns users with different id
-          this.selectedUser = undefined;
-        },
+      this.userService.deleteUser(this.selectedUser.id).subscribe(() => {
+        this.users = this.users?.filter(
+          (user) => user.id !== this.selectedUser?.id,
+        ); // removes the user = returns users with different id
+        this.selectedUser = undefined;
       });
+    }
+  }
+
+  onEdit(updateUserDto: UpdateUserDto): void {
+    if (this.selectedUser) {
+      this.userService
+        .updateUser(this.selectedUser.id, updateUserDto)
+        .subscribe(() => {
+          const index = this.users!.findIndex(
+            (user) => user.id === this.selectedUser!.id,
+          );
+          this.users = [
+            ...this.users!.slice(0, index),
+            {
+              ...this.users![index],
+              ...updateUserDto,
+            },
+            ...this.users!.slice(index),
+          ];
+          this.selectedUser = undefined;
+        });
     }
   }
 

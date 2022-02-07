@@ -1,0 +1,7 @@
+<div class="container">
+  <shared-input [header]="'Username'" placeholder="Username of the user that you want to add" [maxLength]="50" #username></shared-input>
+  <div [className]="'wrapper'">
+    <shared-button [text]="'Add'" theme="dark" (onClick)="add()"></shared-button>
+    <shared-button [text]="'Cancel'" theme="error" (onClick)="cancel()"></shared-button>
+  </div>
+</div>

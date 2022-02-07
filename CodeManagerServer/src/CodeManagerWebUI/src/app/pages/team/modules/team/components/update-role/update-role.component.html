@@ -1,0 +1,10 @@
+<div class="container">
+  <p>You are about to update user <span>{{member?.username ?? 'N/A'}}</span>'s permission.</p>
+  <select [(ngModel)]="value">
+    <option *ngFor="let permission of permissions" [value]="permission.value">{{permission.name}}</option>
+  </select>
+  <div [className]="'wrapper'">
+    <shared-button [text]="'Update'" theme="dark" (onClick)="update()"></shared-button>
+    <shared-button [text]="'Cancel'" theme="error" (onClick)="cancel()"></shared-button>
+  </div>
+</div>

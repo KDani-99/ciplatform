@@ -8,4 +8,5 @@ export interface Config {
     baseUrl: string;
     endpoints: Record<string, ApiEndpoint>;
   };
+  hub: string;
 }

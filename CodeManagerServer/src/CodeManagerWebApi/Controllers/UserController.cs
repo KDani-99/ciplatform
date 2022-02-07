@@ -76,6 +76,13 @@ namespace CodeManagerWebApi.Controllers
             return Ok(userDto);
         }
         
+        [Authorize(Roles = "User,Admin")]
+        [HttpPut]
+        public async Task<IActionResult> UpdateUser()
+        {
+            throw new NotImplementedException();
+        }
+        
         [Authorize(Roles = "Admin")]
         [HttpGet, Route("/api/users")]
         public async Task<IActionResult> GetUsers()
@@ -90,18 +97,10 @@ namespace CodeManagerWebApi.Controllers
         public async Task<IActionResult> Register([FromBody] CreateUserDto createUserDto)
         {
             await _userService.CreateUser(createUserDto);
-            _logger.LogInformation($"User `{createUserDto.Username}` created @ {DateTime.Now}");
+            _logger.LogInformation($"User `{createUserDto.Username}` has been created @ {DateTime.Now}");
 
             return StatusCode((int)HttpStatusCode.Created);
         }
-
-        [HttpPost, Route("/api/refresh")]
-        public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
-        {
-            var authTokens = await _userService.LoginAsync(loginDto, HttpContext);
-            _logger.LogInformation($"User `{loginDto.Username}` logged in @ {DateTime.Now}");
-                
-            return Ok(authTokens);
-        }
+        
     }
 }

@@ -5,6 +5,7 @@ import {
   MemberDto,
   MemberPermission,
   TeamDataDto,
+  UpdateRoleDto,
 } from '../../../../services/team/team.interface';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
@@ -27,6 +28,8 @@ export class TeamComponent implements OnInit {
   @ViewChild('editTeamTemplate') editTeamTemplate?: TemplateRef<any>;
   @ViewChild('deleteTeamTemplate') deleteTeamTemplate?: TemplateRef<any>;
   @ViewChild('kickMemberTemplate') kickMemberTemplate?: TemplateRef<any>;
+  @ViewChild('addMemberTemplate') addMemberTemplate?: TemplateRef<any>;
+  @ViewChild('updateRoleTemplate') updateRoleTemplate?: TemplateRef<any>;
 
   @Select((state: any) => state.app.user.user.id) userId?: Observable<number>;
   @Select((state: any) => state.app.user.user.isAdmin)
@@ -71,7 +74,7 @@ export class TeamComponent implements OnInit {
   }
 
   onEdit(createTeamDto: CreateTeamDto): void {
-    this.teamService.updateTeam(createTeamDto, this.team?.id ?? -1).subscribe({
+    this.teamService.updateTeam(createTeamDto, this.team!.id).subscribe({
       next: () => {
         this.team = {
           // merge if successful
@@ -84,7 +87,7 @@ export class TeamComponent implements OnInit {
   }
 
   onDelete(): void {
-    this.teamService.deleteTeam(this.team?.id ?? -1).subscribe({
+    this.teamService.deleteTeam(this.team!.id).subscribe({
       next: () => {
         this.router.navigate(['teams']);
       },
@@ -92,12 +95,28 @@ export class TeamComponent implements OnInit {
   }
 
   onKick(memberId: number): void {
-    this.teamService.kickmember(this.team?.id ?? -1, memberId).subscribe(() => {
+    this.teamService.kickMember(this.team!.id, memberId).subscribe(() => {
       this.team.members = this.team.members.filter(
         (member) => member.id !== memberId,
       );
       this.toggleWindow(false);
     });
+  }
+
+  onAddMember(username: string): void {
+    this.teamService.addMember(this.team!.id, username).subscribe(() => {
+      window.location.reload();
+    });
+  }
+
+  onUpdateRole(updateRoleDto: UpdateRoleDto): void {
+    this.teamService
+      .updateMemberRole(this.team!.id, updateRoleDto)
+      .subscribe(() => {
+        // TODO: update member's role
+        this.selectedMember!.permission = updateRoleDto.role;
+        this.toggleWindow(false);
+      });
   }
 
   openEditWindow(): void {
@@ -113,6 +132,15 @@ export class TeamComponent implements OnInit {
     this.toggleWindow(true, this.kickMemberTemplate);
   }
 
+  openAddMemberWindow(): void {
+    this.toggleWindow(true, this.addMemberTemplate);
+  }
+
+  openUpdateRoleWindow(member: MemberDto): void {
+    this.selectedMember = member;
+    this.toggleWindow(true, this.updateRoleTemplate);
+  }
+
   toggleWindow(show: boolean, template?: TemplateRef<any>): void {
     this.showWindow = show;
     if (this.showWindow) {
@@ -126,12 +154,6 @@ export class TeamComponent implements OnInit {
     return new Observable<boolean>((observer) => {
       this.userId?.subscribe({
         next: (id: number) => {
-          console.log(
-            member.id,
-            id,
-            this.team?.userPermission === MemberPermission.ADMIN &&
-              member.id !== id,
-          );
           observer.next(
             this.team?.userPermission === MemberPermission.ADMIN &&
               member.id !== id,

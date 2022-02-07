@@ -17,10 +17,12 @@ namespace CodeManagerWebApi.Services
     {
         private readonly ITeamRepository _teamRepository;
         private readonly IProjectRepository _projectRepository;
+        private readonly IUserRepository _userRepository;
 
-        public TeamService(ITeamRepository teamRepository, IProjectRepository projectRepository)
+        public TeamService(ITeamRepository teamRepository, IUserRepository userRepository, IProjectRepository projectRepository)
         {
             _teamRepository = teamRepository ?? throw new ArgumentNullException(nameof(teamRepository));
+            _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
             _projectRepository = projectRepository ?? throw new ArgumentNullException(nameof(projectRepository));
         }
 
@@ -67,7 +69,8 @@ namespace CodeManagerWebApi.Services
                     Id = teamMember.User.Id,
                     Name = teamMember.User.Name,
                     Username = teamMember.User.Username,
-                    JoinTime = teamMember.JoinTime
+                    JoinTime = teamMember.JoinTime,
+                    Permission = teamMember.Permission
                 }),
                 Projects = team.Projects.Select(project => new ProjectDto
                 {
@@ -178,13 +181,8 @@ namespace CodeManagerWebApi.Services
         {
             var team = await _teamRepository.GetAsync(teamId) ?? throw new TeamDoesNotExistException();
 
-            var member = team.Members.FirstOrDefault(teamMember => teamMember.User.Id == user.Id);
-            var memberToKick = team.Members.FirstOrDefault(teamMember => teamMember.User.Id == memberId);
-
-            if (memberToKick == default)
-            {
-                throw new BadHttpRequestException($"Member with id {memberId} is not in this team.", (int)HttpStatusCode.BadRequest);
-            }
+            var member = team.Members.FirstOrDefault(teamMember => teamMember.User.Id == user.Id) ?? throw new BadHttpRequestException($"You must be in the team to kick members.", (int)HttpStatusCode.BadRequest);
+            var memberToKick = team.Members.FirstOrDefault(teamMember => teamMember.User.Id == memberId) ?? throw new BadHttpRequestException($"Member with id {memberId} is not in this team.", (int)HttpStatusCode.BadRequest);
 
             if (team.Owner.Id == memberToKick.Id)
             {
@@ -197,6 +195,56 @@ namespace CodeManagerWebApi.Services
             }
 
             team.Members = team.Members.Where(teamMember => teamMember.User.Id != memberId).ToList();
+
+            await _teamRepository.UpdateAsync(team); 
+        }
+
+        public async Task AddMemberAsync(long teamId, AddMemberDto addMemberDto, User user)
+        {
+            var userToAdd = (await _userRepository.GetAsync(repoUser => repoUser.Username == addMemberDto.Username)).FirstOrDefault( ) ?? throw new UserDoesNotExistException();
+            
+            var team = await _teamRepository.GetAsync(teamId) ?? throw new TeamDoesNotExistException();
+            
+            var member = team.Members.FirstOrDefault(teamMember => teamMember.User.Id == user.Id) ?? throw new BadHttpRequestException($"You must be in the team to kick members.", (int)HttpStatusCode.BadRequest);
+
+            if (team.Members.Any(teamMember => teamMember.User.Id == userToAdd.Id))
+            {
+                throw new BadHttpRequestException($"User is already member of this team.", (int)HttpStatusCode.BadRequest);
+            }
+            
+            if (!member.IsAdmin())
+            {
+                throw new UnauthorizedAccessWebException("You are not allowed to add members.");
+            }
+
+            team.Members.Add(new TeamMember
+            {
+                Permission = Permissions.Read,
+                JoinTime = DateTime.Now,
+                User = userToAdd
+            });
+            
+            await _teamRepository.UpdateAsync(team);
+        }
+
+        public async Task UpdateRoleAsync(long teamId, UpdateRoleDto updateRoleDto, User user)
+        {
+            var team = await _teamRepository.GetAsync(teamId) ?? throw new TeamDoesNotExistException();
+
+            var member = team.Members.FirstOrDefault(teamMember => teamMember.User.Id == user.Id) ?? throw new BadHttpRequestException($"You must be in the team to update the role of members.", (int)HttpStatusCode.BadRequest);
+            var memberToUpdate = team.Members.FirstOrDefault(teamMember => teamMember.User.Id == updateRoleDto.UserId) ?? throw new BadHttpRequestException($"Member with id {updateRoleDto.UserId} is not in this team.", (int)HttpStatusCode.BadRequest);
+
+            if (team.Owner.Id == memberToUpdate.Id)
+            {
+                throw new UnauthorizedAccessWebException("Team owner's role can't be changes.");
+            }
+
+            if (!member.IsAdmin())
+            {
+                throw new UnauthorizedAccessWebException("You are not allowed to update roles.");
+            }
+
+            memberToUpdate.Permission = updateRoleDto.Role;
 
             await _teamRepository.UpdateAsync(team); 
         }

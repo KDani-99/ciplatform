@@ -6,14 +6,14 @@
   </ng-template>
   <shared-topbar [buttonsTemplate]="buttonsTemplate" [header]="'Edit user'"></shared-topbar>
 
-  <shared-input [header]="'Username'" [maxLength]="50" [value]="user?.username ?? ''"></shared-input>
-  <shared-input [header]="'Name'" [maxLength]="75" [value]="user?.name ?? ''"></shared-input>
-  <shared-input [header]="'Email'" [maxLength]="255" [value]="user?.email ?? ''"></shared-input>
-  <shared-input [header]="'Image URL'" [maxLength]="255" [value]="user?.image ?? ''"></shared-input>
+  <shared-input [header]="'Username'" [maxLength]="50" [value]="user?.username ?? ''" #username></shared-input>
+  <shared-input [header]="'Name'" [maxLength]="75" [value]="user?.name ?? ''" #name></shared-input>
+  <shared-input [header]="'Email'" [maxLength]="255" [value]="user?.email ?? ''" #email></shared-input>
+  <shared-input [header]="'Image URL'" [maxLength]="255" [value]="user?.image ?? ''" #imageUrl></shared-input>
   <div [className]="'wrapper'">
     <shared-checkbox [id]="'is-admin'" [value]="'Admin'" #isAdmin></shared-checkbox>
   </div>
   <div [className]="'wrapper'">
-    <shared-button [text]="'Edit'" theme="dark"></shared-button>
+    <shared-button [text]="'Edit'" theme="dark" (onClick)="edit()"></shared-button>
   </div>
 </div>

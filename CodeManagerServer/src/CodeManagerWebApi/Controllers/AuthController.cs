@@ -29,7 +29,7 @@ namespace CodeManagerWebApi.Controllers
         public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
             var authTokens = await _userService.LoginAsync(loginDto, HttpContext);
-            _logger.LogInformation($"User `{loginDto.Username}` logged in @ {DateTime.Now}");
+            _logger.LogInformation($"User `{loginDto.Username}` has logged in @ {DateTime.Now}");
                 
             return Ok(authTokens);
         }
@@ -46,6 +46,7 @@ namespace CodeManagerWebApi.Controllers
 
                 await _tokenService.InvalidateAccessTokenAsync(username);
                 await _tokenService.InvalidRefreshTokenAsync(username);
+                _logger.LogInformation($"User `{username}` has logged out @ {DateTime.Now}");
 
                 return NoContent();
             }
@@ -68,8 +69,8 @@ namespace CodeManagerWebApi.Controllers
 
                 var claimsPrincipal = await _tokenService.VerifyRefreshTokenAsync(token);
                 var username = claimsPrincipal.Claims.First(claim => claim.Type == JwtRegisteredClaimNames.Sub).Value;
-
                 var authTokens = await _userService.GenerateAuthTokensAsync(username);
+                _logger.LogInformation($"Refreshed tokens for `{username}` @ {DateTime.Now}");
 
                 return Ok(authTokens);
             }

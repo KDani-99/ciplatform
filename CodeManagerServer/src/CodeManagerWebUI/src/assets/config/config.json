@@ -1,5 +1,7 @@
 {
-  "hub": "http://localhost:5100/ws",
+  "hubs": {
+    "runs": "http://localhost:5100/runs"
+  },
   "api": {
     "baseUrl": "http://localhost:5100",
     "endpoints": {
@@ -31,6 +33,10 @@
         "url": "api/teams/{0}/members/add",
         "authRequired": true
       },
+      "updateUser": {
+        "url": "api/user",
+        "authRequired": true
+      },
       "updateRole": {
         "url": "api/teams/{0}/members/role",
         "authRequired": true
@@ -47,9 +53,21 @@
         "url": "api/users",
         "authRequired": true
       },
+      "deleteUser": {
+        "url": "api/user",
+        "authRequired": true
+      },
       "refreshToken": {
         "url": "api/auth/refresh",
         "authRequired": false
+      },
+      "uploadRunInstructions": {
+        "url": "api/runs/{0}/start",
+        "authRequired": true
+      },
+      "runs": {
+        "url": "api/runs",
+        "authRequired": true
       }
     }
   }

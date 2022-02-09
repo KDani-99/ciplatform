@@ -52,6 +52,10 @@ const routes: Routes = [
   {
     path: 'teams/:id',
     component: TeamComponent,
+    loadChildren: () =>
+      import('./pages/team/modules/teams/teams.module').then(
+        (m) => m.TeamsModule,
+      ),
     canActivate: [AuthenticatedGuard],
   },
   {
@@ -74,7 +78,7 @@ const routes: Routes = [
     canActivate: [AuthenticatedGuard],
   },
   {
-    path: 'jobs/:id',
+    path: 'runs/:runId/jobs/:id',
     component: JobComponent,
     canActivate: [AuthenticatedGuard],
   },

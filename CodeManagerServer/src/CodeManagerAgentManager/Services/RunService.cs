@@ -35,25 +35,21 @@ namespace CodeManagerAgentManager.Services
         private readonly IHubContext<AgentHub, IAgentClient> _hubContext;
         private readonly IManagerClient _managerClient;
         private readonly JsonSerializerOptions _jsonSerializerOptions;
-        private readonly ILogger<RunService> _logger;
-        private readonly IFileProcessorService<RunConfiguration> _runConfigurationFileProcessorService;
         private readonly IRunRepository _runRepository;
+        private readonly IProjectRepository _projectRepository;
         private readonly ITokenService<JwtSecurityToken> _tokenService;
-        private readonly IVariableService _variableService;
         private readonly IWorkerConnectionService _workerConnectionService;
 
-        public RunService(JsonSerializerOptions jsonSerializerOptions, IVariableService variableService,
-            IRunRepository runRepository, ILogger<RunService> logger,
+        public RunService(JsonSerializerOptions jsonSerializerOptions,
+            IRunRepository runRepository, IProjectRepository projectRepository,
             IOptions<AgentManagerConfiguration> agentManagerConfiguration,
             IHubContext<AgentHub, IAgentClient> hubContext, IManagerClient managerClient, IWorkerConnectionService workerConnectionService,
-            ITokenService<JwtSecurityToken> tokenService,
-            IFileProcessorService<RunConfiguration> runConfigurationFileProcessorService)
+            ITokenService<JwtSecurityToken> tokenService)
         {
             _jsonSerializerOptions =
                 jsonSerializerOptions ?? throw new ArgumentNullException(nameof(jsonSerializerOptions));
-            _variableService = variableService ?? throw new ArgumentNullException(nameof(variableService));
             _runRepository = runRepository ?? throw new ArgumentNullException(nameof(runRepository));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _projectRepository = projectRepository ?? throw new ArgumentNullException(nameof(projectRepository));
             _agentManagerConfiguration = agentManagerConfiguration.Value ??
                                          throw new ArgumentNullException(nameof(agentManagerConfiguration));
             _hubContext = hubContext ?? throw new ArgumentNullException(nameof(hubContext));
@@ -61,35 +57,25 @@ namespace CodeManagerAgentManager.Services
             _workerConnectionService = workerConnectionService ??
                                        throw new ArgumentNullException(nameof(workerConnectionService));
             _tokenService = tokenService ?? throw new ArgumentNullException(nameof(tokenService));
-            _runConfigurationFileProcessorService = runConfigurationFileProcessorService ??
-                                                    throw new ArgumentNullException(
-                                                        nameof(runConfigurationFileProcessorService));
         }
 
         public async Task<long> QueueAsync(QueueRunCommand cmd)
         {
-            var runConfiguration =
-                await _runConfigurationFileProcessorService.ProcessAsync(cmd.RunConfigurationString, cmd.ProjectId);
-
-            var run = await SaveRunConfigurationAsync(cmd.Repository, cmd.ProjectId, runConfiguration);
+            var run = await SaveRunConfigurationAsync(cmd.Repository, cmd.ProjectId, cmd.RunConfiguration);
             run.State = States.Running;
 
             foreach (var job in run.Jobs)
                 await QueueJobAsync(run, job);
-            // await _runRepository.UpdateAsync(run); // TODO: use job repository?
 
             run.State = States.Queued;
             await _runRepository.UpdateAsync(run);
 
             return run.Id;
-            // TODO: send run queued event?
         }
 
         private async Task QueueJobAsync(Run run, Job job)
         {
             var jobToken = await _tokenService.CreateJobTokenAsync(run.Id, job.Id);
-
-            var cancellationToken = CancellationToken.None; // TODO: add token
 
             var workerConnectionId =
                 (await _workerConnectionService.GetAvailableWorkerConnectionIdsOfTypeAsync(job.Context))
@@ -97,10 +83,8 @@ namespace CodeManagerAgentManager.Services
 
             if (workerConnectionId == null) throw new WorkersNotAvailableException();
 
-            var variables = await _variableService.GetVariablesForProject(run.Project.Id);
             var jobConfiguration =
-                ParseSecretsAsync(JsonSerializer.Deserialize<JobConfiguration>(job.JsonContext, _jsonSerializerOptions),
-                    variables.ToList());
+                JsonSerializer.Deserialize<JobConfiguration>(job.JsonContext, _jsonSerializerOptions);
 
             var queueJobEvent = new QueueJobCommand
             {
@@ -127,9 +111,6 @@ namespace CodeManagerAgentManager.Services
 
             await UpdateWorkerStateAsync(workerConnectionId);
 
-            //await _busControl.Publish(queueJobEvent);
-            // TODO: send job queued event back to the client
-
             job.Steps.Insert(0, new Step
             {
                 Name = "Checkout repository (setup)"
@@ -151,6 +132,8 @@ namespace CodeManagerAgentManager.Services
         private async Task<Run> SaveRunConfigurationAsync(string repository, long projectId,
             RunConfiguration runConfiguration)
         {
+            var project = await _projectRepository.GetAsync(projectId);
+            
             var run = new Run
             {
                 Repository = repository,
@@ -167,8 +150,9 @@ namespace CodeManagerAgentManager.Services
                     }).ToList(),
                     State = States.NotRun
                 }).ToList(),
+                StartedDateTime = DateTime.Now,
                 State = States.NotRun,
-                Project = new Project {Id = projectId}
+                Project = project
             };
 
             await _runRepository.CreateAsync(run);
@@ -183,18 +167,6 @@ namespace CodeManagerAgentManager.Services
                 JobId = job.Id
             };
             return _managerClient.HubConnection.SendAsync(CommonWebApiMethods.JobQueueResponse, processed);
-        }
-
-        private static JobConfiguration ParseSecretsAsync(JobConfiguration jobConfiguration, IList<Variable> variables)
-        {
-            // modifies the state and returns the reference to the given object
-            foreach (var step in jobConfiguration.Steps)
-            {
-                var sb = new StringBuilder(step.Cmd); // StringBuilder is better for repeated replace calls
-                foreach (var variable in variables) sb.Replace($"$({variable.Name})", variable.Value);
-            }
-
-            return jobConfiguration;
         }
     }
 }

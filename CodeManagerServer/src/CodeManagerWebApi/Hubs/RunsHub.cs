@@ -18,6 +18,11 @@ namespace CodeManagerWebApi.Hubs
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
+        public override async Task OnConnectedAsync()
+        {
+            var x = Context.Features;
+        }
+
         [HubMethodName("SubscribeToChannel")]
         public Task SubscribeToChannelAsync(long runId, long jobId)
         {
@@ -41,7 +46,10 @@ namespace CodeManagerWebApi.Hubs
                 cancellationToken.ThrowIfCancellationRequested();
                 
                 await Task.Yield();
-                await Clients.Group(GetGroupName(runId, jobId)).SendAsync("ReceiveLogs", item, cancellationToken: cancellationToken);
+                // TEST:
+                Console.WriteLine("ASD => " + item);
+                await Clients.All.SendAsync("ReceiveLogs", item, cancellationToken: cancellationToken);
+               // await Clients.Group(GetGroupName(runId, jobId)).SendAsync("ReceiveLogs", item, cancellationToken: cancellationToken);
             }
 
         }

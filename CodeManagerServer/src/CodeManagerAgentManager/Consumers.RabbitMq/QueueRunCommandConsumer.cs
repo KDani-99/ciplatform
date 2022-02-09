@@ -13,7 +13,7 @@ namespace CodeManagerAgentManager.Consumers.RabbitMq
         private readonly IRunService _runService;
         private readonly ILogger<QueueRunCommandConsumer> _logger;
 
-        public QueueRunCommandConsumer(IRunService runService, ILogger<QueueRunCommandConsumer> logger, IFileProcessorService<RunConfiguration> runConfigurationFileProcessorService)
+        public QueueRunCommandConsumer(IRunService runService, ILogger<QueueRunCommandConsumer> logger)
         {
             _runService = runService ?? throw new ArgumentNullException(nameof(runService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -24,11 +24,7 @@ namespace CodeManagerAgentManager.Consumers.RabbitMq
             try
             {
                 var runId = await _runService.QueueAsync(context.Message);
-
-                await context.RespondAsync(new SuccessfulQueueRunCommandResponse
-                {
-                    RunId = runId,
-                });
+                _logger.LogInformation($"Queued run with id `{runId}`. (Project id: `{context.Message.ProjectId}`)");
             }
             catch (Exception exception)
             {

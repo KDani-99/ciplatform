@@ -1,10 +1,6 @@
 import { MemberPermission } from '../team/team.interface';
+import { RunDto } from '../run/run.interface';
 
-export interface VariableDto {
-  name: string;
-  value: string;
-  isSecret: boolean;
-}
 export interface ProjectDto {
   id: number;
   name: string;
@@ -16,19 +12,15 @@ export interface ProjectDto {
 }
 export interface ProjectDataDto {
   project: ProjectDto;
-  isPrivateRepository: boolean;
   repositoryUrl: string;
   teamId: number;
   userPermission: MemberPermission;
-  variables: VariableDto[];
+  runs: RunDto[];
 }
 export interface CreateProjectDto {
   teamId: number;
   name: string;
   description: string;
   repositoryUrl: string;
-  isPrivateRepository: boolean;
   isPrivateProject: boolean;
-  username?: string;
-  secretToken?: string;
 }

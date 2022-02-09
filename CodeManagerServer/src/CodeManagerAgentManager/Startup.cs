@@ -1,7 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using CodeManager.Core.Services;
 using CodeManager.Data.Commands;
 using CodeManager.Data.Configuration;
 using CodeManager.Data.Database;
@@ -64,13 +63,7 @@ namespace CodeManagerAgentManager
                 .AddSingleton<IManagerClient, ManagerClient>()
                 .AddScoped<IWorkerConnectionRepository, WorkerConnectionRepository>()
                 .AddScoped<IRunRepository, RunRepository>()
-                .AddScoped((_) => new DeserializerBuilder()
-                    .WithNamingConvention(LowerCaseNamingConvention.Instance)
-                    .Build())
-                .AddScoped<IVariableRepository, VariableRepository>()
-                .AddScoped<IVariableService, VariableService>()
-                .AddScoped<IEncryptionService, EncryptionService>()
-                .AddScoped<IFileProcessorService<RunConfiguration>, YmlFileProcessorService>()
+                .AddScoped<IProjectRepository, ProjectRepository>()
                 .AddScoped<IRunService, RunService>()
                 .AddScoped<ITokenService<JwtSecurityToken>, TokenService>()
                 .AddScoped<IRunRepository, RunRepository>()

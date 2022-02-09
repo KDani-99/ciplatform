@@ -4,7 +4,6 @@
     {
         Available,
         Working,
-        Failing,
         Offline
     }
 }

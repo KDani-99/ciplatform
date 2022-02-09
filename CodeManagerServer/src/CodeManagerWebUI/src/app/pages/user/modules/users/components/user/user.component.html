@@ -2,7 +2,7 @@
   <div class="id-container">ID: {{user?.id ?? 'N/A'}}</div>
   <div class="edit-button" (click)="edit()"><i class="eva eva-edit-outline"></i></div>
   <div class="image">
-    <img [src]="user?.image"/>
+    <i class="eva eva-person-outline"></i>
   </div>
   <div class="info">
     <h1>{{user?.name ?? 'N/A'}}</h1>
@@ -20,10 +20,6 @@
     <div class="data">
       <h1>Teams</h1>
       <h2>{{user?.teams ?? 'N/A'}}</h2>
-    </div>
-    <div class="data">
-      <h1>Plan</h1>
-      <h2>{{user?.plan ?? 'N/A'}}</h2>
     </div>
     <div class="data">
       <h1>Account created</h1>

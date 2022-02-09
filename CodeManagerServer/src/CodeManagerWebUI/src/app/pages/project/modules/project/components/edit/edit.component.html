@@ -13,13 +13,6 @@
     <shared-checkbox [id]="'is-private'" [value]="'Private'" #isPrivateProject></shared-checkbox>
   </div>
   <div [className]="'wrapper'">
-    <shared-checkbox [id]="'is-private-repo'" [value]="'Private repository'" #isPrivateRepository></shared-checkbox>
-  </div>
-  <div *ngIf="isPrivateRepository.isChecked">
-    <shared-input [header]="'Git username'" [maxLength]="100" #username></shared-input>
-    <shared-input [type]="'password'" [header]="'Git secret'" [maxLength]="255" #secretToken></shared-input>
-  </div>
-  <div [className]="'wrapper'">
     <shared-button [text]="'Edit'" theme="default" (onClick)="edit()"></shared-button>
   </div>
 </div>

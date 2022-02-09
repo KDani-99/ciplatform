@@ -23,22 +23,16 @@ namespace CodeManagerWebApi.Services
         private readonly ICredentialManagerService _credentialManagerService;
         private readonly ITokenService<JwtSecurityToken> _tokenService;
         private readonly IUserRepository _userRepository;
-        private readonly IPlanRepository _planRepository;
-        private readonly UserConfiguration _userConfiguration;
 
         public UserService(
             IUserRepository userRepository,
-            IPlanRepository planRepository,
             ITokenService<JwtSecurityToken> tokenService,
-            ICredentialManagerService credentialManagerService,
-            IOptions<UserConfiguration> userConfiguration)
+            ICredentialManagerService credentialManagerService)
         {
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
-            _planRepository = planRepository ?? throw new ArgumentNullException(nameof(planRepository));
             _tokenService = tokenService ?? throw new ArgumentNullException(nameof(tokenService));
             _credentialManagerService = credentialManagerService ??
                                         throw new ArgumentNullException(nameof(credentialManagerService));
-            _userConfiguration = userConfiguration?.Value ?? throw new ArgumentNullException(nameof(userConfiguration));
         }
 
         public async Task CreateUser(CreateUserDto createUserDto)
@@ -49,18 +43,14 @@ namespace CodeManagerWebApi.Services
             if (await _userRepository.GetByEmailAsync(createUserDto.Email) is not null)
                 throw new EmailAlreadyInUseException();
 
-            var defaultPlan = (await _planRepository.GetAsync(plan => plan.Name == _userConfiguration.DefaultPlan)).FirstOrDefault();
-
             var user = new User
             {
                 Username = createUserDto.Username,
                 Name = createUserDto.Name,
                 Email = createUserDto.Email,
-                Image = null,
                 Password = _credentialManagerService.CreateHashedPassword(createUserDto.Password),
                 Roles = new [] {Roles.User},
                 RegistrationTimestamp = DateTime.Now,
-                Plan = defaultPlan
             };
             
             await _userRepository.CreateAsync(user);
@@ -81,7 +71,6 @@ namespace CodeManagerWebApi.Services
                 Username = selectedUser.Username,
                 Name = selectedUser.Name,
                 Email = selectedUser.Email,
-                Image = selectedUser.Image,
                 IsAdmin = selectedUser.IsAdmin(),
                 Teams = selectedUser.Teams.Count,
                 Registration = selectedUser.RegistrationTimestamp
@@ -98,7 +87,6 @@ namespace CodeManagerWebApi.Services
                 Username = dbUser.Username,
                 Name = dbUser.Name,
                 Email = dbUser.Email,
-                Image = dbUser.Image,
                 IsAdmin = dbUser.IsAdmin(),
                 Teams = dbUser.Teams.Count,
                 Registration = dbUser.RegistrationTimestamp
@@ -115,10 +103,10 @@ namespace CodeManagerWebApi.Services
         {
             var user = await _userRepository.GetByUsernameAsync(loginDto.Username);
 
-            if (user is null) throw new UserDoesNotExistException();
+            if (user is null) throw new InvalidCredentialsException();
 
             if (!_credentialManagerService.VerifyPassword(loginDto.Password, user.Password))
-                throw new InvalidCredentialException();
+                throw new InvalidCredentialsException();
 
             var accessToken = await _tokenService.CreateAccessTokenAsync(user);
             var refreshToken = await _tokenService.CreateRefreshTokenAsync(user);
@@ -150,13 +138,37 @@ namespace CodeManagerWebApi.Services
             };
         }
 
-        public async Task DeleteUserAsync(long id)
+        public async Task UpdateUserAsync(long id, UpdateUserDto updateUserDto, User user)
         {
-            if (!await _userRepository.ExistsAsync(user => user.Id == id))
+            var userToUpdate = await _userRepository.GetAsync(id) ?? throw new UserDoesNotExistException();
+
+            userToUpdate.Email = updateUserDto.Email;
+            userToUpdate.Name = updateUserDto.Name;
+            userToUpdate.Username = updateUserDto.Username;
+            if (updateUserDto.Password != null)
             {
-                throw new UserDoesNotExistException();
+                userToUpdate.Password = _credentialManagerService.CreateHashedPassword(updateUserDto.Password);  
             }
-            
+
+            userToUpdate.Roles = updateUserDto.IsAdmin ? new[] {Roles.User, Roles.Admin} : new[] {Roles.User};
+
+            await _userRepository.UpdateAsync(userToUpdate);
+        }
+
+        public async Task DeleteUserAsync(long id, User user)
+        {
+            var userToDelete = await _userRepository.GetAsync(id) ?? throw new UserDoesNotExistException();
+
+            if (userToDelete.IsAdmin())
+            {
+                throw new UnauthorizedAccessWebException("You are not allowed to delete admin users");
+            }
+
+            if (userToDelete.Id == user.Id)
+            {
+                throw new UnauthorizedAccessWebException("You can not delete yourself.");
+            }
+
             await _userRepository.DeleteAsync(id);
         }
     }

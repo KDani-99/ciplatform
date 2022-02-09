@@ -40,13 +40,6 @@ namespace CodeManagerAgentManager.Services
             var job = run.Jobs.First(item => item.Id == jobId); // TODO: lazy load!!
             var step = job.Steps[stepIndex]; // TODO: use step id instead of index
 
-            // TODO: commented out for tesint purposes
-           /* var secrets = run.Project.Variables
-                .Where(variable => variable.IsSecret)
-                .Select(s => s.Value)
-                .ToList();*/
-           var secrets = new List<string>();
-            
             step.LogPath = logPath;
             await _runRepository.UpdateAsync(run);
             
@@ -69,16 +62,12 @@ namespace CodeManagerAgentManager.Services
                         throw new LogStreamException($"Unable to write more data to file {logPath}. Log file has reached the maximum size (Max.:{_logStreamServiceConfiguration.MaxFileSize}).");
                     }
 
-                    var filtered = FilterSecrets(line, secrets);
-
-                    Console.Write(filtered);
+                    await channel.Writer.WriteAsync(line); //TEST
                 
-                    await channel.Writer.WriteAsync(filtered); //TEST
-                
-                    await outputStream.WriteAsync(filtered);
+                    await outputStream.WriteAsync(line);
                     await outputStream.FlushAsync();
 
-                    sizeInBytes += Encoding.UTF8.GetByteCount(filtered);
+                    sizeInBytes += Encoding.UTF8.GetByteCount(line);
                     numberOfLines++;
                 }
             }
@@ -89,21 +78,6 @@ namespace CodeManagerAgentManager.Services
         private string GetLogPath(long runId, long jobId, int step)
         {
             return Path.Join(_logStreamServiceConfiguration.LogPath, runId.ToString(), jobId.ToString(), $"{step}.log");
-        }
-
-        private static string FilterSecrets(string log, IEnumerable<string> secrets)
-        {
-            // the reason why it needs to be filtered here is because a command might output a secret,
-            // even if it gets marked before sending it to the agent
-            // (so it would have been faster to stream it back as it would not require additional processing)
-            var sb = new StringBuilder(log);
-
-            foreach (var secret in secrets)
-            {
-                sb.Replace(secret, "********");
-            }
-            
-            return sb.ToString();
         }
     }
 }

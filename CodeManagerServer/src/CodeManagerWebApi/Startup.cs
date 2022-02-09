@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using CodeManager.Core.Services;
+using CodeManager.Data.Configuration;
 using CodeManager.Data.Repositories;
 using CodeManagerWebApi.Cache;
 using CodeManagerWebApi.Database;
@@ -27,8 +27,11 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace CodeManagerWebApi
 {
@@ -47,7 +50,6 @@ namespace CodeManagerWebApi
                 .AddCors()
                 .AddFluentValidation()
                 .Configure<JwtConfiguration>(_configuration.GetSection("JwtConfiguration"))
-                .Configure<UserConfiguration>(_configuration.GetSection("UserConfiguration"))
                 .Configure<RedisConfiguration>(_configuration.GetSection("RedisConfiguration"))
                 .Configure<IConfiguration>(_configuration)
                 .AddDbContext<CodeManager.Data.Database.CodeManagerDbContext, CodeManagerDbContext>(options =>
@@ -60,6 +62,9 @@ namespace CodeManagerWebApi
                         new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)
                     }
                 })
+                .AddScoped((_) => new DeserializerBuilder()
+                    .WithNamingConvention(LowerCaseNamingConvention.Instance)
+                    .Build())
                 .AddScoped<ITokenService<JwtSecurityToken>, TokenService>()
                 .AddSingleton<ITokenCache, RedisTokenCache>()
                 .AddScoped<IUserRepository, UserRepository>()
@@ -68,12 +73,10 @@ namespace CodeManagerWebApi
                 .AddScoped<ITeamService, TeamService>()
                 .AddScoped<IProjectRepository, ProjectRepository>()
                 .AddScoped<IProjectService, ProjectService>()
-                .AddScoped<IVariableRepository, VariableRepository>()
-                .AddScoped<IVariableService, VariableService>()
-                .AddScoped<IEncryptionService, EncryptionService>()
-                .AddScoped<IPlanRepository, PlanRepository>()
-                .AddScoped<IPlanService, PlanService>()
                 .AddScoped<ITokenRepository, TokenRepository>()
+                .AddScoped<IRunRepository, RunRepository>()
+                .AddScoped<IRunService, RunService>()
+                .AddScoped<IFileProcessorService<RunConfiguration>, YmlFileProcessorService>()
                 .AddAntiforgery()
                 .AddRabbitMq(_configuration)
                 .AddControllers().Services
@@ -89,10 +92,36 @@ namespace CodeManagerWebApi
                 .AddTransient<IValidator<TeamDto>, TeamDtoValidator>()
                 .AddTransient<IValidator<LoginDto>, LoginDtoValidator>()
                 .AddTransient<IValidator<CreateUserDto>, CreateUserDtoValidator>()
-                .AddTransient<IValidator<VariableDto>, VariableDtoValidator>();
+                .AddTransient<IValidator<UpdateUserDto>, UpdateUserDtoValidator>();
+            
+            services.Configure<FormOptions>(options =>
+            {
+                options.ValueCountLimit = 2;
+                options.ValueLengthLimit = int.MaxValue;
+                options.MultipartBodyLengthLimit = long.MaxValue;
+            });
             
             services.AddAuthentication("JwtAuthToken")
-                .AddJwtBearer(opts => opts.MapInboundClaims = false)
+                .AddJwtBearer(options =>
+                {
+                    options.MapInboundClaims = false;
+                    
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            var accessToken = context.Request.Query["access_token"];
+                            
+                            var path = context.HttpContext.Request.Path;
+                            if (!string.IsNullOrEmpty(accessToken) &&
+                                (path.StartsWithSegments("/runs")))
+                            {
+                                context.Token = accessToken;
+                            }
+                            return Task.CompletedTask;
+                        }
+                    };
+                })
                 .AddScheme<JwtAuthenticationTokenSchemeOptions, JwtAuthenticationHandler>("JwtAuthToken",null);
         }
         
@@ -114,6 +143,7 @@ namespace CodeManagerWebApi
                 .UseCors(x => x
                     .AllowAnyMethod()
                     .AllowAnyHeader()
+                    .WithExposedHeaders("Token-Expired")
                     .SetIsOriginAllowed(origin => true) // any
                     //.WithOrigins("https://localhost:4000"));
                     .AllowCredentials())

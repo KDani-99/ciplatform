@@ -21,7 +21,6 @@ export class CreateProjectComponent implements OnInit {
   @ViewChild('description') descriptionRef?: InputComponent;
   @ViewChild('repositoryUrl') repositoryUrlRef?: InputComponent;
   @ViewChild('isPrivateProject') isPrivateProjectRef?: CheckboxComponent;
-  @ViewChild('isPrivateRepository') isPrivateRepositoryRef?: CheckboxComponent;
   @ViewChild('username') usernameRef?: InputComponent;
   @ViewChild('secretToken') secretTokenRef?: InputComponent;
 
@@ -44,10 +43,7 @@ export class CreateProjectComponent implements OnInit {
       name: this.nameRef?.value ?? 'N/A',
       description: this.descriptionRef?.value ?? 'N/A',
       repositoryUrl: this.repositoryUrlRef?.value ?? 'N/A',
-      username: this.usernameRef?.value ?? 'N/A',
-      secretToken: this.secretTokenRef?.value ?? 'N/A',
       isPrivateProject: this.isPrivateProjectRef?.isChecked ?? false,
-      isPrivateRepository: this.isPrivateRepositoryRef?.isChecked ?? false,
     });
   }
 }

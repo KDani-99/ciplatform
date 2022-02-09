@@ -19,10 +19,12 @@ namespace CodeManager.Data.Repositories
         {
             return DbContext
                 .Projects
-                .Include(x => x.Variables)
+                .Include(x => x.Runs)
+                .ThenInclude(x => x.Jobs)
                 .Include(x => x.Team)
                 .ThenInclude(x => x.Members)
                 .ThenInclude(x => x.User)
+             //   .ThenInclude(x => x.Name)
                 .FirstOrDefaultAsync(project => project.Id == id);
         }
 
@@ -30,7 +32,8 @@ namespace CodeManager.Data.Repositories
         {
             return DbContext
                 .Projects
-                .Include(x => x.Variables)
+                .Include(x => x.Runs)
+                .ThenInclude(x => x.Jobs)
                 .Include(x => x.Team)
                 .ThenInclude(x => x.Members)
                 .Where(expression)

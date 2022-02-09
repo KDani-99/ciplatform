@@ -16,9 +16,7 @@ export class NavbarComponent implements OnInit {
 
   ngOnInit(): void {
     this.isAdmin$?.subscribe({
-      next: (value: boolean) => {
-        console.log(value);
-      },
+      next: (value: boolean) => {},
     });
   }
 

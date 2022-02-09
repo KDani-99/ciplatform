@@ -14,7 +14,7 @@ namespace CodeManagerWebApi.Extensions
             {
                 var massTransitConfiguration = configuration.GetSection("MassTransitConfiguration").Get<MassTransitConfiguration>();
 
-                busConfigurator.AddRequestClient<QueueRunCommand>();
+                //busConfigurator.AddRequestClient<QueueRunCommand>();
                 
                 busConfigurator.SetKebabCaseEndpointNameFormatter();
 

@@ -1,2 +1,8 @@
 <app-navbar *ngIf="(isLoggedIn$ | async)"></app-navbar>
+<div class="global-error-container" *ngIf="showError() | async">
+  <ng-template #error>
+    <app-error [error]="getErrorMessage() | async" (onClose)="closeError()"></app-error>
+  </ng-template>
+  <shared-popup [contentTemplate]="error"></shared-popup>
+</div>
 <router-outlet></router-outlet>

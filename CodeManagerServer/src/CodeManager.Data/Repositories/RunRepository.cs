@@ -21,12 +21,22 @@ namespace CodeManager.Data.Repositories
                 .Runs
                 .Include(x => x.Jobs)
                     .ThenInclude(x => x.Steps)
+                .Include(x => x.Project)
+                    .ThenInclude(x => x.Team)
+                    .ThenInclude(x => x.Members)
                 .FirstOrDefaultAsync(job => job.Id == id);
         }
 
         public override Task<List<Run>> GetAsync(Expression<Func<Run, bool>> expression)
         {
-            return DbContext.Runs.Where(expression).ToListAsync();
+            return DbContext
+                .Runs
+                .Include(x => x.Jobs)
+                    .ThenInclude(x => x.Steps)
+                .Include(x => x.Project)
+                    .ThenInclude(x => x.Team)
+                    .ThenInclude(x => x.Members)
+                .Where(expression).ToListAsync();
         }
 
         public override Task<bool> ExistsAsync(Expression<Func<Run, bool>> expression)

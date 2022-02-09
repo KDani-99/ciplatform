@@ -17,9 +17,6 @@ export class UserComponent implements OnInit {
     private readonly loginService: AuthService,
   ) {
     this.user$ = store.select((state) => state.app.user.user);
-    this.user$.subscribe({
-      next: (v) => console.log(v.username),
-    });
   }
 
   ngOnInit(): void {}

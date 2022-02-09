@@ -65,16 +65,11 @@ export class UsersComponent implements OnInit {
               ...this.users![index],
               ...updateUserDto,
             },
-            ...this.users!.slice(index),
+            ...this.users!.slice(index + 1),
           ];
+          this.toggleWindow(false);
           this.selectedUser = undefined;
         });
-    }
-  }
-
-  onResetPassword(): void {
-    if (this.selectedUser) {
-      this.userService.resetPassword(this.selectedUser.id);
     }
   }
 

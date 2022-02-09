@@ -113,8 +113,6 @@ namespace CodeManagerAgent.WebSocket.Consumers
                 {
                     channel.Writer.Complete();
                 }
-                
-                channel.Writer.Complete();
             }
             
             var afterExecutionDateTime = DateTime.Now;

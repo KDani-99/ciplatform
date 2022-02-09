@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CodeManager.Data.Entities;
+using CodeManager.Data.Entities.CI;
 using CodeManager.Data.Repositories;
 using CodeManagerWebApi.DataTransfer;
 using CodeManagerWebApi.Exceptions;
@@ -37,16 +38,18 @@ namespace CodeManagerWebApi.Services
                     Description = project.Description,
                     IsPrivateProject = project.IsPrivateProject,
                 },
+                Runs = project.Runs.Select(run => new RunDto
+                {
+                    Id = run.Id,
+                    StartedDateTime = run.StartedDateTime,
+                    FinishedDateTime = run.FinishedDateTime,
+                    ExecutionTime = (long) (run.FinishedDateTime - run.StartedDateTime).TotalSeconds,
+                    State = run.State,
+                    Jobs = run.Jobs.Count
+                }),
                 TeamId = project.Team.Id,
-                IsPrivateRepository = project.IsPrivateRepository,
                 UserPermission = member.Permission,
                 RepositoryUrl = project.RepositoryUrl,
-                Variables = project.Variables.Select(variable => new VariableDto
-                {
-                    Name = variable.Name,
-                    Value = variable.IsSecret ? "******" : variable.Value,
-                    IsSecret = variable.IsSecret
-                })
             };
 
             if (!project.IsPrivateProject)
@@ -97,12 +100,10 @@ namespace CodeManagerWebApi.Services
             {
                 Name = createProjectDto.Name,
                 RepositoryUrl = createProjectDto.RepositoryUrl,
-                SecretToken = createProjectDto.SecretToken, // TODO: encrypt
                 Username = user.Username,
                 Description = createProjectDto.Description,
                 Team = team,
                 IsPrivateProject = createProjectDto.IsPrivateProject,
-                IsPrivateRepository = createProjectDto.IsPrivateRepository,
             });
 
             return new ProjectDto
@@ -136,9 +137,6 @@ namespace CodeManagerWebApi.Services
             project.Name = createProjectDto.Name;
             project.Description = createProjectDto.Description;
             project.IsPrivateProject = createProjectDto.IsPrivateProject;
-            project.IsPrivateRepository = createProjectDto.IsPrivateRepository;
-            project.Username = createProjectDto.Username;
-            project.SecretToken = createProjectDto.SecretToken;
 
             await _projectRepository.UpdateAsync(project);
         }

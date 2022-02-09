@@ -28,13 +28,11 @@ namespace CodeManagerWebApi.Controllers
         private readonly IUserService _userService;
         private readonly ILogger<UserController> _logger;
         private readonly IWebApiClient _webApiClient;
-        private readonly IRequestClient<QueueRunCommand> _requestClient;
 
-        public UserController(IUserService userService, ILogger<UserController> logger, IRequestClient<QueueRunCommand> requestClient)
+        public UserController(IUserService userService, ILogger<UserController> logger)
         {
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _requestClient = requestClient;
         }
 
         [HttpPost, Route("test")]
@@ -48,11 +46,10 @@ namespace CodeManagerWebApi.Controllers
             var configuration = deserializer.Deserialize<RunConfiguration>(content);*/
             
           // TODO: send data with the request
-            var response = await _requestClient.GetResponse<SuccessfulQueueRunCommandResponse, FailedQueueRunCommandResponse>(new QueueRunCommand {RunConfigurationString = content, Repository = "https://github.com/KDani-99/doc-assistant"});
 
             //var response = await _webApiClient.HubConnection.InvokeAsync<long?>(CommonManagerMethods.QueueRun);
            
-            return Ok(response);
+            return Ok();
         }
 
         [Authorize(Roles = "User,Admin")]
@@ -76,11 +73,24 @@ namespace CodeManagerWebApi.Controllers
             return Ok(userDto);
         }
         
-        [Authorize(Roles = "User,Admin")]
-        [HttpPut]
-        public async Task<IActionResult> UpdateUser()
+        [Authorize(Roles = "Admin")]
+        [HttpPut, Route("{id:long}")]
+        public async Task<IActionResult> UpdateUser([FromRoute] long id,[FromBody] UpdateUserDto updateUserDto)
         {
-            throw new NotImplementedException();
+            var user = HttpContext.Items["user"] as User;
+            await _userService.UpdateUserAsync(id,updateUserDto, user);
+
+            return NoContent();
+        }
+        
+        [Authorize(Roles = "Admin")]
+        [HttpDelete, Route("{id:long}")]
+        public async Task<IActionResult> DeleteUser([FromRoute] long id)
+        {
+            var user = HttpContext.Items["user"] as User;
+            await _userService.DeleteUserAsync(id, user);
+
+            return NoContent();
         }
         
         [Authorize(Roles = "Admin")]

@@ -32,7 +32,6 @@
             ],
             "styles": [
               "src/styles.scss",
-              "node_modules/ngx-toastr/toastr.css",
               "node_modules/eva-icons/style/eva-icons.css"
             ],
             "scripts": []

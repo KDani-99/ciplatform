@@ -10,6 +10,12 @@
 
   <shared-topbar [buttonsTemplate]="buttonsTemplate" [imageTemplate]="imageTemplate" [header]="'Job #1132'"></shared-topbar>
 
+  <ng-template #jobConsole>
+    <job-console (onClose)="toggleWindow(false)"></job-console>
+  </ng-template>
+
+  <shared-popup *ngIf="showWindow" [contentTemplate]="currentTemplate"></shared-popup>
+
   <table [className]="'run-table'">
     <thead>
     <tr>
@@ -21,7 +27,7 @@
     </tr>
     </thead>
     <tbody>
-    <tr>
+    <tr (click)="openConsoleWindow()">
       <td>#1</td>
       <td>1</td>
       <td>2013.13.1</td>

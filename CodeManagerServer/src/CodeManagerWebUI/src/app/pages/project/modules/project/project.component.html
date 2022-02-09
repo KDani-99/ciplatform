@@ -2,7 +2,7 @@
 
   <ng-template #buttonsTemplate>
     <div [className]="'button-container-top'" *ngIf="(showActions() | async)">
-      <shared-button [text]="'Variables'" theme="default" (onClick)="openVariablesWindow()"></shared-button>
+      <shared-button [text]="'Start run'" theme="default" (onClick)="openStartRunWindow()"></shared-button>
       <shared-button [text]="'Edit details'" theme="default" (onClick)="openEditWindow()"></shared-button>
       <shared-button [text]="'Delete'" theme="error" (onClick)="openDeleteWindow()"></shared-button>
     </div>
@@ -19,8 +19,8 @@
     <project-delete (onCancel)="toggleWindow(false)" [projectName]="projectData?.project?.name" (onDelete)="onDelete()"></project-delete>
   </ng-template>
 
-  <ng-template #variablesTemplate>
-    <project-variables (onClose)="toggleWindow(false)"></project-variables>
+  <ng-template #startRunTemplate>
+    <start-run (onClose)="toggleWindow(false)" (onStart)="onStart($event)"></start-run>
   </ng-template>
 
   <shared-popup *ngIf="showWindow" [contentTemplate]="currentTemplate"></shared-popup>
@@ -31,8 +31,6 @@
       <shared-data [header]="'Id'" [value]="projectData?.project?.id?.toString() ?? 'N/A'"></shared-data>
       <shared-data [header]="'Description'" [value]="projectData?.project?.description?.toString() ?? 'N/A'"></shared-data>
       <shared-data [header]="'Visibility'" [value]="projectData?.project?.isPrivateProject ? 'Private' : 'Public'"></shared-data>
-      <shared-data *ngIf="projectData?.isPrivateRepository" [header]="'Git user'" [value]="'*******'"></shared-data>
-      <shared-data *ngIf="projectData?.isPrivateRepository" [header]="'Git secret'" [value]="'*******'"></shared-data>
     </div>
   </div>
 
@@ -44,20 +42,20 @@
     <thead>
     <tr>
       <th>ID</th>
-      <th>Context</th>
       <th>Started</th>
+      <th>Finished</th>
       <th>Execution time</th>
       <th>Jobs</th>
       <th>Status</th>
     </tr>
     </thead>
     <tbody>
-    <tr (click)="openRun(1)">
-      <td>1</td>
-      <td>Windows</td>
-      <td>2013.13.1</td>
+    <tr *ngFor="let run of projectData?.runs" (click)="openRun(run.id)">
+      <td>{{run.id}}</td>
+      <td>{{run.startedDateTime}}</td>
+      <td>{{run.finishedDateTime}}</td>
       <td>0:55</td>
-      <td>4/5</td>
+      <td>{{run.jobs}}</td>
       <td [className]="'successful'"><i class="eva eva-checkmark-circle-outline"></i></td>
     </tr>
     <tr>

@@ -40,8 +40,9 @@ namespace CodeManagerWebApi.Hubs
            {
                while (stream.TryRead(out var item))
                {
-                   Console.Write(item);
-                   await _runsHubContext.Clients.Group(GetGroupName(runId, jobId)).SendAsync("ReceiveLogs", item); // why send? because thats the only way to ""stream"" it to multiple clients
+                   Console.Write("=> " + item);
+                   await _runsHubContext.Clients.All.SendAsync("ReceiveLogs", item);
+                   //await _runsHubContext.Clients.Group(GetGroupName(runId, jobId)).SendAsync("ReceiveLogs", item); // why send? because thats the only way to ""stream"" it to multiple clients
                    // as regular streaming involves only a single client
                }
            }

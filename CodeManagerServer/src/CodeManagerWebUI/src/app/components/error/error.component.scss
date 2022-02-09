@@ -1,0 +1,18 @@
+@import "src/app/shared/popup/styles/content";
+.error {
+  min-width: 600px;
+  margin-top: 0.5em;
+  z-index: 100;
+  h1, p {
+    color: rgb(231, 76, 60);
+  }
+  h1 {
+    font-size: 16px;
+  }
+  p {
+    font-size: 14px;
+  }
+  .error-data {
+    margin-top: 0.25em;
+  }
+}

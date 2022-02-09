@@ -14,6 +14,7 @@ import { ProjectService } from '../../../../services/project/project.service';
 import { MemberPermission } from '../../../../services/team/team.interface';
 import { Select } from '@ngxs/store';
 import { Observable } from 'rxjs';
+import { RunService } from '../../../../services/run/run.service';
 
 @Component({
   selector: 'app-project',
@@ -25,7 +26,7 @@ export class ProjectComponent implements OnInit {
 
   @ViewChild('editProjectTemplate') editProjectTemplate?: TemplateRef<any>;
   @ViewChild('deleteProjectTemplate') deleteProjectTemplate?: TemplateRef<any>;
-  @ViewChild('variablesTemplate') variablesTemplate?: TemplateRef<any>;
+  @ViewChild('startRunTemplate') startRunTemplate?: TemplateRef<any>;
 
   @Input() projectData?: ProjectDataDto;
   showWindow: boolean = false;
@@ -37,6 +38,7 @@ export class ProjectComponent implements OnInit {
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly projectService: ProjectService,
+    private readonly runService: RunService,
   ) {}
 
   ngOnInit(): void {
@@ -56,13 +58,13 @@ export class ProjectComponent implements OnInit {
     this.toggleWindow(true, this.editProjectTemplate);
   }
 
-  openVariablesWindow(): void {
-    this.toggleWindow(true, this.variablesTemplate);
+  openStartRunWindow(): void {
+    this.toggleWindow(true, this.startRunTemplate);
   }
 
   onEdit(createProjectDto: CreateProjectDto): void {
     this.projectService
-      .updateProject(createProjectDto, this.projectData?.project.id ?? -1)
+      .updateProject(createProjectDto, this.projectData!.project.id)
       .subscribe(() => {
         this.projectData = {
           ...(this.projectData as any),
@@ -72,7 +74,6 @@ export class ProjectComponent implements OnInit {
             description: createProjectDto.description,
             name: createProjectDto.name,
           },
-          isPrivateRepository: createProjectDto.isPrivateRepository,
           repositoryUrl: createProjectDto.repositoryUrl,
         };
         this.toggleWindow(false);
@@ -80,13 +81,19 @@ export class ProjectComponent implements OnInit {
   }
 
   onDelete(): void {
-    this.projectService
-      .deleteProject(this.projectData?.project.id ?? -1)
-      .subscribe({
-        next: () => {
-          this.router.navigate(['projects']);
-        },
-      });
+    this.projectService.deleteProject(this.projectData!.project.id).subscribe({
+      next: () => {
+        this.router.navigate(['projects']);
+      },
+    });
+  }
+
+  onStart(file: File | null): void {
+    if (file) {
+      this.runService
+        .startRun(this.projectData!.project.id, file)
+        .subscribe(() => this.toggleWindow(false));
+    }
   }
 
   toggleWindow(show: boolean, template?: TemplateRef<any>): void {

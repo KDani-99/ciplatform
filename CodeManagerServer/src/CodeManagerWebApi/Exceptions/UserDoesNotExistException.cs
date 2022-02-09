@@ -6,6 +6,6 @@ namespace CodeManagerWebApi.Exceptions
 {
     public class UserDoesNotExistException : BadHttpRequestException
     {
-        public UserDoesNotExistException() : base("The specified user does not exist.", (int)HttpStatusCode.NotFound) {}
+        public UserDoesNotExistException() : base("The specified user does not exist.", (int)HttpStatusCode.BadRequest) {}
     }
 }

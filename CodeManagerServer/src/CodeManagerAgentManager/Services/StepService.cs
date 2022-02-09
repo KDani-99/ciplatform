@@ -2,6 +2,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
+using Automatonymous;
 using CodeManager.Data.Agent;
 using CodeManager.Data.Configuration;
 using CodeManager.Data.Entities;
@@ -71,6 +72,11 @@ namespace CodeManagerAgentManager.Services
                 States.Successful when context.StepIndex == job.Steps.Count - 1 => States.Successful,
                 _ => run.State
             };
+
+            if (run.State is not States.Running and not States.Queued)
+            {
+                run.FinishedDateTime = DateTime.Now;
+            }
 
             await UpdateWorkerStateAsync(connectionId);
 

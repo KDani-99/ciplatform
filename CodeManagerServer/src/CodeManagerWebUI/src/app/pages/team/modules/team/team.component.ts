@@ -113,7 +113,6 @@ export class TeamComponent implements OnInit {
     this.teamService
       .updateMemberRole(this.team!.id, updateRoleDto)
       .subscribe(() => {
-        // TODO: update member's role
         this.selectedMember!.permission = updateRoleDto.role;
         this.toggleWindow(false);
       });

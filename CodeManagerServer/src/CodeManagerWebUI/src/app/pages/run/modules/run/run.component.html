@@ -18,29 +18,24 @@
         <th>Context</th>
         <th>Image</th>
         <th>Started</th>
+        <th>Finished</th>
         <th>Overall time</th>
         <th>Steps</th>
         <th>Status</th>
       </tr>
     </thead>
     <tbody>
-      <tr (click)="openJob(1)">
-        <td>1</td>
-        <td>Windows</td>
+      <tr *ngFor="let job of runData?.jobs" (click)="openJob(job.id)">
+        <td>{{job.id}}</td>
+        <td>{{job.jobContext}}</td>
         <td>latest</td>
-        <td>2013.13.1</td>
-        <td>0:55</td>
-        <td>4/5</td>
-        <td [className]="'successful'"><i class="eva eva-checkmark-circle-outline"></i></td>
-      </tr>
-      <tr>
-        <td>1</td>
-        <td>Windows</td>
-        <td>latest</td>
-        <td>2013.13.1</td>
-        <td>0:55</td>
-        <td>4/5</td>
-        <td [className]="'successful'"><i class="eva eva-checkmark-circle-outline"></i></td>
+        <td>{{getStartedTime(job)}}</td>
+        <td>{{getFinishedTime(job)}}</td>
+        <td>{{job.executionTime}}</td>
+        <td>{{job.steps}}</td>
+        <td *ngIf="job.state == State.RUNNING" [className]="'running'"><i class="eva eva-loader-outline"></i></td>
+        <td *ngIf="job.state == State.SUCCESSFUL" [className]="'successful'"><i class="eva eva-checkmark-circle-outline"></i></td>
+        <td *ngIf="job.state == State.FAILED" [className]="'failed'"><i class="eva eva-alert-circle-outline"></i></td>
       </tr>
     </tbody>
   </table>

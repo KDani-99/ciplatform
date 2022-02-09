@@ -4,7 +4,6 @@ import { BrowserModule } from '@angular/platform-browser';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { SharedModule } from './shared/shared.module';
-import { ToastrModule } from 'ngx-toastr';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { ConfigService } from './config/config.service';
@@ -33,9 +32,11 @@ import { AppState } from './state/app/app.state';
 import { AuthenticatedGuard } from './guards/authenticated.guard';
 import { JwtAuthInterceptor } from './interceptors/jwt-http-auth.inteceptor';
 import { LoginGuard } from './guards/login.guard';
+import { ErrorComponent } from './components/error/error.component';
 
 @NgModule({
   declarations: [
+    ErrorComponent,
     AppComponent,
     NavbarComponent,
     ButtonComponent,
@@ -48,6 +49,7 @@ import { LoginGuard } from './guards/login.guard';
     RunComponent,
     PopupComponent,
     UsersComponent,
+    ErrorComponent,
   ],
   imports: [
     BrowserModule,
@@ -55,7 +57,6 @@ import { LoginGuard } from './guards/login.guard';
     SharedModule,
     BrowserAnimationsModule,
     HttpClientModule,
-    ToastrModule.forRoot(),
     TeamModule,
     ProjectsModule,
     TeamsModule,

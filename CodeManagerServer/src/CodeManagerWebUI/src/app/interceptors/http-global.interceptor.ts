@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import {
-  HttpClient,
   HttpErrorResponse,
   HttpEvent,
   HttpHandler,
@@ -8,18 +7,18 @@ import {
   HttpRequest,
   HttpStatusCode,
 } from '@angular/common/http';
-import { ToastrService } from 'ngx-toastr';
 import { catchError, concatMap } from 'rxjs/operators';
 import { Observable, throwError } from 'rxjs';
 import { AuthService } from '../services/auth/auth.service';
+import { ErrorService } from '../services/error/error.service';
 
 @Injectable()
 export class HttpGlobalInterceptor implements HttpInterceptor {
   private retrying: boolean = false;
 
   constructor(
-    private readonly toastrService: ToastrService,
     private readonly authService: AuthService,
+    private readonly errorService: ErrorService,
   ) {}
 
   intercept(
@@ -28,19 +27,21 @@ export class HttpGlobalInterceptor implements HttpInterceptor {
   ): Observable<HttpEvent<any>> {
     return next.handle(request).pipe(
       catchError((error: HttpErrorResponse) => {
-        if (error.status === HttpStatusCode.Unauthorized) {
+        if (
+          error.status === HttpStatusCode.Unauthorized &&
+          error.headers.has('Token-Expired')
+        ) {
           return this.refreshToken(request).pipe(
             concatMap((authReq) => next.handle(authReq)),
+            catchError((nestedError: HttpErrorResponse) => {
+              this.handleError(nestedError.error);
+              return throwError(() => nestedError);
+            }),
           );
         }
-        this.toastrService.error(
-          'An unexpected HTTP error has occured',
-          'Error',
-          {
-            closeButton: true,
-            disableTimeOut: true,
-          },
-        );
+
+        this.handleError(error.error);
+
         return throwError(() => error);
       }),
     );
@@ -62,10 +63,22 @@ export class HttpGlobalInterceptor implements HttpInterceptor {
               }),
             );
           })
-          .catch((error: any) => observer.error(error))
+          .catch((error: any) => {
+            observer.error(error);
+          })
           .finally(() => (this.retrying = false));
       });
     }
     return new Observable<HttpRequest<any>>((observer) => observer.next());
+  }
+
+  private handleError(error: any): void {
+    if (error?.errors) {
+      // multiple errors
+      this.errorService.show(error.errors);
+    } else if (error?.error) {
+      // single error
+      this.errorService.show(error?.error);
+    }
   }
 }

@@ -22,8 +22,8 @@ export class EditComponent implements OnInit {
   @ViewChild('username') usernameRef?: InputComponent;
   @ViewChild('name') nameRef?: InputComponent;
   @ViewChild('email') emailRef?: InputComponent;
-  @ViewChild('imageUrl') imageUrlRef?: InputComponent;
   @ViewChild('isAdmin', { static: true }) isAdminRef?: CheckboxComponent;
+  @ViewChild('password') passwordRef?: InputComponent;
 
   @Input() user?: UserDto;
   @Output() onClose: EventEmitter<any> = new EventEmitter<any>();
@@ -42,8 +42,8 @@ export class EditComponent implements OnInit {
       username: this.usernameRef!.value,
       name: this.nameRef!.value,
       email: this.emailRef!.value,
-      imageUrl: this.imageUrlRef!.value,
       isAdmin: this.isAdminRef!.isChecked,
+      password: this.passwordRef!.value,
     });
   }
 

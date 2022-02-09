@@ -3,12 +3,12 @@ import { Observable, of } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 
 export abstract class BaseDataService {
-  httpOptions = {
+  protected httpOptions = {
     headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
     withCredentials: true,
   };
 
-  protected constructor(private readonly httpClient: HttpClient) {}
+  protected constructor(protected readonly httpClient: HttpClient) {}
 
   protected getAll<TResult>(url: string): Observable<TResult[]> {
     return this.httpClient.get<TResult[]>(url, this.httpOptions);

@@ -88,18 +88,6 @@ namespace CodeManagerWebApi.Services
 
         public async Task<TeamDto> CreateTeamAsync(TeamDto teamDto, User user)
         {
-            if (!user.IsAdmin())
-            {
-                if (user.Teams.Count >= user.Plan.MaxCreatedTeamsPerUser)
-                {
-                    throw new UserReachedMaxCreatedTeamsException();
-                }
-                            
-                if (user.Teams.Count >= user.Plan.MaxJoinedTeamsPerUser)
-                {
-                    throw new UserReachedMaxJoinedTeamsException();
-                }
-            }
 
             if (await _teamRepository.ExistsAsync(teamEntity => teamEntity.Name == teamDto.Name))
             {
@@ -212,7 +200,7 @@ namespace CodeManagerWebApi.Services
                 throw new BadHttpRequestException($"User is already member of this team.", (int)HttpStatusCode.BadRequest);
             }
             
-            if (!member.IsAdmin())
+            if (!member.IsAdmin() && !team.IsPublic)
             {
                 throw new UnauthorizedAccessWebException("You are not allowed to add members.");
             }

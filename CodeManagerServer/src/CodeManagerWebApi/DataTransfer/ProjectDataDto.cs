@@ -7,10 +7,9 @@ namespace CodeManagerWebApi.DataTransfer
     public class ProjectDataDto
     {
         public ProjectDto Project { get; set; }
-        public bool IsPrivateRepository { get; set; }
         public string RepositoryUrl { get; set; }
         public long TeamId { get; set; }
         public Permissions UserPermission { get; set; }
-        public IEnumerable<VariableDto> Variables { get; set; }
+        public IEnumerable<RunDto> Runs { get; set; }
     }
 }

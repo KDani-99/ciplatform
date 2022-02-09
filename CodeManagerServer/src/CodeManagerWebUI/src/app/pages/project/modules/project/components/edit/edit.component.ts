@@ -22,8 +22,6 @@ import { InputComponent } from '../../../../../../shared/input/input.component';
 export class EditComponent implements OnInit {
   @ViewChild('isPrivateProject', { static: true })
   isPrivateProjectRef?: CheckboxComponent;
-  @ViewChild('isPrivateRepository', { static: true })
-  isPrivateRepositoryRef?: CheckboxComponent;
   @ViewChild('name') nameRef?: InputComponent;
   @ViewChild('description') descriptionRef?: InputComponent;
   @ViewChild('repositoryUrl') repositoryUrlRef?: InputComponent;
@@ -41,8 +39,6 @@ export class EditComponent implements OnInit {
   ngOnInit(): void {
     this.isPrivateProjectRef!.isChecked =
       this.project?.project.isPrivateProject ?? false;
-    this.isPrivateRepositoryRef!.isChecked =
-      this.project?.isPrivateRepository ?? false;
   }
 
   close(): void {
@@ -56,9 +52,6 @@ export class EditComponent implements OnInit {
       description: this.descriptionRef?.value ?? '',
       repositoryUrl: this.repositoryUrlRef?.value ?? '',
       isPrivateProject: this.isPrivateProjectRef?.isChecked ?? false,
-      isPrivateRepository: this.isPrivateRepositoryRef?.isChecked ?? false,
-      username: this.usernameRef?.value ?? undefined,
-      secretToken: this.secretTokenRef?.value ?? undefined,
     });
   }
 }

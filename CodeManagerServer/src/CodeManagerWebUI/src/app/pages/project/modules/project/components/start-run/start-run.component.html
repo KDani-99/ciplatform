@@ -1,0 +1,16 @@
+<div>
+  <ng-template #buttonsTemplate>
+    <div [className]="'exit-button'" (click)="close()">
+      <i class="eva eva-close-outline"></i>
+    </div>
+  </ng-template>
+  <shared-topbar [buttonsTemplate]="buttonsTemplate" [header]="'Start run'"></shared-topbar>
+
+  <form class="wrapper">
+    <p>Select instructions configuration file</p>
+    <input type="file" (change)="onFileChange($event)"/>
+  </form>
+  <div [className]="'wrapper'">
+    <shared-button [text]="'Start'" theme="default" (onClick)="start()"></shared-button>
+  </div>
+</div>

@@ -1,11 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { ToastrService } from 'ngx-toastr';
-import { HttpClient } from '@angular/common/http';
-import { ConfigService } from '../../../../config/config.service';
 import { InputComponent } from '../../../../shared/input/input.component';
-import { LoginResponseDto } from '../../../../services/auth/login.interface';
-import { UserDto } from '../../../../services/user/user.interface';
 import { AuthService } from '../../../../services/auth/auth.service';
 
 @Component({
@@ -19,7 +14,6 @@ export class LoginComponent implements OnInit {
 
   constructor(
     private readonly router: Router,
-    private readonly toastrService: ToastrService,
     private readonly loginService: AuthService,
   ) {}
 
@@ -30,7 +24,6 @@ export class LoginComponent implements OnInit {
   }
 
   async login() {
-    // TODO: use login service to login
     await this.loginService.login(
       this.usernameRef?.value ?? '',
       this.passwordRef?.value ?? '',

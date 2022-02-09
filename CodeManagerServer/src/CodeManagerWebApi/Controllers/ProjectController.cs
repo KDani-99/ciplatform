@@ -19,13 +19,11 @@ namespace CodeManagerWebApi.Controllers
     public class ProjectController : ControllerBase
     {
         private readonly IProjectService _projectService;
-        private readonly IVariableService _variableService;
         private readonly ILogger<ProjectController> _logger;
         
-        public ProjectController(IProjectService projectService, IVariableService variableService, ILogger<ProjectController> logger)
+        public ProjectController(IProjectService projectService, ILogger<ProjectController> logger)
         {
             _projectService = projectService ?? throw new ArgumentNullException(nameof(projectService));
-            _variableService = variableService ?? throw new ArgumentNullException(nameof(variableService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
         
@@ -76,17 +74,5 @@ namespace CodeManagerWebApi.Controllers
             return NoContent();
         }
 
-        [HttpPut, Route("{id:long}/vars")] // constant long param
-        public async Task<IActionResult> PutVariable([FromRoute] long id, [FromBody] VariableDto variableDto)
-        {
-            // Logically, a variable cant exist without a project, so that's the reason why I decided not to make a separate controller for that
-            // TODO: verify user permission
-            var user = HttpContext.Items["user"] as User;
-            await _variableService.CreateOrUpdateVariableAsync(id, variableDto, user);
-
-            return NoContent();
-        }
-        
-        
     }
 }

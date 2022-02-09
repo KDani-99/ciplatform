@@ -76,7 +76,10 @@ namespace CodeManagerWebApi.Services
             var claimsPrincipal = await VerifyTokenAsync(token);
             var jti = claimsPrincipal.Claims.FirstOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Jti).Value;
             var username = claimsPrincipal.Claims.FirstOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Sub).Value;
+            var exp = claimsPrincipal.Claims.FirstOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Exp).Value;;
 
+            ValidateTokenLifetime(long.Parse(exp));
+            
             var storedJti = await _tokenRepository.GetRefreshTokenAsync(username);
 
             if (jti != storedJti)
@@ -92,6 +95,9 @@ namespace CodeManagerWebApi.Services
             var claimsPrincipal = await VerifyTokenAsync(token);
             var jti = claimsPrincipal.Claims.FirstOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Jti).Value;
             var username = claimsPrincipal.Claims.FirstOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Sub).Value;
+            var exp = claimsPrincipal.Claims.FirstOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Exp).Value;;
+
+            ValidateTokenLifetime(long.Parse(exp));
 
             var storedJti = await _tokenRepository.GetAccessTokenAsync(username);
 
@@ -115,23 +121,40 @@ namespace CodeManagerWebApi.Services
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtConfiguration.Secret)),
             };
 
-
             return Task.FromResult(tokenHandler.ValidateToken(token, validationParameters, out _));
         }
 
         private JwtSecurityToken GenerateToken(IEnumerable<Claim> claims, int lifeTime, string algorithm)
         {
-            var tokenHandler = new JwtSecurityTokenHandler();
+          /*  var tokenHandler = new JwtSecurityTokenHandler();
             var secretBytes = Encoding.UTF8.GetBytes(_jwtConfiguration.Secret);
             
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.Now.AddSeconds(lifeTime),
+                Expires = DateTime.Now.AddSeconds(1),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(secretBytes), algorithm),
             };
 
-           return tokenHandler.CreateJwtSecurityToken(tokenDescriptor);
+           return tokenHandler.CreateJwtSecurityToken(tokenDescriptor);*/
+          var secretBytes = Encoding.UTF8.GetBytes(_jwtConfiguration.Secret);
+          
+          var jwtHeader = new JwtHeader(new SigningCredentials(new SymmetricSecurityKey(secretBytes), algorithm));
+          
+          var jwtPayload = new JwtPayload();
+          jwtPayload.AddClaims(claims);
+
+          jwtPayload.Add(JwtRegisteredClaimNames.Exp, (int)(DateTime.Now.AddSeconds(lifeTime) - DateTime.UnixEpoch).TotalSeconds);
+
+          return new JwtSecurityToken(jwtHeader, jwtPayload);
+        }
+
+        private void ValidateTokenLifetime(double expires)
+        {
+            if ((DateTime.UnixEpoch.AddSeconds(expires) - DateTime.Now).TotalSeconds <= 0)
+            {
+                throw new SecurityTokenExpiredException();
+            }
         }
     }
 }

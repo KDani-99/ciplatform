@@ -20,11 +20,8 @@ namespace CodeManagerAgentManager.Extensions
                 var massTransitConfiguration =
                     configuration.GetSection("MassTransitConfiguration").Get<MassTransitConfiguration>();
 
-                // TODO: make consumers temporary
-
                 busConfigurator.AddConsumer<QueueRunCommandConsumer>();
                 busConfigurator.AddConsumer<StepResultEventConsumer>();
-               // busConfigurator.AddConsumer<RequestJobCommandConsumer>();
 
                 busConfigurator.SetKebabCaseEndpointNameFormatter();
 
@@ -49,12 +46,6 @@ namespace CodeManagerAgentManager.Extensions
                             opts.AutoDelete = true;
                             opts.ConfigureConsumer<StepResultEventConsumer>(context);
                         });
-                   /* cfg.ReceiveEndpoint(massTransitConfiguration.Queues["RequestJobCommandQueue"],
-                        opts =>
-                        {
-                            opts.AutoDelete = true;
-                            opts.ConfigureConsumer<RequestJobCommandConsumer>(context);
-                        });*/
                 });
 
                 services.AddMassTransitHostedService(true);

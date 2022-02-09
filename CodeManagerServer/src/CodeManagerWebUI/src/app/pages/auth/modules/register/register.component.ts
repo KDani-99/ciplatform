@@ -2,8 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { ConfigService } from '../../../../config/config.service';
-import { PasswordMismatchError } from '../login/errors/password-mismatch.error';
-import { ToastrService } from 'ngx-toastr';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-register',
@@ -15,7 +14,6 @@ export class RegisterComponent implements OnInit {
     private readonly router: Router,
     private readonly httpClient: HttpClient,
     private readonly configService: ConfigService,
-    private readonly toastrService: ToastrService,
   ) {}
 
   ngOnInit(): void {}
@@ -32,17 +30,18 @@ export class RegisterComponent implements OnInit {
     passwordAgain: string,
   ) {
     if (password !== passwordAgain) {
-      this.toastrService.error('Different passwords provided!');
       return;
     }
 
-    const response = await this.httpClient
-      .post(this.configService.getFullUrl('register'), {
+    await firstValueFrom(
+      this.httpClient.post(this.configService.getFullUrl('register'), {
         username,
         name,
         email,
         password,
-      })
-      .toPromise();
+      }),
+    );
+
+    this.router.navigate(['login']);
   }
 }

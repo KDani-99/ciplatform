@@ -2,7 +2,7 @@ export interface UpdateUserDto {
   username: string;
   name: string;
   email: string;
-  imageUrl: string;
+  password: string;
   isAdmin: boolean;
 }
 export interface UserDto {
@@ -12,7 +12,5 @@ export interface UserDto {
   email: string;
   name: string;
   isAdmin: boolean;
-  plan: string;
   registration: string;
-  image: string;
 }

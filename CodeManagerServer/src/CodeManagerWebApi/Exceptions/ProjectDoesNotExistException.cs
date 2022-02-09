@@ -5,7 +5,7 @@ namespace CodeManagerWebApi.Exceptions
 {
     public class ProjectDoesNotExistException : BadHttpRequestException
     {
-        public ProjectDoesNotExistException() : base("The specified project does not exist.", (int) HttpStatusCode.NotFound)
+        public ProjectDoesNotExistException() : base("The specified project does not exist.", (int) HttpStatusCode.BadRequest)
         {
         }
     }

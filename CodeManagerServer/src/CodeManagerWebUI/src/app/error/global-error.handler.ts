@@ -1,6 +1,4 @@
 import { ErrorHandler, Inject, Injectable, Injector } from '@angular/core';
-import { ToastrService } from 'ngx-toastr';
-import { BaseError } from '../pages/auth/modules/login/errors/base.error';
 
 @Injectable()
 export class GlobalErrorHandler extends ErrorHandler {
@@ -12,10 +10,6 @@ export class GlobalErrorHandler extends ErrorHandler {
     if (error.promise && error.rejection) {
       error = error.rejection;
     }
-
-    if (error.type === BaseError.name) {
-    } else {
-      super.handleError(error);
-    }
+    super.handleError(error);
   }
 }

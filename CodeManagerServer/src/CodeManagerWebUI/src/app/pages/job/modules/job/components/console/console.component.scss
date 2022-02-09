@@ -1,0 +1,38 @@
+@import "../../../../../../shared/popup/styles/content";
+.console-container {
+  max-width: 800px;
+  max-height: 500px;
+  width: 800px;
+  height: 500px;
+  min-width: 300px;
+  min-height: 100px;
+  padding: 1em;
+  background-color: rgb(15, 15, 15);
+  border-radius: var(--default-border-radius);
+  box-shadow: 0 4px 30px -10px rgba(0, 0, 0, 0.35);
+  color: white;
+  overflow: auto;
+
+  table {
+    table-layout: fixed;
+    border-collapse: collapse;
+    text-align: left;
+    th, td {
+      font-family: Lato-Regular, serif;
+      font-weight: normal;
+      font-size: 14px;
+      color: white;
+      padding-bottom: 0.5em;
+    }
+    th {
+      vertical-align: top;
+      border-right: 1px solid white;
+      padding-right: 0.5em;
+    }
+    td {
+      padding-left: 0.5em;
+      white-space: pre-wrap;
+      word-break:break-word;
+    }
+  }
+}

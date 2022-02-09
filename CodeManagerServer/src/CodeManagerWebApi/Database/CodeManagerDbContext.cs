@@ -44,7 +44,6 @@ namespace CodeManagerWebApi.Database
                         Password = credentialManagerService.CreateHashedPassword(serviceAccountConfiguration.Password),
                         RegistrationTimestamp = DateTime.Now,
                         Name = "Admin",
-                        PlanId = 1,
                         Roles = new [] {Roles.Admin, Roles.User }
                     });
         }

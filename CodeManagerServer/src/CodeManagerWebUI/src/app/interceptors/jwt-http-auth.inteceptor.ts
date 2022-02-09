@@ -7,14 +7,10 @@ import {
 } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Store } from '@ngxs/store';
-import { ConfigService } from '../config/config.service';
 
 @Injectable()
 export class JwtAuthInterceptor implements HttpInterceptor {
-  constructor(
-    private readonly store: Store,
-    private readonly configService: ConfigService,
-  ) {}
+  constructor(private readonly store: Store) {}
 
   intercept(
     request: HttpRequest<any>,
@@ -23,7 +19,6 @@ export class JwtAuthInterceptor implements HttpInterceptor {
     if (request?.url === '/assets/config/config.json') {
       return next.handle(request);
     }
-
     if (request.withCredentials) {
       const accessToken = this.store.selectSnapshot<string | undefined>(
         (state) => state.app.user.accessToken,

@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace CodeManagerAgentManager.Services
+namespace CodeManagerWebApi.Services
 {
     public interface IFileProcessorService<T>
         where T : new()

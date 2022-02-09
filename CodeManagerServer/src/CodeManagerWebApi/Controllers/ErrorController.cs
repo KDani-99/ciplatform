@@ -30,8 +30,8 @@ namespace CodeManagerWebApi.Controllers
             {
                 var response = new
                 {
-                    error = ex.Message,
-                    status = ex.StatusCode
+                    Error = ex.Message,
+                    Status = ex.StatusCode
                 };
                 return StatusCode(ex.StatusCode, response);
             }

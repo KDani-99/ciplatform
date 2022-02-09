@@ -1,0 +1,28 @@
+<ng-template #err>
+  <div>
+    <ng-template #buttonsTemplate>
+      <div [className]="'exit-button'" (click)="close()">
+        <i class="eva eva-close-outline"></i>
+      </div>
+    </ng-template>
+    <shared-topbar [buttonsTemplate]="buttonsTemplate" [header]="'An error has occurred'"></shared-topbar>
+    <div class="error">
+      <div *ngIf="!isSimpleError()">
+        <div class="error-data" *ngFor="let data of getRecord() | keyvalue">
+          <h1>
+            {{data.key}}
+          </h1>
+          <p *ngFor="let err of data.value">
+            {{err}}
+          </p>
+        </div>
+      </div>
+      <div *ngIf="isSimpleError()">
+        <p>
+          {{error}}
+        </p>
+      </div>
+    </div>
+  </div>
+</ng-template>
+<shared-popup *ngIf="true" [contentTemplate]="err"></shared-popup>

@@ -29,13 +29,12 @@ export class UserService {
     return this.httpClient.delete(url, this.httpOptions);
   }
 
-  updateUser(id: number, updateUserDto: UpdateUserDto): Observable<UserDto> {
+  updateUser(id: number, updateUserDto: UpdateUserDto): Observable<any> {
     const url = `${this.configService.getFullUrl('updateUser')}/${id}`;
-    return this.httpClient.put<UserDto>(url, updateUserDto, this.httpOptions);
-  }
-
-  resetPassword(id: number): Observable<any> {
-    const url = `${this.configService.getFullUrl('resetPassword')}/${id}`;
-    return this.httpClient.post(url, this.httpOptions);
+    return this.httpClient.put<UpdateUserDto>(
+      url,
+      updateUserDto,
+      this.httpOptions,
+    );
   }
 }

@@ -29,22 +29,17 @@ namespace CodeManager.Data.Database
         public DbSet<User> Users { get; set; }
         public DbSet<Team> Teams { get; set; }
         public DbSet<TeamMember> TeamMembers { get; set; }
-        public DbSet<Plan> Plans { get; set; }
         public DbSet<Project> Projects { get; set; }
         public DbSet<Run> Runs { get; set; }
         public DbSet<Job> Jobs { get; set; }
         public DbSet<Step> Steps { get; set; }
-        public DbSet<Variable> Variables { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasPostgresEnum<Roles>();
             modelBuilder.HasPostgresEnum<JobContext>();
             modelBuilder.HasPostgresEnum<Permissions>();
-            
-            modelBuilder.Entity<User>()
-                .HasOne(user => user.Plan);
-            
+
             modelBuilder.Entity<Project>()
                 .HasMany(project => project.Runs)
                 .WithOne(run => run.Project)
@@ -53,10 +48,6 @@ namespace CodeManager.Data.Database
             modelBuilder.Entity<TeamMember>()
                 .HasOne(teamMember => teamMember.Team)
                 .WithMany(team => team.Members);
-
-            modelBuilder.Entity<Variable>()
-                .HasOne(variable => variable.Project)
-                .WithMany(project => project.Variables);
 
             modelBuilder.Entity<Team>()
                 .HasMany(team => team.Projects)

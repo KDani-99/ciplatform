@@ -10,7 +10,7 @@ namespace CodeManager.Data.Entities.CI
         public States State { get; set; }
         public string LogPath { get; set; }
         public Job Job { get; set; }
-        public DateTime StartDateTime { get; set; }
+        public DateTime StartedDateTime { get; set; }
         public DateTime FinishedDateTime { get; set; }
     }
 }

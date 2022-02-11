@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using CodeManager.Data.Entities.CI;
+using CodeManager.Data.Entities;
 
 namespace CodeManager.Data.Entities
 {

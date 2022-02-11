@@ -1,10 +1,10 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { JobComponent } from './job.component';
 import { SharedModule } from '../../../../shared/shared.module';
+import { RunModule } from '../../../run/modules/run/run.module';
 
 @NgModule({
-  declarations: [JobComponent],
-  imports: [CommonModule, SharedModule],
+  declarations: [],
+  imports: [CommonModule, SharedModule, RunModule],
 })
 export class JobModule {}

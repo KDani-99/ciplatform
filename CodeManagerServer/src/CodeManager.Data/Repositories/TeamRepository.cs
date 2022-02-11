@@ -15,23 +15,31 @@ namespace CodeManager.Data.Repositories
         {
         }
 
-        public override Task<Team> GetAsync(long id) => DbContext.Teams
-            .Include(team => team.Owner)
-            .Include(team => team.Projects)
-            .Include(team => team.Members)
-            .ThenInclude(member => member.User)
-            .FirstOrDefaultAsync(team => team.Id == id);
+        public override Task<Team> GetAsync(long id)
+        {
+            return DbContext.Teams
+                            .Include(team => team.Owner)
+                            .Include(team => team.Projects)
+                            .Include(team => team.Members)
+                            .ThenInclude<Team, TeamMember, User>(member => member.User)
+                            .FirstOrDefaultAsync(team => team.Id == id);
+        }
 
-        public override Task<List<Team>> GetAsync(Expression<Func<Team, bool>> expression) =>
-            DbContext.Teams
-                .Include(team => team.Owner)
-                .Include(team => team.Projects)
-                .Include(team => team.Members)
-                .ThenInclude(member => member.User)
-                .Where(expression)
-                .ToListAsync();
+        public override Task<List<Team>> GetAsync(Expression<Func<Team, bool>> expression)
+        {
+            return DbContext.Teams
+                            .Include(team => team.Owner)
+                            .Include(team => team.Projects)
+                            .Include(team => team.Members)
+                            .ThenInclude<Team, TeamMember, User>(member => member.User)
+                            .Where(expression)
+                            .ToListAsync();
+        }
 
-        public override Task<bool> ExistsAsync(Expression<Func<Team, bool>> expression) => DbContext.Teams.AnyAsync(expression);
+        public override Task<bool> ExistsAsync(Expression<Func<Team, bool>> expression)
+        {
+            return DbContext.Teams.AnyAsync(expression);
+        }
 
         public override async Task<long> CreateAsync(Team entity)
         {
@@ -51,7 +59,7 @@ namespace CodeManager.Data.Repositories
         {
             var entity = await DbContext.Teams.Where(team => team.Id == id).FirstOrDefaultAsync();
             DbContext.Teams.Remove(entity);
-            
+
             await DbContext.SaveChangesAsync();
         }
     }

@@ -24,7 +24,7 @@ namespace CodeManagerAgent.Tests
             };
             // Act
             process.ConfigureCliProcess(executable, args, environmentVariables);
-            
+
             // Assert
             Assert.AreEqual(executable, process.StartInfo.FileName);
             Assert.AreEqual(args, process.StartInfo.Arguments);

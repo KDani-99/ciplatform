@@ -6,15 +6,15 @@ namespace CodeManagerWebApi.Repositories
 {
     public class TokenRepository : ITokenRepository
     {
-        private readonly ITokenCache _tokenCache;
         private const string RefreshTokensKey = "refresh_token";
         private const string AccessTokensKey = "access_token";
-        
+        private readonly ITokenCache _tokenCache;
+
         public TokenRepository(ITokenCache tokenCache)
         {
             _tokenCache = tokenCache ?? throw new ArgumentNullException(nameof(tokenCache));
         }
-        
+
         public async Task<string> GetAccessTokenAsync(string username)
         {
             var token = await _tokenCache.Database.StringGetAsync(GetAccessTokenKey(username));
@@ -51,6 +51,7 @@ namespace CodeManagerWebApi.Repositories
         {
             return $"{RefreshTokensKey}_{username}";
         }
+
         private static string GetAccessTokenKey(string username)
         {
             return $"{AccessTokensKey}_{username}";

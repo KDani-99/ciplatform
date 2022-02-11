@@ -3,19 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CodeManager.Data.Configuration;
-using CodeManager.Data.Entities;
 using CodeManagerAgentManager.Cache;
 using Microsoft.OpenApi.Extensions;
-using Newtonsoft.Json;
-using StackExchange.Redis;
 
 namespace CodeManagerAgentManager.Repositories
 {
     public class WorkerConnectionRepository : IWorkerConnectionRepository
     {
-        private readonly IConnectionCache _connectionCache;
         private const string ConnectionsHashKey = "connections";
-        
+        private readonly IConnectionCache _connectionCache;
+
         public WorkerConnectionRepository(IConnectionCache connectionCache)
         {
             _connectionCache = connectionCache ?? throw new ArgumentNullException(nameof(connectionCache));
@@ -33,7 +30,7 @@ namespace CodeManagerAgentManager.Repositories
             // TODO: below it just stores info about the worker  
             return _connectionCache.Database.HashSetAsync(ConnectionsHashKey, connectionId, workerData);
         }
-        
+
         public Task<bool> AddToPoolAsync(JobContext jobContext, string connectionId)
         {
             // TODO: it allows fast lookup - > only available agents will be there

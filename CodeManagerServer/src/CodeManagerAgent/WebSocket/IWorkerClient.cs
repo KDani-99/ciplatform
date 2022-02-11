@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Channels;
+﻿using System.Threading.Channels;
 using System.Threading.Tasks;
 using CodeManager.Data.Events;
 using Microsoft.AspNetCore.SignalR.Client;

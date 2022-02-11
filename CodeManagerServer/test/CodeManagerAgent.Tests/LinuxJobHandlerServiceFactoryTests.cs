@@ -7,10 +7,7 @@ using CodeManagerAgent.Configuration;
 using CodeManagerAgent.Entities;
 using CodeManagerAgent.Factories;
 using CodeManagerAgent.Services;
-using CodeManagerAgent.WebSocket;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Moq;
 using NUnit.Framework;
 
 namespace CodeManagerAgent.Tests
@@ -21,9 +18,9 @@ namespace CodeManagerAgent.Tests
         public void Create_NewLinuxJobHandlerServiceFactory_ShouldThrowArgumentNullException()
         {
             // Arrange
-            Assert.Throws<ArgumentNullException>(() => new LinuxJobHandlerServiceFactory( null));
+            Assert.Throws<ArgumentNullException>(() => new LinuxJobHandlerServiceFactory(null));
         }
-        
+
         [Test]
         public void Create_NewLinuxJobHandlerServiceWithCreate_ShouldReturnNewLinuxHandlerServiceInstance()
         {
@@ -36,9 +33,11 @@ namespace CodeManagerAgent.Tests
             var mockLinuxJobHandlerServiceFactory = new LinuxJobHandlerServiceFactory(agentConfiguration);
 
             // Act and Assert
-            Assert.DoesNotThrow(() =>  mockLinuxJobHandlerServiceFactory.Create(jobDetails, jobConfiguration, cancellationToken));
+            Assert.DoesNotThrow(
+                () => mockLinuxJobHandlerServiceFactory.Create(jobDetails, jobConfiguration, cancellationToken));
             Assert.NotNull(mockLinuxJobHandlerServiceFactory.Create(jobDetails, jobConfiguration, cancellationToken));
-            Assert.IsInstanceOf<LinuxJobHandlerService>(mockLinuxJobHandlerServiceFactory.Create(jobDetails, jobConfiguration, cancellationToken));
+            Assert.IsInstanceOf<LinuxJobHandlerService>(
+                mockLinuxJobHandlerServiceFactory.Create(jobDetails, jobConfiguration, cancellationToken));
         }
 
         [Test]
@@ -49,10 +48,11 @@ namespace CodeManagerAgent.Tests
             var agentConfiguration = fixture.Create<IOptions<AgentConfiguration>>();
             var cancellationToken = CancellationToken.None;
             var mockLinuxJobHandlerServiceFactory = new LinuxJobHandlerServiceFactory(agentConfiguration);
-            
+
             // Act and Assert
-            Assert.Throws<ArgumentNullException>(() => 
-                mockLinuxJobHandlerServiceFactory.Create(null, null, cancellationToken));
+            Assert.Throws<ArgumentNullException>(() =>
+                                                     mockLinuxJobHandlerServiceFactory.Create(
+                                                         null, null, cancellationToken));
         }
     }
 }

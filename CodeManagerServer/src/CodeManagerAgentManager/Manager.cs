@@ -9,9 +9,9 @@ namespace CodeManagerAgentManager
 {
     public class Manager : BackgroundService
     {
+        private readonly IHost _host;
         private readonly ILogger<Manager> _logger;
         private readonly IManagerClient _workerClient;
-        private readonly IHost _host;
 
         public Manager(ILogger<Manager> logger, IManagerClient workerClient, IHost host)
         {

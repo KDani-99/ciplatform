@@ -8,9 +8,9 @@ namespace CodeManagerAgentManager.Tests
         public void Test1()
         {
             // Arrange
-            
+
             // Act
-            
+
             // Assert
         }
     }

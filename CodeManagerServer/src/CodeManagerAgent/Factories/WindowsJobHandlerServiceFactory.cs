@@ -3,10 +3,6 @@ using CodeManager.Data.Configuration;
 using CodeManagerAgent.Configuration;
 using CodeManagerAgent.Entities;
 using CodeManagerAgent.Services;
-using CodeManagerAgent.WebSocket;
-using MassTransit;
-using Microsoft.AspNetCore.SignalR.Client;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace CodeManagerAgent.Factories
@@ -18,8 +14,9 @@ namespace CodeManagerAgent.Factories
         {
         }
 
-        public override IJobHandlerService Create(JobDetails jobDetails, JobConfiguration jobConfiguration,
-            CancellationToken cancellationToken)
+        public override IJobHandlerService Create(JobDetails jobDetails,
+                                                  JobConfiguration jobConfiguration,
+                                                  CancellationToken cancellationToken)
         {
             return new WindowsJobHandlerService(jobDetails, jobConfiguration, AgentConfiguration, cancellationToken);
         }

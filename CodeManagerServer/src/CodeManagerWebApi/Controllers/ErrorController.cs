@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Net;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -23,9 +22,9 @@ namespace CodeManagerWebApi.Controllers
         public IActionResult HandleError()
         {
             var exception = HttpContext.Features
-                .Get<IExceptionHandlerPathFeature>()
-                .Error;
-            
+                                       .Get<IExceptionHandlerPathFeature>()
+                                       .Error;
+
             if (exception is BadHttpRequestException ex)
             {
                 var response = new
@@ -37,11 +36,11 @@ namespace CodeManagerWebApi.Controllers
             }
             else
             {
-                var response = new { error = "An unexpected error has occured.", status = (int) HttpStatusCode.InternalServerError };
+                var response = new
+                    {error = "An unexpected error has occured.", status = (int) HttpStatusCode.InternalServerError};
                 _logger.LogTrace(exception, $"An unexpected error has occured @ {DateTime.Now}.");
                 return StatusCode((int) HttpStatusCode.InternalServerError, response);
             }
-            
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -19,7 +18,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Moq;
 using NUnit.Framework;
-using Serilog;
 
 namespace CodeManagerAgent.Tests
 {
@@ -29,17 +27,19 @@ namespace CodeManagerAgent.Tests
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var secretBytes = Encoding.UTF8.GetBytes(Guid.NewGuid().ToString());
-            
+
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
                 Expires = DateTime.Now.AddMinutes(1),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(secretBytes), SecurityAlgorithms.HmacSha256Signature),
+                SigningCredentials =
+                    new SigningCredentials(new SymmetricSecurityKey(secretBytes),
+                                           SecurityAlgorithms.HmacSha256Signature)
             };
 
             return tokenHandler.CreateJwtSecurityToken(tokenDescriptor);
         }
-        
+
         [Test]
         public async Task ReceiveAsync_ConsumeReceivedMessage_ShouldProcessJob()
         {
@@ -53,7 +53,6 @@ namespace CodeManagerAgent.Tests
             {
                 Token = token
             };
-            var agentService = new Mock<IAgentService>();
             var jobHandlerServiceFactory = new Mock<IJobHandlerServiceFactory>();
             var logger = new Mock<ILogger<QueueJobCommandConsumer>>();
             var jobHandlerService = new Mock<IJobHandlerService>();
@@ -61,17 +60,18 @@ namespace CodeManagerAgent.Tests
 
             jobHandlerServiceFactory
                 .Setup(x => x.Create(It.IsAny<JobDetails>(), It.IsAny<JobConfiguration>(),
-                    It.IsAny<CancellationToken>()))
+                                     It.IsAny<CancellationToken>()))
                 .Returns(jobHandlerService.Object);
-            
-            var consumer = new QueueJobCommandConsumer(agentService.Object, jobHandlerServiceFactory.Object, logger.Object, workerClient.Object);
+
+            var consumer = new QueueJobCommandConsumer(jobHandlerServiceFactory.Object,
+                                                       logger.Object, workerClient.Object);
 
             // Act
             await consumer.ConsumeAsync(queueJobCommand);
-            
+
             // Assert
             jobHandlerServiceFactory.Verify(x => x.Create(It.IsAny<JobDetails>(), It.IsAny<JobConfiguration>(),
-                It.IsAny<CancellationToken>()), Times.Exactly(1));
+                                                          It.IsAny<CancellationToken>()), Times.Exactly(1));
             jobHandlerService
                 .Verify(x => x.PrepareEnvironmentAsync(), Times.Exactly(1));
             jobHandlerService

@@ -44,6 +44,11 @@ export class SignalRService {
     console.log('RECEIVED LOG: ', logData);
   }
 
+  registerMethod(name: string, action: any) {
+    this.hubConnection?.off(name);
+    this.hubConnection?.on(name, action);
+  }
+
   disconnect() {
     this.hubConnection?.stop();
   }

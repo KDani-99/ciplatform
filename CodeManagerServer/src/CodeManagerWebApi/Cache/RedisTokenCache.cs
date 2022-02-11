@@ -12,9 +12,12 @@ namespace CodeManagerWebApi.Cache
 
         public RedisTokenCache(IOptions<RedisConfiguration> redisConfiguration)
         {
-            _redisConfiguration = redisConfiguration.Value ?? throw new ArgumentNullException(nameof(redisConfiguration));
+            _redisConfiguration =
+                redisConfiguration.Value ?? throw new ArgumentNullException(nameof(redisConfiguration));
             Setup();
         }
+
+        public IDatabase Database => _connectionMultiplexer.GetDatabase();
 
         private void Setup()
         {
@@ -22,10 +25,8 @@ namespace CodeManagerWebApi.Cache
             {
                 EndPoints = {_redisConfiguration.ConnectionString},
                 Password = _redisConfiguration.Password,
-                DefaultDatabase = _redisConfiguration.Database,
+                DefaultDatabase = _redisConfiguration.Database
             });
         }
-
-        public IDatabase Database => _connectionMultiplexer.GetDatabase();
     }
 }

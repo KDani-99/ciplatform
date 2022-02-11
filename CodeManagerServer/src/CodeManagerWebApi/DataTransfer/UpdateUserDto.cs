@@ -10,12 +10,16 @@ namespace CodeManagerWebApi.DataTransfer
         public string Password { get; set; }
         public bool IsAdmin { get; set; }
     }
-    public class UpdateUserDtoValidator : AbstractValidator<UpdateUserDto> {
-        public UpdateUserDtoValidator() : base() {
+
+    public class UpdateUserDtoValidator : AbstractValidator<UpdateUserDto>
+    {
+        public UpdateUserDtoValidator()
+        {
             RuleFor(x => x.Username)
                 .NotNull()
                 .Matches("(^[a-zA-Z0-9]{1}([a-zA-Z0-9-_]{2,48})[a-zA-Z0-9]{1}$)")
-                .WithMessage("Field `username` must be between 4 and 50 characters, may only contain alphanumeric characters, hyphens and underscores.");
+                .WithMessage(
+                    "Field `username` must be between 4 and 50 characters, may only contain alphanumeric characters, hyphens and underscores.");
             RuleFor(x => x.Name)
                 .Length(1, 75)
                 .WithMessage("Field `name` must be between 1 and 75 characters.");

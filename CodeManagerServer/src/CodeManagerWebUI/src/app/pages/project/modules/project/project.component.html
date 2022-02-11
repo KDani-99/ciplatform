@@ -52,25 +52,14 @@
     <tbody>
     <tr *ngFor="let run of projectData?.runs" (click)="openRun(run.id)">
       <td>{{run.id}}</td>
-      <td>{{run.startedDateTime}}</td>
-      <td>{{run.finishedDateTime}}</td>
-      <td>0:55</td>
+      <td>{{runService.getStartedTime(run.startedDateTime)}}</td>
+      <td>{{runService.getFinishedTime(run.finishedDateTime, run.state)}}</td>
+      <td>{{runService.getFormattedExecutionTime(run.executionTime)}}</td>
       <td>{{run.jobs}}</td>
-      <td [className]="'successful'"><i class="eva eva-checkmark-circle-outline"></i></td>
-    </tr>
-    <tr>
-      <td>1</td>
-      <td>Linux</td>
-      <td>2013.13.1</td>
-      <td>0:55</td>
-      <td>1/1</td>
-      <td [className]="'failed'"><i class="eva eva-alert-circle-outline"></i></td>
-    </tr>
-    <tr>
-      <td>1</td>
-      <td>2013.13.1</td>
-      <td>0:55</td>
-      <td>Successful</td>
+      <td *ngIf="run.state == State.RUNNING || run.state == State.QUEUED" [className]="'running'"><i class="eva eva-loader-outline"></i></td>
+      <td *ngIf="run.state == State.SUCCESSFUL" [className]="'successful'"><i class="eva eva-checkmark-circle-outline"></i></td>
+      <td *ngIf="run.state == State.FAILED" [className]="'failed'"><i class="eva eva-alert-circle-outline"></i></td>
+      <td *ngIf="run.state == State.SKIPPED" [className]="'skipped'"><i class="eva eva-slash-outline"></i></td>
     </tr>
     </tbody>
   </table>

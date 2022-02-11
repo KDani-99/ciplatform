@@ -15,6 +15,8 @@ import { MemberPermission } from '../../../../services/team/team.interface';
 import { Select } from '@ngxs/store';
 import { Observable } from 'rxjs';
 import { RunService } from '../../../../services/run/run.service';
+import { State } from '../../../../services/run/run.interface';
+import { SignalRService } from '../../../../services/signalr/signalr.service';
 
 @Component({
   selector: 'app-project',
@@ -23,6 +25,8 @@ import { RunService } from '../../../../services/run/run.service';
 })
 export class ProjectComponent implements OnInit {
   currentTemplate?: TemplateRef<any>;
+
+  State = State;
 
   @ViewChild('editProjectTemplate') editProjectTemplate?: TemplateRef<any>;
   @ViewChild('deleteProjectTemplate') deleteProjectTemplate?: TemplateRef<any>;
@@ -38,7 +42,8 @@ export class ProjectComponent implements OnInit {
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly projectService: ProjectService,
-    private readonly runService: RunService,
+    private readonly signalrService: SignalRService,
+    readonly runService: RunService,
   ) {}
 
   ngOnInit(): void {
@@ -47,6 +52,11 @@ export class ProjectComponent implements OnInit {
       .getProject(id)
       .subscribe((projectData: ProjectDataDto) => {
         this.projectData = projectData;
+        // TODO: join group
+        this.signalrService.registerMethod(
+          'ReceiveStepResultEvent',
+          this.onReceiveStepResultEvent,
+        );
       });
   }
 
@@ -94,6 +104,10 @@ export class ProjectComponent implements OnInit {
         .startRun(this.projectData!.project.id, file)
         .subscribe(() => this.toggleWindow(false));
     }
+  }
+
+  onReceiveStepResultEvent(stepResultEvent: any): void {
+    console.log('step result', stepResultEvent);
   }
 
   toggleWindow(show: boolean, template?: TemplateRef<any>): void {

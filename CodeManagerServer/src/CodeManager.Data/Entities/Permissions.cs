@@ -1,6 +1,4 @@
-﻿using System.Runtime.Serialization;
-
-namespace CodeManager.Data.Entities
+﻿namespace CodeManager.Data.Entities
 {
     public enum Permissions
     {

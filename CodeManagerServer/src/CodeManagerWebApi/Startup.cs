@@ -1,35 +1,29 @@
 using System;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using CodeManager.Data.Configuration;
+using CodeManager.Data.Database;
 using CodeManager.Data.Repositories;
 using CodeManagerWebApi.Cache;
-using CodeManagerWebApi.Database;
 using CodeManagerWebApi.Configuration;
 using CodeManagerWebApi.DataTransfer;
 using CodeManagerWebApi.Extensions;
 using CodeManagerWebApi.Hubs;
 using CodeManagerWebApi.Repositories;
 using CodeManagerWebApi.Services;
-using CodeManagerWebApi.Utils.Extensions;
 using FluentValidation;
 using FluentValidation.AspNetCore;
-using MassTransit;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Http.Features;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.EntityFrameworkCore;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
@@ -43,7 +37,7 @@ namespace CodeManagerWebApi
         {
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         }
-        
+
         public void ConfigureServices(IServiceCollection services)
         {
             services
@@ -51,8 +45,9 @@ namespace CodeManagerWebApi
                 .AddFluentValidation()
                 .Configure<JwtConfiguration>(_configuration.GetSection("JwtConfiguration"))
                 .Configure<RedisConfiguration>(_configuration.GetSection("RedisConfiguration"))
+                .Configure<RedisConfiguration>(_configuration.GetSection("YmlConfiguration"))
                 .Configure<IConfiguration>(_configuration)
-                .AddDbContext<CodeManager.Data.Database.CodeManagerDbContext, CodeManagerDbContext>(options =>
+                .AddDbContext<CodeManagerDbContext, Database.CodeManagerDbContext>(options =>
                     options.UseNpgsql(_configuration.GetValue<string>("ConnectionString")))
                 .AddSingleton<ICredentialManagerService, CredentialManagerService>()
                 .AddSingleton(new JsonSerializerOptions
@@ -62,9 +57,9 @@ namespace CodeManagerWebApi
                         new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)
                     }
                 })
-                .AddScoped((_) => new DeserializerBuilder()
-                    .WithNamingConvention(LowerCaseNamingConvention.Instance)
-                    .Build())
+                .AddScoped(_ => new DeserializerBuilder()
+                                .WithNamingConvention(LowerCaseNamingConvention.Instance)
+                                .Build())
                 .AddScoped<ITokenService<JwtSecurityToken>, TokenService>()
                 .AddSingleton<ITokenCache, RedisTokenCache>()
                 .AddScoped<IUserRepository, UserRepository>()
@@ -93,41 +88,39 @@ namespace CodeManagerWebApi
                 .AddTransient<IValidator<LoginDto>, LoginDtoValidator>()
                 .AddTransient<IValidator<CreateUserDto>, CreateUserDtoValidator>()
                 .AddTransient<IValidator<UpdateUserDto>, UpdateUserDtoValidator>();
-            
+
             services.Configure<FormOptions>(options =>
             {
                 options.ValueCountLimit = 2;
                 options.ValueLengthLimit = int.MaxValue;
                 options.MultipartBodyLengthLimit = long.MaxValue;
             });
-            
+
             services.AddAuthentication("JwtAuthToken")
-                .AddJwtBearer(options =>
-                {
-                    options.MapInboundClaims = false;
-                    
-                    options.Events = new JwtBearerEvents
+                    .AddJwtBearer(options =>
                     {
-                        OnMessageReceived = context =>
+                        options.MapInboundClaims = false;
+
+                        options.Events = new JwtBearerEvents
                         {
-                            var accessToken = context.Request.Query["access_token"];
-                            
-                            var path = context.HttpContext.Request.Path;
-                            if (!string.IsNullOrEmpty(accessToken) &&
-                                (path.StartsWithSegments("/runs")))
+                            OnMessageReceived = context =>
                             {
-                                context.Token = accessToken;
+                                var accessToken = context.Request.Query["access_token"];
+
+                                var path = context.HttpContext.Request.Path;
+                                if (!string.IsNullOrEmpty(accessToken) &&
+                                    path.StartsWithSegments("/runs"))
+                                    context.Token = accessToken;
+
+                                return Task.CompletedTask;
                             }
-                            return Task.CompletedTask;
-                        }
-                    };
-                })
-                .AddScheme<JwtAuthenticationTokenSchemeOptions, JwtAuthenticationHandler>("JwtAuthToken",null);
+                        };
+                    })
+                    .AddScheme<JwtAuthenticationTokenSchemeOptions, JwtAuthenticationHandler>("JwtAuthToken", null);
         }
-        
-        public void Configure(
-            IApplicationBuilder app,
-            IWebHostEnvironment env)
+
+        public void Configure(IApplicationBuilder app,
+                              IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -141,12 +134,12 @@ namespace CodeManagerWebApi
                 .UseHttpsRedirection()
                 .UseRouting()
                 .UseCors(x => x
-                    .AllowAnyMethod()
-                    .AllowAnyHeader()
-                    .WithExposedHeaders("Token-Expired")
-                    .SetIsOriginAllowed(origin => true) // any
-                    //.WithOrigins("https://localhost:4000"));
-                    .AllowCredentials())
+                              .AllowAnyMethod()
+                              .AllowAnyHeader()
+                              .WithExposedHeaders("Token-Expired")
+                              .SetIsOriginAllowed(origin => true) // any
+                              //.WithOrigins("https://localhost:4000"));
+                              .AllowCredentials())
                 .UseAuthentication()
                 .UseAuthorization()
                 .UseEndpoints(endpoints =>

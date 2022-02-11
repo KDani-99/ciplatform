@@ -18,7 +18,7 @@ namespace CodeManagerAgentManager.Services
         public TokenService(IOptions<TokenServiceConfiguration> tokenServiceConfiguration)
         {
             _tokenServiceConfiguration = tokenServiceConfiguration.Value ??
-                                         throw new ArgumentNullException(nameof(tokenServiceConfiguration));
+                throw new ArgumentNullException(nameof(tokenServiceConfiguration));
         }
 
         public Task<JwtSecurityToken> CreateJobTokenAsync(long runId, long jobId)
@@ -31,8 +31,9 @@ namespace CodeManagerAgentManager.Services
             return VerifyTokenAsync(token, _tokenServiceConfiguration.JobTokenConfiguration.Secret);
         }
 
-        private static Task<JwtSecurityToken> CreateJobTokenAsync(long runId, long jobId,
-            TokenConfiguration tokenConfiguration)
+        private static Task<JwtSecurityToken> CreateJobTokenAsync(long runId,
+                                                                  long jobId,
+                                                                  TokenConfiguration tokenConfiguration)
         {
             var claims = new[]
             {
@@ -68,7 +69,7 @@ namespace CodeManagerAgentManager.Services
                 Subject = new ClaimsIdentity(claims),
                 Expires = DateTime.Now.AddSeconds(tokenConfiguration.LifeTime),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(secretBytes),
-                    SecurityAlgorithms.HmacSha256Signature)
+                                                            SecurityAlgorithms.HmacSha256Signature)
             };
 
             return tokenHandler.CreateJwtSecurityToken(tokenDescriptor);

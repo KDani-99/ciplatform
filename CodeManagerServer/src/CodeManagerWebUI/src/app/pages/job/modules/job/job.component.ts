@@ -1,7 +1,9 @@
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { TeamDataDto } from '../../../../services/team/team.interface';
 import { SignalRService } from '../../../../services/signalr/signalr.service';
-import { ActivatedRoute, Route } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
+import { RunService } from '../../../../services/run/run.service';
+import { JobDataDto } from '../../../../services/run/run.interface';
+import { State } from '../../../../services/run/run.interface';
 
 @Component({
   selector: 'app-job',
@@ -12,17 +14,39 @@ export class JobComponent implements OnInit {
   currentTemplate?: TemplateRef<any>;
   showWindow: boolean = false;
   @ViewChild('jobConsole') jobConsole?: TemplateRef<any>;
+
+  jobDto?: JobDataDto;
+
+  State = State;
+
+  private runId: number = 0;
+  private jobId: number = 0;
+
+  log?: string[];
+
   constructor(
     private readonly route: ActivatedRoute,
+    readonly runService: RunService,
     private readonly signalrService: SignalRService,
   ) {}
 
   ngOnInit(): void {
-    const id = parseInt(this.route.snapshot.paramMap.get('id')!, 10);
+    this.runId = parseInt(this.route.snapshot.paramMap.get('runId')!, 10);
+    this.jobId = parseInt(this.route.snapshot.paramMap.get('id')!, 10);
+    this.runService
+      .getJob(this.runId, this.jobId)
+      .subscribe((jobDto: JobDataDto) => {
+        this.jobDto = jobDto;
+      });
   }
 
-  openConsoleWindow(): void {
-    this.toggleWindow(true, this.jobConsole);
+  openConsoleWindow(stepId: number): void {
+    this.runService
+      .getStepFile(this.runId, this.jobId, stepId)
+      .subscribe((content: string) => {
+        this.log = content?.split('\n');
+        this.toggleWindow(true, this.jobConsole);
+      });
   }
 
   toggleWindow(show: boolean, template?: TemplateRef<any>): void {

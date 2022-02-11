@@ -1,11 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { RunService } from '../../../../services/run/run.service';
-import {
-  JobDto,
-  RunDataDto,
-  State,
-} from '../../../../services/run/run.interface';
+import { RunDataDto, State } from '../../../../services/run/run.interface';
 
 @Component({
   selector: 'app-run',
@@ -20,7 +16,7 @@ export class RunComponent implements OnInit {
   constructor(
     private readonly route: ActivatedRoute,
     private readonly router: Router,
-    private readonly runService: RunService,
+    readonly runService: RunService,
   ) {}
 
   ngOnInit(): void {
@@ -32,15 +28,5 @@ export class RunComponent implements OnInit {
 
   async openJob(id: number): Promise<void> {
     await this.router.navigate([`runs/${this.runData?.run.id}/jobs/${id}`]);
-  }
-
-  getFinishedTime(job: JobDto): string {
-    return job.state === State.RUNNING
-      ? '-'
-      : new Date(job.finishedDateTime).toLocaleString();
-  }
-
-  getStartedTime(job: JobDto): string {
-    return new Date(job.startedDateTime).toLocaleString();
   }
 }

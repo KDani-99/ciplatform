@@ -9,13 +9,9 @@
     <div class="console-container">
       <table>
         <tbody>
-          <tr>
-            <th>1.</th>
-            <td>dsadsada</td>
-          </tr>
-          <tr>
-            <th>2.</th>
-            <td>dsadsadadsadsadadsadsadadsadsadadsadsadadsadsadadsadsadadsadsadadsadsadadsadsadadsadsadadsadsadadsadsadadsadsadadsadsadadsadsadadsadsadadsadsadadsadsadadsadsadadsadsadadsadsadadsadsadadsadsadadsadsadadsadsadadsadsadadsadsadadsadsadadsadsadadsadsadadsadsadadsadsada</td>
+          <tr *ngFor="let line of log; index as lineNo;">
+            <th>{{lineNo + 1}}.</th>
+            <td>{{line}}</td>
           </tr>
         </tbody>
       </table>

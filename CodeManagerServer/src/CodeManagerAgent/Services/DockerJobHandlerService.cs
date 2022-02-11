@@ -4,18 +4,12 @@ using System.Text;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
-using CodeManager.Core.Hubs.Common;
 using CodeManager.Data.Configuration;
-using CodeManager.Data.Events;
 using CodeManagerAgent.Configuration;
 using CodeManagerAgent.Entities;
 using CodeManagerAgent.Exceptions;
-using CodeManagerAgent.WebSocket;
 using Docker.DotNet;
 using Docker.DotNet.Models;
-using MassTransit;
-using Microsoft.AspNetCore.SignalR.Client;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace CodeManagerAgent.Services
@@ -26,14 +20,13 @@ namespace CodeManagerAgent.Services
         private string _containerId;
 
         // unit of work
-        public DockerJobHandlerService(
-            JobDetails jobDetails,
-            JobConfiguration jobConfiguration,
-            IOptions<AgentConfiguration> agentConfiguration,
-            IDockerClient dockerClient,
-            CancellationToken cancellationToken) :
+        public DockerJobHandlerService(JobDetails jobDetails,
+                                       JobConfiguration jobConfiguration,
+                                       IOptions<AgentConfiguration> agentConfiguration,
+                                       IDockerClient dockerClient,
+                                       CancellationToken cancellationToken) :
             base(jobDetails, jobConfiguration, agentConfiguration,
-                cancellationToken)
+                 cancellationToken)
         {
             _dockerClient = dockerClient ?? throw new ArgumentNullException(nameof(dockerClient));
         }
@@ -41,7 +34,7 @@ namespace CodeManagerAgent.Services
         public override async Task PrepareEnvironmentAsync()
         {
             await base.PrepareEnvironmentAsync();
-            
+
             var (from, tag) = JobConfiguration.Image.Split(":") switch {var result => (result[0], result[1])};
 
             await _dockerClient.Images.CreateImageAsync(
@@ -52,7 +45,7 @@ namespace CodeManagerAgent.Services
                 },
                 JobConfiguration.AuthConfig,
                 new Progress<JSONMessage>());
-            
+
             var container = await _dockerClient.Containers.CreateContainerAsync(new CreateContainerParameters
             {
                 Image = JobConfiguration.Image,
@@ -66,16 +59,16 @@ namespace CodeManagerAgent.Services
             _containerId = container.ID;
 
             if (!await _dockerClient.Containers.StartContainerAsync(_containerId, new ContainerStartParameters()))
-            {
                 throw new StepFailedException(
                     $"Failed to start {nameof(JobContext.Docker)} container. Container id: {_containerId}");
-            }
         }
 
-        public override async Task ExecuteStepAsync(ChannelWriter<string> channelWriter ,StepConfiguration step, int stepIndex)
+        public override async Task ExecuteStepAsync(ChannelWriter<string> channelWriter,
+                                                    StepConfiguration step,
+                                                    int stepIndex)
         {
             await base.ExecuteStepAsync(channelWriter, step, stepIndex);
-            
+
             var command = step.Cmd.Split(" ");
 
             var execCreateResponse =
@@ -154,7 +147,7 @@ namespace CodeManagerAgent.Services
         {
             if (_dockerClient?.Containers != null)
                 await _dockerClient.Containers.StopContainerAsync(_containerId, new ContainerStopParameters())
-                    .ConfigureAwait(false);
+                                   .ConfigureAwait(false);
             Dispose(false);
             GC.SuppressFinalize(this);
         }

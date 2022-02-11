@@ -8,6 +8,6 @@ namespace CodeManagerAgent.Services
     public interface IJobHandlerService : IAsyncDisposable, IDisposable
     {
         public Task PrepareEnvironmentAsync();
-        public Task ExecuteStepAsync(ChannelWriter<string> channelWriter,StepConfiguration step, int stepIndex);
+        public Task ExecuteStepAsync(ChannelWriter<string> channelWriter, StepConfiguration step, int stepIndex);
     }
 }

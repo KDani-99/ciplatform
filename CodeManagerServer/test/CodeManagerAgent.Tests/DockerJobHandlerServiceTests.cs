@@ -1,14 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using AutoFixture;
 using AutoFixture.AutoMoq;
 using CodeManager.Data.Configuration;
-using CodeManager.Data.Events;
 using CodeManagerAgent.Configuration;
 using CodeManagerAgent.Entities;
 using CodeManagerAgent.Exceptions;
@@ -17,18 +15,14 @@ using CodeManagerAgent.Tests.Mocks;
 using CodeManagerAgent.WebSocket;
 using Docker.DotNet;
 using Docker.DotNet.Models;
-using Microsoft.AspNetCore.Connections;
-using Microsoft.AspNetCore.SignalR.Client;
-using Microsoft.AspNetCore.SignalR.Protocol;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NUnit.Framework;
 using Moq;
+using NUnit.Framework;
+
 namespace CodeManagerAgent.Tests
 {
     public class DockerJobHandlerServiceTests
     {
-
         [Test]
         public async Task PrepareEnvironmentAsync_CreateDockerContainer_ShouldThrowStepFailedException()
         {
@@ -48,7 +42,8 @@ namespace CodeManagerAgent.Tests
             {
                 ID = "test-docker-container-id"
             };
-            var agentConfiguration = fixture.Create<IOptions<AgentConfiguration>>(); ;
+            var agentConfiguration = fixture.Create<IOptions<AgentConfiguration>>();
+            ;
             var workerClient = new Mock<IWorkerClient>();
             var dockerClient = new Mock<IDockerClient>();
 
@@ -56,22 +51,28 @@ namespace CodeManagerAgent.Tests
 
             workerClient
                 .SetupGet(x => x.HubConnection)
-                .Returns(hubConnection.Object); 
-            hubConnection.Setup(x => x.SendCoreAsync(It.IsAny<string>(), It.IsAny<object[]>(), It.IsAny<CancellationToken>()))
+                .Returns(hubConnection.Object);
+            hubConnection
+                .Setup(x => x.SendCoreAsync(It.IsAny<string>(), It.IsAny<object[]>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
             dockerClient
-                .Setup(x => x.Images.CreateImageAsync(imagesCreateParameters.Object, jobConfiguration.AuthConfig, new Progress<JSONMessage>(), cancellationToken))
+                .Setup(x => x.Images.CreateImageAsync(imagesCreateParameters.Object, jobConfiguration.AuthConfig,
+                                                      new Progress<JSONMessage>(), cancellationToken))
                 .Returns(Task.FromResult(createContainerResponse));
-           dockerClient
-                .Setup(x => x.Containers.CreateContainerAsync(It.IsAny<CreateContainerParameters>(), It.IsAny<CancellationToken>()))
+            dockerClient
+                .Setup(x => x.Containers.CreateContainerAsync(It.IsAny<CreateContainerParameters>(),
+                                                              It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(createContainerResponse));
-           dockerClient
-               .Setup(x => x.Containers.StartContainerAsync(It.IsAny<string>(), It.IsAny<ContainerStartParameters>(), It.IsAny<CancellationToken>()))
-               .Returns(Task.FromResult(false));
-           await using var dockerJobHandlerService = new DockerJobHandlerService(jobDetails.Object, jobConfiguration,agentConfiguration, dockerClient.Object, cancellationToken);
-           
-           // Act and Assert
-           Assert.ThrowsAsync<StepFailedException>(async () => await dockerJobHandlerService.PrepareEnvironmentAsync());
+            dockerClient
+                .Setup(x => x.Containers.StartContainerAsync(It.IsAny<string>(), It.IsAny<ContainerStartParameters>(),
+                                                             It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(false));
+            await using var dockerJobHandlerService = new DockerJobHandlerService(
+                jobDetails.Object, jobConfiguration, agentConfiguration, dockerClient.Object, cancellationToken);
+
+            // Act and Assert
+            Assert.ThrowsAsync<StepFailedException>(
+                async () => await dockerJobHandlerService.PrepareEnvironmentAsync());
         }
 
         [Test]
@@ -93,7 +94,8 @@ namespace CodeManagerAgent.Tests
             {
                 ID = "test-docker-container-id"
             };
-            var agentConfiguration = fixture.Create<IOptions<AgentConfiguration>>(); ;
+            var agentConfiguration = fixture.Create<IOptions<AgentConfiguration>>();
+            ;
             var workerClient = new Mock<IWorkerClient>();
             var dockerClient = new Mock<IDockerClient>();
 
@@ -101,30 +103,42 @@ namespace CodeManagerAgent.Tests
 
             workerClient
                 .SetupGet(x => x.HubConnection)
-                .Returns(hubConnection.Object); 
-            hubConnection.Setup(x => x.SendCoreAsync(It.IsAny<string>(), It.IsAny<object[]>(), It.IsAny<CancellationToken>()))
+                .Returns(hubConnection.Object);
+            hubConnection
+                .Setup(x => x.SendCoreAsync(It.IsAny<string>(), It.IsAny<object[]>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
             dockerClient
-                .Setup(x => x.Images.CreateImageAsync(imagesCreateParameters.Object, jobConfiguration.AuthConfig, new Progress<JSONMessage>(), cancellationToken))
+                .Setup(x => x.Images.CreateImageAsync(imagesCreateParameters.Object, jobConfiguration.AuthConfig,
+                                                      new Progress<JSONMessage>(), cancellationToken))
                 .Returns(Task.FromResult(createContainerResponse));
-           dockerClient
-                .Setup(x => x.Containers.CreateContainerAsync(It.IsAny<CreateContainerParameters>(), It.IsAny<CancellationToken>()))
+            dockerClient
+                .Setup(x => x.Containers.CreateContainerAsync(It.IsAny<CreateContainerParameters>(),
+                                                              It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(createContainerResponse));
-           dockerClient
-               .Setup(x => x.Containers.StartContainerAsync(It.IsAny<string>(),It.IsAny<ContainerStartParameters>(), It.IsAny<CancellationToken>()))
-               .Returns(Task.FromResult(true));
-           await using var dockerJobHandlerService = new DockerJobHandlerService(jobDetails.Object, jobConfiguration,agentConfiguration, dockerClient.Object, cancellationToken);
-            
-           // Act
+            dockerClient
+                .Setup(x => x.Containers.StartContainerAsync(It.IsAny<string>(), It.IsAny<ContainerStartParameters>(),
+                                                             It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(true));
+            await using var dockerJobHandlerService = new DockerJobHandlerService(
+                jobDetails.Object, jobConfiguration, agentConfiguration, dockerClient.Object, cancellationToken);
+
+            // Act
             await dockerJobHandlerService.PrepareEnvironmentAsync();
-            
+
             // Assert
             dockerClient
-                .Verify((x) => x.Images.CreateImageAsync(It.IsAny<ImagesCreateParameters>(), It.IsAny<AuthConfig>(), It.IsAny<Progress<JSONMessage>>(), It.IsAny<CancellationToken>()), Times.Exactly(1));
+                .Verify(
+                    x => x.Images.CreateImageAsync(It.IsAny<ImagesCreateParameters>(), It.IsAny<AuthConfig>(),
+                                                   It.IsAny<Progress<JSONMessage>>(), It.IsAny<CancellationToken>()),
+                    Times.Exactly(1));
             dockerClient
-                .Verify((x) => x.Containers.CreateContainerAsync(It.IsAny<CreateContainerParameters>(), It.IsAny<CancellationToken>()), Times.Exactly(1));
+                .Verify(
+                    x => x.Containers.CreateContainerAsync(It.IsAny<CreateContainerParameters>(),
+                                                           It.IsAny<CancellationToken>()), Times.Exactly(1));
             dockerClient
-                .Verify((x) => x.Containers.StartContainerAsync(It.IsAny<string>(), It.IsAny<ContainerStartParameters>(), It.IsAny<CancellationToken>()), Times.Exactly(1));
+                .Verify(
+                    x => x.Containers.StartContainerAsync(It.IsAny<string>(), It.IsAny<ContainerStartParameters>(),
+                                                          It.IsAny<CancellationToken>()), Times.Exactly(1));
         }
 
         [Test]
@@ -141,18 +155,22 @@ namespace CodeManagerAgent.Tests
             };
             var jobDetails = new Mock<JobDetails>();
             var cancellationToken = CancellationToken.None;
-            var agentConfiguration = fixture.Create<IOptions<AgentConfiguration>>(); ;
+            var agentConfiguration = fixture.Create<IOptions<AgentConfiguration>>();
+            ;
             var dockerClient = new Mock<IDockerClient>();
             var channelWriter = new Mock<ChannelWriter<string>>();
             var stepConfiguration = new Mock<StepConfiguration>();
             var stepIndex = 0;
-            await using var dockerJobHandlerService = new DockerJobHandlerService(jobDetails.Object, jobConfiguration,agentConfiguration, dockerClient.Object, cancellationToken);
-           
-           // Act and Assert
-           Assert.ThrowsAsync<EnvironmentNotPreparedException>(async () =>
-               await dockerJobHandlerService.ExecuteStepAsync(channelWriter.Object, stepConfiguration.Object, stepIndex));
+            await using var dockerJobHandlerService = new DockerJobHandlerService(
+                jobDetails.Object, jobConfiguration, agentConfiguration, dockerClient.Object, cancellationToken);
+
+            // Act and Assert
+            Assert.ThrowsAsync<EnvironmentNotPreparedException>(async () =>
+                                                                    await dockerJobHandlerService.ExecuteStepAsync(
+                                                                        channelWriter.Object, stepConfiguration.Object,
+                                                                        stepIndex));
         }
-        
+
         [Test]
         public async Task PrepareEnvironmentAsync_CreateDockerContainer_ShouldExecAndAttachToContainer()
         {
@@ -180,7 +198,8 @@ namespace CodeManagerAgent.Tests
             {
                 ExitCode = 0
             };
-            var agentConfiguration = fixture.Create<IOptions<AgentConfiguration>>(); ;
+            var agentConfiguration = fixture.Create<IOptions<AgentConfiguration>>();
+            ;
             var workerClient = new Mock<IWorkerClient>();
             var dockerClient = new Mock<IDockerClient>();
             var channelWriter = new Mock<ChannelWriter<string>>();
@@ -192,49 +211,62 @@ namespace CodeManagerAgent.Tests
             var hubConnection = new Mock<MockHubConnection>();
             var stream = new Mock<Stream>();
             var multiplexedStream = new MultiplexedStream(stream.Object, true);
-            
+
             workerClient
                 .SetupGet(x => x.HubConnection)
-                .Returns(hubConnection.Object); 
-            hubConnection.Setup(x => x.SendCoreAsync(It.IsAny<string>(), It.IsAny<object[]>(), It.IsAny<CancellationToken>()))
+                .Returns(hubConnection.Object);
+            hubConnection
+                .Setup(x => x.SendCoreAsync(It.IsAny<string>(), It.IsAny<object[]>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
             dockerClient
-                .Setup(x => x.Images.CreateImageAsync(imagesCreateParameters.Object, jobConfiguration.AuthConfig, new Progress<JSONMessage>(), cancellationToken))
+                .Setup(x => x.Images.CreateImageAsync(imagesCreateParameters.Object, jobConfiguration.AuthConfig,
+                                                      new Progress<JSONMessage>(), cancellationToken))
                 .Returns(Task.FromResult(createContainerResponse));
-           dockerClient
-                .Setup(x => x.Containers.CreateContainerAsync(It.IsAny<CreateContainerParameters>(), It.IsAny<CancellationToken>()))
+            dockerClient
+                .Setup(x => x.Containers.CreateContainerAsync(It.IsAny<CreateContainerParameters>(),
+                                                              It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(createContainerResponse));
-           dockerClient
-               .Setup(x => x.Containers.StartContainerAsync(It.IsAny<string>(),It.IsAny<ContainerStartParameters>(), It.IsAny<CancellationToken>()))
-               .Returns(Task.FromResult(true));
-           dockerClient
-               .Setup(x => x.Exec.ExecCreateContainerAsync(It.IsAny<string>(),It.IsAny<ContainerExecCreateParameters>(), It.IsAny<CancellationToken>()))
-               .Returns(Task.FromResult(execContainerResponse));
-           dockerClient
-               .Setup(x => x.Exec.StartAndAttachContainerExecAsync(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
-               .Returns(Task.FromResult(multiplexedStream));
-           dockerClient
-               .Setup(x => x.Exec.InspectContainerExecAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-               .Returns(Task.FromResult(inspectContainerResponse));
-           await using var dockerJobHandlerService = new DockerJobHandlerService(jobDetails.Object, jobConfiguration,agentConfiguration, dockerClient.Object, cancellationToken);
-            
-           // Act
+            dockerClient
+                .Setup(x => x.Containers.StartContainerAsync(It.IsAny<string>(), It.IsAny<ContainerStartParameters>(),
+                                                             It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(true));
+            dockerClient
+                .Setup(x => x.Exec.ExecCreateContainerAsync(It.IsAny<string>(),
+                                                            It.IsAny<ContainerExecCreateParameters>(),
+                                                            It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(execContainerResponse));
+            dockerClient
+                .Setup(x => x.Exec.StartAndAttachContainerExecAsync(It.IsAny<string>(), It.IsAny<bool>(),
+                                                                    It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(multiplexedStream));
+            dockerClient
+                .Setup(x => x.Exec.InspectContainerExecAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(inspectContainerResponse));
+            await using var dockerJobHandlerService = new DockerJobHandlerService(
+                jobDetails.Object, jobConfiguration, agentConfiguration, dockerClient.Object, cancellationToken);
+
+            // Act
             await dockerJobHandlerService.PrepareEnvironmentAsync();
-            
+
             await dockerJobHandlerService.ExecuteStepAsync(channelWriter.Object, stepConfiguration, stepIndex);
-            
+
             // Assert
             dockerClient
-                .Verify((x) => x.Exec.ExecCreateContainerAsync(It.IsAny<string>(),It.IsAny<ContainerExecCreateParameters>(), It.IsAny<CancellationToken>()), Times.Exactly(1));
+                .Verify(
+                    x => x.Exec.ExecCreateContainerAsync(It.IsAny<string>(), It.IsAny<ContainerExecCreateParameters>(),
+                                                         It.IsAny<CancellationToken>()), Times.Exactly(1));
             dockerClient
-                .Verify((x) => x.Exec.StartAndAttachContainerExecAsync(It.IsAny<string>(),It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Exactly(1));
+                .Verify(
+                    x => x.Exec.StartAndAttachContainerExecAsync(It.IsAny<string>(), It.IsAny<bool>(),
+                                                                 It.IsAny<CancellationToken>()), Times.Exactly(1));
         }
-        
+
         [Test]
         [TestCase(1)]
         [TestCase(-1)]
         [TestCase(45564)]
-        public async Task PrepareEnvironmentAsync_CreateDockerContainer_NonZeroExitCodShouldThrowStepFailedException(int exitCode)
+        public async Task PrepareEnvironmentAsync_CreateDockerContainer_NonZeroExitCodShouldThrowStepFailedException(
+            int exitCode)
         {
             // Arrange
             var fixture = new Fixture().Customize(new AutoMoqCustomization());
@@ -260,7 +292,8 @@ namespace CodeManagerAgent.Tests
             {
                 ExitCode = exitCode
             };
-            var agentConfiguration = fixture.Create<IOptions<AgentConfiguration>>(); ;
+            var agentConfiguration = fixture.Create<IOptions<AgentConfiguration>>();
+            ;
             var workerClient = new Mock<IWorkerClient>();
             var dockerClient = new Mock<IDockerClient>();
             var channelWriter = new Mock<ChannelWriter<string>>();
@@ -272,35 +305,45 @@ namespace CodeManagerAgent.Tests
             var hubConnection = new Mock<MockHubConnection>();
             var stream = new Mock<Stream>();
             var multiplexedStream = new MultiplexedStream(stream.Object, true);
-            
+
             workerClient
                 .SetupGet(x => x.HubConnection)
-                .Returns(hubConnection.Object); 
-            hubConnection.Setup(x => x.SendCoreAsync(It.IsAny<string>(), It.IsAny<object[]>(), It.IsAny<CancellationToken>()))
+                .Returns(hubConnection.Object);
+            hubConnection
+                .Setup(x => x.SendCoreAsync(It.IsAny<string>(), It.IsAny<object[]>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
             dockerClient
-                .Setup(x => x.Images.CreateImageAsync(imagesCreateParameters.Object, jobConfiguration.AuthConfig, new Progress<JSONMessage>(), cancellationToken))
+                .Setup(x => x.Images.CreateImageAsync(imagesCreateParameters.Object, jobConfiguration.AuthConfig,
+                                                      new Progress<JSONMessage>(), cancellationToken))
                 .Returns(Task.FromResult(createContainerResponse));
-           dockerClient
-                .Setup(x => x.Containers.CreateContainerAsync(It.IsAny<CreateContainerParameters>(), It.IsAny<CancellationToken>()))
+            dockerClient
+                .Setup(x => x.Containers.CreateContainerAsync(It.IsAny<CreateContainerParameters>(),
+                                                              It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(createContainerResponse));
-           dockerClient
-               .Setup(x => x.Containers.StartContainerAsync(It.IsAny<string>(),It.IsAny<ContainerStartParameters>(), It.IsAny<CancellationToken>()))
-               .Returns(Task.FromResult(true));
-           dockerClient
-               .Setup(x => x.Exec.ExecCreateContainerAsync(It.IsAny<string>(),It.IsAny<ContainerExecCreateParameters>(), It.IsAny<CancellationToken>()))
-               .Returns(Task.FromResult(execContainerResponse));
-           dockerClient
-               .Setup(x => x.Exec.StartAndAttachContainerExecAsync(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
-               .Returns(Task.FromResult(multiplexedStream));
-           dockerClient
-               .Setup(x => x.Exec.InspectContainerExecAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-               .Returns(Task.FromResult(inspectContainerResponse));
-           await using var dockerJobHandlerService = new DockerJobHandlerService(jobDetails.Object, jobConfiguration,agentConfiguration, dockerClient.Object, cancellationToken);
-           await dockerJobHandlerService.PrepareEnvironmentAsync();
-           
-           // Act and Assert
-           Assert.ThrowsAsync<StepFailedException>(async () => await dockerJobHandlerService.ExecuteStepAsync(channelWriter.Object, stepConfiguration, stepIndex));
+            dockerClient
+                .Setup(x => x.Containers.StartContainerAsync(It.IsAny<string>(), It.IsAny<ContainerStartParameters>(),
+                                                             It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(true));
+            dockerClient
+                .Setup(x => x.Exec.ExecCreateContainerAsync(It.IsAny<string>(),
+                                                            It.IsAny<ContainerExecCreateParameters>(),
+                                                            It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(execContainerResponse));
+            dockerClient
+                .Setup(x => x.Exec.StartAndAttachContainerExecAsync(It.IsAny<string>(), It.IsAny<bool>(),
+                                                                    It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(multiplexedStream));
+            dockerClient
+                .Setup(x => x.Exec.InspectContainerExecAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(inspectContainerResponse));
+            await using var dockerJobHandlerService = new DockerJobHandlerService(
+                jobDetails.Object, jobConfiguration, agentConfiguration, dockerClient.Object, cancellationToken);
+            await dockerJobHandlerService.PrepareEnvironmentAsync();
+
+            // Act and Assert
+            Assert.ThrowsAsync<StepFailedException>(
+                async () => await dockerJobHandlerService.ExecuteStepAsync(
+                    channelWriter.Object, stepConfiguration, stepIndex));
         }
     }
 }

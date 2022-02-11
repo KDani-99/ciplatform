@@ -33,6 +33,7 @@ import { AuthenticatedGuard } from './guards/authenticated.guard';
 import { JwtAuthInterceptor } from './interceptors/jwt-http-auth.inteceptor';
 import { LoginGuard } from './guards/login.guard';
 import { ErrorComponent } from './components/error/error.component';
+import { JobModule } from './pages/job/modules/job/job.module';
 
 @NgModule({
   declarations: [
@@ -42,12 +43,12 @@ import { ErrorComponent } from './components/error/error.component';
     ButtonComponent,
     UserComponent,
     TeamComponent,
-    JobComponent,
     ProjectsComponent,
     ProjectComponent,
     TeamsComponent,
     RunComponent,
     PopupComponent,
+    JobComponent,
     UsersComponent,
     ErrorComponent,
   ],
@@ -58,6 +59,7 @@ import { ErrorComponent } from './components/error/error.component';
     BrowserAnimationsModule,
     HttpClientModule,
     TeamModule,
+    JobModule,
     ProjectsModule,
     TeamsModule,
     RunModule,

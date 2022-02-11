@@ -4,10 +4,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using CodeManager.Data.Configuration;
 using CodeManager.Data.Entities;
-using CodeManagerAgentManager.Exceptions;
 using CodeManagerAgentManager.Repositories;
-using Newtonsoft.Json;
-using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace CodeManagerAgentManager.Services
 {
@@ -15,19 +12,20 @@ namespace CodeManagerAgentManager.Services
     {
         private readonly JsonSerializerOptions _jsonSerializerOptions;
         private readonly IWorkerConnectionRepository _workerConnectionRepository;
-        
-        public WorkerConnectionService(JsonSerializerOptions jsonSerializerOptions, IWorkerConnectionRepository workerConnectionRepository)
+
+        public WorkerConnectionService(JsonSerializerOptions jsonSerializerOptions,
+                                       IWorkerConnectionRepository workerConnectionRepository)
         {
             _jsonSerializerOptions =
                 jsonSerializerOptions ?? throw new ArgumentNullException(nameof(jsonSerializerOptions));
             _workerConnectionRepository = workerConnectionRepository ??
-                                       throw new ArgumentNullException(nameof(workerConnectionRepository));
+                throw new ArgumentNullException(nameof(workerConnectionRepository));
         }
 
         public async Task<WorkerConnectionData> GetWorkerConnectionAsync(string connectionId)
         {
             var jsonString = await _workerConnectionRepository.GetAsync(connectionId);
-            
+
             return JsonSerializer.Deserialize<WorkerConnectionData>(jsonString, _jsonSerializerOptions);
         }
 
@@ -35,14 +33,16 @@ namespace CodeManagerAgentManager.Services
         {
             var serialized = JsonSerializer.Serialize(workerConnectionData, _jsonSerializerOptions);
 
-            await _workerConnectionRepository.AddToPoolAsync(workerConnectionData.JobContext, workerConnectionData.ConnectionId);
+            await _workerConnectionRepository.AddToPoolAsync(workerConnectionData.JobContext,
+                                                             workerConnectionData.ConnectionId);
             await _workerConnectionRepository.AddAsync(workerConnectionData.ConnectionId, serialized);
         }
 
         public async Task RemoveWorkerConnectionAsync(string connectionId)
         {
             var jsonString = await _workerConnectionRepository.GetAsync(connectionId);
-            var workerConnectionData = JsonSerializer.Deserialize<WorkerConnectionData>(jsonString, _jsonSerializerOptions);
+            var workerConnectionData =
+                JsonSerializer.Deserialize<WorkerConnectionData>(jsonString, _jsonSerializerOptions);
             await _workerConnectionRepository.RemoveFromPoolAsync(workerConnectionData.JobContext, connectionId);
             await _workerConnectionRepository.RemoveAsync(connectionId);
         }
@@ -55,7 +55,7 @@ namespace CodeManagerAgentManager.Services
                     jsonString, _jsonSerializerOptions);
 
             workerConnectionData.JobContext = stored.JobContext;
-            
+
             var serialized = JsonSerializer.Serialize(workerConnectionData, _jsonSerializerOptions);
             await _workerConnectionRepository.UpdateAsync(workerConnectionData.ConnectionId, serialized);
         }

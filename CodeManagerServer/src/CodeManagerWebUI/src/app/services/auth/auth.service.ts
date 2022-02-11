@@ -37,16 +37,11 @@ export class AuthService {
       `Bearer ${appState.user?.refreshToken}`,
     );
 
-    await firstValueFrom(
-      this.httpClient.post(
-        this.configService.getFullUrl('logout'),
-        {},
-        this.httpOptions,
-      ),
-    );
-
     await this.store.dispatch(new SetUser(undefined));
-    this.router.navigate(['login']);
+
+    this.httpClient
+      .post(this.configService.getFullUrl('logout'), {}, this.httpOptions)
+      .subscribe(() => this.router.navigate(['login']));
   }
 
   async login(username: string, password: string): Promise<void> {

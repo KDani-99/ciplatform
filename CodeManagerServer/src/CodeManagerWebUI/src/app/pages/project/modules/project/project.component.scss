@@ -40,14 +40,16 @@
       border-radius: 100px;
     }
   }
-  .failed i {
-    background-color: rgba(231, 76, 60, 0.1);
-    border: 1px solid rgb(231, 76, 60);
-    color: rgb(231, 76, 60);
+}
+.steps-details {
+  display: flex;
+  background-color: red;
+}
+@keyframes rotate {
+  from {
+    transform:rotate(0deg);
   }
-  .successful i {
-    background-color: rgba(46, 204, 113, 0.15);
-    border: 1px solid rgb(46, 204, 113);
-    color: rgb(46, 204, 113);
+  to {
+    transform:rotate(360deg);
   }
 }

@@ -14,27 +14,31 @@ namespace CodeManagerWebApi.Controllers
     [Route("/api/auth")]
     public class AuthController : ControllerBase
     {
-        private readonly IUserService _userService;
-        private readonly ITokenService<JwtSecurityToken> _tokenService;
         private readonly ILogger<AuthController> _logger;
+        private readonly ITokenService<JwtSecurityToken> _tokenService;
+        private readonly IUserService _userService;
 
-        public AuthController(IUserService userService, ITokenService<JwtSecurityToken> tokenService, ILogger<AuthController> logger)
+        public AuthController(IUserService userService,
+                              ITokenService<JwtSecurityToken> tokenService,
+                              ILogger<AuthController> logger)
         {
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
             _tokenService = tokenService ?? throw new ArgumentNullException(nameof(tokenService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
-        
-        [HttpPost, Route("login")]
+
+        [HttpPost]
+        [Route("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
             var authTokens = await _userService.LoginAsync(loginDto, HttpContext);
             _logger.LogInformation($"User `{loginDto.Username}` has logged in @ {DateTime.Now}");
-                
+
             return Ok(authTokens);
         }
-        
-        [HttpPost, Route("logout")]
+
+        [HttpPost]
+        [Route("logout")]
         public async Task<IActionResult> Logout()
         {
             try
@@ -59,8 +63,9 @@ namespace CodeManagerWebApi.Controllers
                 return Unauthorized();
             }
         }
-        
-        [HttpPost, Route("refresh")]
+
+        [HttpPost]
+        [Route("refresh")]
         public async Task<IActionResult> RefreshToken()
         {
             try

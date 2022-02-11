@@ -7,9 +7,11 @@ namespace CodeManagerWebApi.DataTransfer
         public string Username { get; set; }
         public string Password { get; set; }
     }
-    
-    public class LoginDtoValidator : AbstractValidator<LoginDto> {
-        public LoginDtoValidator() {
+
+    public class LoginDtoValidator : AbstractValidator<LoginDto>
+    {
+        public LoginDtoValidator()
+        {
             RuleFor(x => x.Username)
                 .NotNull()
                 .Matches("(^[a-zA-Z0-9]{1}([a-zA-Z0-9-_]{2,48})[a-zA-Z0-9]{1}$)")

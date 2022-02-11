@@ -8,9 +8,7 @@ import { SignalRService } from '../../../../../../services/signalr/signalr.servi
   styleUrls: ['./console.component.scss'],
 })
 export class ConsoleComponent implements OnInit {
-  @Input() runId!: number;
-  @Input() jobId!: number;
-  @Input() step!: number;
+  @Input() log?: string[];
 
   @Output() onClose: EventEmitter<any> = new EventEmitter<any>();
 

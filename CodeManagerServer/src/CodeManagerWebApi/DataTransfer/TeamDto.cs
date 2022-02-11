@@ -14,9 +14,11 @@ namespace CodeManagerWebApi.DataTransfer
         public bool IsMember { get; set; } // is the current user a member of the team?
         public string Owner { get; set; }
     }
-    
-    public class TeamDtoValidator : AbstractValidator<TeamDto> {
-        public TeamDtoValidator() {
+
+    public class TeamDtoValidator : AbstractValidator<TeamDto>
+    {
+        public TeamDtoValidator()
+        {
             RuleFor(x => x.Name)
                 .NotNull()
                 .Length(1, 50)

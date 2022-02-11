@@ -10,13 +10,13 @@ namespace CodeManagerAgent.Extensions
     public static class ServiceCollectionExtensionsSignalR
     {
         public static IServiceCollection AddSignalRClient(this IServiceCollection serviceCollection,
-            IConfiguration configuration)
+                                                          IConfiguration configuration)
         {
             var wsConfiguration = configuration.GetSection("WebSocketConfiguration").Get<WebSocketConfiguration>();
             var connection = new HubConnectionBuilder()
-                .WithUrl($"{wsConfiguration.Host}/{wsConfiguration.Hub}",
-                    options => options.AccessTokenProvider = () => Task.FromResult(""))
-                .Build();
+                             .WithUrl($"{wsConfiguration.Host}/{wsConfiguration.Hub}",
+                                      options => options.AccessTokenProvider = () => Task.FromResult(""))
+                             .Build();
 
             connection.Closed += async error =>
             {

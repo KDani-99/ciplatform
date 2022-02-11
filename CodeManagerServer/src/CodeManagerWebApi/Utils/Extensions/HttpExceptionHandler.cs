@@ -12,9 +12,9 @@ namespace CodeManagerWebApi.Utils.Extensions
             appBuilder.Run(async context =>
             {
                 var exception = context.Features
-                    .Get<IExceptionHandlerPathFeature>()
-                    .Error;
-            
+                                       .Get<IExceptionHandlerPathFeature>()
+                                       .Error;
+
                 if (!context.Response.HasStarted)
                 {
                     if (exception is BadHttpRequestException ex)
@@ -24,14 +24,18 @@ namespace CodeManagerWebApi.Utils.Extensions
                             error = ex.Message,
                             status = ex.StatusCode
                         };
-            
+
                         context.Response.StatusCode = ex.StatusCode;
-            
+
                         await context.Response.WriteAsJsonAsync(response);
                     }
                     else
                     {
-                        var response = new { error = "An unexpected error has occured.", status = (int) HttpStatusCode.InternalServerError };
+                        var response = new
+                        {
+                            error = "An unexpected error has occured.",
+                            status = (int) HttpStatusCode.InternalServerError
+                        };
                         await context.Response.WriteAsJsonAsync(response);
                     }
                 }

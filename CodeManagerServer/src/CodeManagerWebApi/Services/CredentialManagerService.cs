@@ -5,7 +5,7 @@ namespace CodeManagerWebApi.Services
     public class CredentialManagerService : ICredentialManagerService
     {
         private const int WorkFactor = 12;
-        
+
         public string CreateHashedPassword(string plain)
         {
             return HashPassword(plain, WorkFactor);

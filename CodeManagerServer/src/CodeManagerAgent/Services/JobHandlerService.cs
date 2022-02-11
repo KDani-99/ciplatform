@@ -1,18 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
-using CodeManager.Core.Hubs.Common;
 using CodeManager.Data.Configuration;
-using CodeManager.Data.Entities.CI;
-using CodeManager.Data.Events;
 using CodeManagerAgent.Configuration;
 using CodeManagerAgent.Entities;
 using CodeManagerAgent.Exceptions;
-using CodeManagerAgent.WebSocket;
-using Microsoft.AspNetCore.SignalR.Client;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace CodeManagerAgent.Services
@@ -20,20 +14,19 @@ namespace CodeManagerAgent.Services
     public abstract class JobHandlerService : IJobHandlerService
     {
         private readonly AgentConfiguration _agentConfiguration;
+        private readonly JobDetails _jobDetails;
 
         protected readonly CancellationToken CancellationToken;
         protected readonly JobConfiguration JobConfiguration;
-        protected readonly JobDetails JobDetails;
 
         private bool _isEnvironmentPrepared;
 
-        protected JobHandlerService(
-            JobDetails jobDetails,
-            JobConfiguration jobConfiguration,
-            IOptions<AgentConfiguration> agentConfiguration,
-            CancellationToken cancellationToken)
+        protected JobHandlerService(JobDetails jobDetails,
+                                    JobConfiguration jobConfiguration,
+                                    IOptions<AgentConfiguration> agentConfiguration,
+                                    CancellationToken cancellationToken)
         {
-            JobDetails = jobDetails ?? throw new ArgumentNullException(nameof(jobDetails));
+            _jobDetails = jobDetails ?? throw new ArgumentNullException(nameof(jobDetails));
             _agentConfiguration =
                 agentConfiguration.Value ?? throw new ArgumentNullException(nameof(agentConfiguration));
             JobConfiguration = jobConfiguration ?? throw new ArgumentNullException(nameof(jobConfiguration));
@@ -46,11 +39,8 @@ namespace CodeManagerAgent.Services
 
         public virtual Task PrepareEnvironmentAsync()
         {
-            JobConfiguration.Steps.Insert(0, new StepConfiguration
-            {
-                Name = "Checkout repository (setup)",
-                Cmd = $"git clone {JobDetails.Repository} {_agentConfiguration.WorkingDirectory}"
-            });
+            var initialStep = JobConfiguration.Steps.First();
+            initialStep.Cmd = initialStep.Cmd.Replace("[wd]", _agentConfiguration.WorkingDirectory);
 
             _isEnvironmentPrepared = true;
 
@@ -60,9 +50,8 @@ namespace CodeManagerAgent.Services
         public virtual Task ExecuteStepAsync(ChannelWriter<string> channelWriter, StepConfiguration step, int stepIndex)
         {
             if (!_isEnvironmentPrepared)
-            {
-                throw new EnvironmentNotPreparedException("`PrepareEnvironmentAsync` must be called before executing any step.");
-            }
+                throw new EnvironmentNotPreparedException(
+                    "`PrepareEnvironmentAsync` must be called before executing any step.");
 
             return Task.CompletedTask;
         }

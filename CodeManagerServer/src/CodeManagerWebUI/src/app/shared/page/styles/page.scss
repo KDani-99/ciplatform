@@ -27,3 +27,35 @@
   max-width: 175px;
   margin-bottom: 1em;
 }
+.failed {
+  i {
+    background-color: rgba(231, 76, 60, 0.1);
+    border: 1px solid rgb(231, 76, 60);
+    color: rgb(231, 76, 60);
+  }
+}
+.successful {
+  i {
+    background-color: rgba(46, 204, 113, 0.15);
+    border: 1px solid rgb(46, 204, 113);
+    color: rgb(46, 204, 113);
+  }
+}
+.running {
+  i {
+    animation-name: rotate;
+    animation-duration: 2000ms;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+    background-color: rgba(52, 152, 219, 0.15);
+    border: 1px solid rgb(52, 152, 219);
+    color: rgb(52, 152, 219);
+  }
+}
+.skipped {
+  i {
+    background-color: rgba(120, 120, 120, 0.15);
+    border: 1px solid rgb(120, 120, 120);
+    color: rgb(120, 120, 120)
+  }
+}

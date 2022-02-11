@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using CodeManager.Data.Configuration;
-using CodeManager.Data.Entities;
 
-namespace CodeManager.Data.Entities.CI
+namespace CodeManager.Data.Entities
 {
     public class Job : Entity
     {
@@ -13,7 +12,7 @@ namespace CodeManager.Data.Entities.CI
         public States State { get; set; } = States.NotRun;
         public string JsonContext { get; set; }
         public JobContext Context { get; set; }
-        public DateTime StartDateTime { get; set; }
+        public DateTime StartedDateTime { get; set; }
         public DateTime FinishedDateTime { get; set; }
     }
 }

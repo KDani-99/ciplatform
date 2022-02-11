@@ -18,26 +18,26 @@ namespace CodeManager.Data.Repositories
         public override Task<Project> GetAsync(long id)
         {
             return DbContext
-                .Projects
-                .Include(x => x.Runs)
-                .ThenInclude(x => x.Jobs)
-                .Include(x => x.Team)
-                .ThenInclude(x => x.Members)
-                .ThenInclude(x => x.User)
-             //   .ThenInclude(x => x.Name)
-                .FirstOrDefaultAsync(project => project.Id == id);
+                   .Projects
+                   .Include(x => x.Runs)
+                   .ThenInclude<Project, Run, List<Job>>(x => x.Jobs)
+                   .Include(x => x.Team)
+                   .ThenInclude(x => x.Members)
+                   .ThenInclude<Project, TeamMember, User>(x => x.User)
+                   //   .ThenInclude(x => x.Name)
+                   .FirstOrDefaultAsync(project => project.Id == id);
         }
 
         public override Task<List<Project>> GetAsync(Expression<Func<Project, bool>> expression)
         {
             return DbContext
-                .Projects
-                .Include(x => x.Runs)
-                .ThenInclude(x => x.Jobs)
-                .Include(x => x.Team)
-                .ThenInclude(x => x.Members)
-                .Where(expression)
-                .ToListAsync();
+                   .Projects
+                   .Include(x => x.Runs)
+                   .ThenInclude<Project, Run, List<Job>>(x => x.Jobs)
+                   .Include(x => x.Team)
+                   .ThenInclude(x => x.Members)
+                   .Where(expression)
+                   .ToListAsync();
         }
 
         public override Task<bool> ExistsAsync(Expression<Func<Project, bool>> expression)
@@ -63,7 +63,7 @@ namespace CodeManager.Data.Repositories
         {
             var entity = await DbContext.Projects.Where(project => project.Id == id).FirstOrDefaultAsync();
             DbContext.Projects.Remove(entity);
-            
+
             await DbContext.SaveChangesAsync();
         }
     }

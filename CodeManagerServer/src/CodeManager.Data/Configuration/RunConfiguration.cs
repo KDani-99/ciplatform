@@ -9,9 +9,9 @@ namespace CodeManager.Data.Configuration
             Push,
             Merge
         }
-        
+
         public string Name { get; set; }
         public Dictionary<Triggers, List<string>> Trigger { get; set; } // trigger: push: [<branch>, <branch1>]
-        public Dictionary<string, JobConfiguration> Jobs { get; set; } // parallel execution?
+        public Dictionary<string, JobConfiguration> Jobs { get; set; }  // parallel execution?
     }
 }

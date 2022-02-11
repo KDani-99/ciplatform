@@ -16,7 +16,7 @@
       <tr>
         <th>ID</th>
         <th>Context</th>
-        <th>Image</th>
+        <th>Name</th>
         <th>Started</th>
         <th>Finished</th>
         <th>Overall time</th>
@@ -28,10 +28,10 @@
       <tr *ngFor="let job of runData?.jobs" (click)="openJob(job.id)">
         <td>{{job.id}}</td>
         <td>{{job.jobContext}}</td>
-        <td>latest</td>
-        <td>{{getStartedTime(job)}}</td>
-        <td>{{getFinishedTime(job)}}</td>
-        <td>{{job.executionTime}}</td>
+        <td>{{job.name}}</td>
+        <td>{{runService.getStartedTime(job.startedDateTime)}}</td>
+        <td>{{runService.getFinishedTime(job.finishedDateTime, job.state)}}</td>
+        <td>{{job.executionTime < 0 ? 'In progress...' : runService.getFormattedExecutionTime(job.executionTime)}}</td>
         <td>{{job.steps}}</td>
         <td *ngIf="job.state == State.RUNNING" [className]="'running'"><i class="eva eva-loader-outline"></i></td>
         <td *ngIf="job.state == State.SUCCESSFUL" [className]="'successful'"><i class="eva eva-checkmark-circle-outline"></i></td>

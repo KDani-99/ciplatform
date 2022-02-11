@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using CodeManager.Data.Commands;
-using CodeManagerAgentManager.Repositories;
 using CodeManagerAgentManager.Services;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
@@ -10,9 +9,9 @@ namespace CodeManagerAgent.Hubs
 {
     public class WebApiHub : Hub
     {
-        private readonly IRunService _runService;
         private readonly ILogger<WebApiHub> _logger;
-        
+        private readonly IRunService _runService;
+
         public WebApiHub(IRunService runService, ILogger<WebApiHub> logger)
         {
             _runService = runService ?? throw new ArgumentNullException(nameof(runService));

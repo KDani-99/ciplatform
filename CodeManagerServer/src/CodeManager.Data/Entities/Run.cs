@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using CodeManager.Data.Configuration;
-using CodeManager.Data.Entities;
 
-namespace CodeManager.Data.Entities.CI
+namespace CodeManager.Data.Entities
 {
     public class Run : Entity
     {

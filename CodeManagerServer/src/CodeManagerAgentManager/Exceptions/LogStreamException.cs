@@ -4,6 +4,8 @@ namespace CodeManagerAgentManager.Exceptions
 {
     public class LogStreamException : Exception
     {
-        public LogStreamException(string message) : base(message) {}
+        public LogStreamException(string message) : base(message)
+        {
+        }
     }
 }

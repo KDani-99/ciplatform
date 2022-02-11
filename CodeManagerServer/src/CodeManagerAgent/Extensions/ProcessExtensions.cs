@@ -5,8 +5,10 @@ namespace CodeManagerAgent.Extensions
 {
     public static class ProcessExtensions
     {
-        public static void ConfigureCliProcess(this Process process, string executable, string arguments,
-            IEnumerable<string> environment)
+        public static void ConfigureCliProcess(this Process process,
+                                               string executable,
+                                               string arguments,
+                                               IEnumerable<string> environment)
         {
             process.StartInfo = new ProcessStartInfo
             {

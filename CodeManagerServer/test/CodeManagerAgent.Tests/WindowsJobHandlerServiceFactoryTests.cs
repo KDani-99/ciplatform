@@ -8,7 +8,6 @@ using CodeManagerAgent.Entities;
 using CodeManagerAgent.Factories;
 using CodeManagerAgent.Services;
 using CodeManagerAgent.WebSocket;
-using Docker.DotNet;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
@@ -24,7 +23,7 @@ namespace CodeManagerAgent.Tests
             // Arrange
             Assert.Throws<ArgumentNullException>(() => new WindowsJobHandlerServiceFactory(null));
         }
-        
+
         [Test]
         public void Create_NewWindowsJobHandlerServiceWithCreate_ShouldReturnNewWindowsHandlerServiceInstance()
         {
@@ -39,9 +38,11 @@ namespace CodeManagerAgent.Tests
             var mockWindowsJobHandlerServiceFactory = new WindowsJobHandlerServiceFactory(agentConfiguration);
 
             // Act and Assert
-            Assert.DoesNotThrow(() =>  mockWindowsJobHandlerServiceFactory.Create(jobDetails, jobConfiguration, cancellationToken));
+            Assert.DoesNotThrow(
+                () => mockWindowsJobHandlerServiceFactory.Create(jobDetails, jobConfiguration, cancellationToken));
             Assert.NotNull(mockWindowsJobHandlerServiceFactory.Create(jobDetails, jobConfiguration, cancellationToken));
-            Assert.IsInstanceOf<WindowsJobHandlerService>(mockWindowsJobHandlerServiceFactory.Create(jobDetails, jobConfiguration, cancellationToken));
+            Assert.IsInstanceOf<WindowsJobHandlerService>(
+                mockWindowsJobHandlerServiceFactory.Create(jobDetails, jobConfiguration, cancellationToken));
         }
 
         [Test]
@@ -54,10 +55,11 @@ namespace CodeManagerAgent.Tests
             var loggerFactory = new Mock<ILoggerFactory>();
             var cancellationToken = CancellationToken.None;
             var mockWindowsJobHandlerServiceFactory = new WindowsJobHandlerServiceFactory(agentConfiguration);
-            
+
             // Act and Assert
-            Assert.Throws<ArgumentNullException>(() => 
-                mockWindowsJobHandlerServiceFactory.Create(null, null, cancellationToken));
+            Assert.Throws<ArgumentNullException>(() =>
+                                                     mockWindowsJobHandlerServiceFactory.Create(
+                                                         null, null, cancellationToken));
         }
     }
 }

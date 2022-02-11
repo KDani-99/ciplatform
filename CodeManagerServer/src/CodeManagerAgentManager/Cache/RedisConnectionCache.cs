@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Net;
-using System.Threading.Tasks;
-using CodeManager.Data.Configuration;
 using CodeManagerAgentManager.Configuration;
 using Microsoft.Extensions.Options;
-using Microsoft.OpenApi.Extensions;
 using StackExchange.Redis;
 
 namespace CodeManagerAgentManager.Cache
@@ -16,9 +12,12 @@ namespace CodeManagerAgentManager.Cache
 
         public RedisConnectionCache(IOptions<RedisConfiguration> redisConfiguration)
         {
-            _redisConfiguration = redisConfiguration.Value ?? throw new ArgumentNullException(nameof(redisConfiguration));
+            _redisConfiguration =
+                redisConfiguration.Value ?? throw new ArgumentNullException(nameof(redisConfiguration));
             Setup();
         }
+
+        public IDatabase Database => _connectionMultiplexer.GetDatabase();
 
         private void Setup()
         {
@@ -26,10 +25,8 @@ namespace CodeManagerAgentManager.Cache
             {
                 EndPoints = {_redisConfiguration.ConnectionString},
                 Password = _redisConfiguration.Password,
-                DefaultDatabase = _redisConfiguration.Database,
+                DefaultDatabase = _redisConfiguration.Database
             });
         }
-
-        public IDatabase Database => _connectionMultiplexer.GetDatabase();
     }
 }

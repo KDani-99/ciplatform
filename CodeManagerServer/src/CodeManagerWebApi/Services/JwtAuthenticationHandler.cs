@@ -17,11 +17,16 @@ namespace CodeManagerWebApi.Services
 {
     public class JwtAuthenticationHandler : AuthenticationHandler<JwtAuthenticationTokenSchemeOptions>
     {
+        private readonly ILogger<JwtAuthenticationHandler> _logger;
         private readonly ITokenService<JwtSecurityToken> _tokenService;
         private readonly IUserRepository _userRepository;
-        private readonly ILogger<JwtAuthenticationHandler> _logger;
-        
-        public JwtAuthenticationHandler(ITokenService<JwtSecurityToken> tokenService, IUserRepository userRepository, IOptionsMonitor<JwtAuthenticationTokenSchemeOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock) : base(options, logger, encoder, clock)
+
+        public JwtAuthenticationHandler(ITokenService<JwtSecurityToken> tokenService,
+                                        IUserRepository userRepository,
+                                        IOptionsMonitor<JwtAuthenticationTokenSchemeOptions> options,
+                                        ILoggerFactory logger,
+                                        UrlEncoder encoder,
+                                        ISystemClock clock) : base(options, logger, encoder, clock)
         {
             _tokenService = tokenService ?? throw new ArgumentNullException(nameof(tokenService));
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
@@ -30,10 +35,7 @@ namespace CodeManagerWebApi.Services
 
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {
-            if (!Request.Headers.ContainsKey("Authorization"))
-            {
-                return AuthenticateResult.Fail("Invalid token.");
-            }
+            if (!Request.Headers.ContainsKey("Authorization")) return AuthenticateResult.Fail("Invalid token.");
 
             try
             {
@@ -43,7 +45,7 @@ namespace CodeManagerWebApi.Services
                 var username = claimsPrincipal.Claims.First(claim => claim.Type == JwtRegisteredClaimNames.Sub).Value;
 
                 var user = await _userRepository.GetByUsernameAsync(username) ??
-                           throw new InvalidCredentialsException();
+                    throw new InvalidCredentialsException();
 
                 Context.Items.Add("user", user);
 
@@ -57,51 +59,50 @@ namespace CodeManagerWebApi.Services
             catch (SecurityTokenExpiredException)
             {
                 Context.Response.Headers.Add("Token-Expired", "1");
-                _logger.LogInformation($"Invalid authentication attempt with expired token.");
+                _logger.LogInformation("Invalid authentication attempt with expired token.");
                 return AuthenticateResult.Fail("Token has expired.");
             }
             catch (Exception)
             {
-                _logger.LogInformation($"Invalid authentication attempt.");
+                _logger.LogInformation("Invalid authentication attempt.");
                 return AuthenticateResult.Fail("Invalid token.");
             }
         }
 
         private Task HandleWsAuthenticationAsync(MessageReceivedContext context)
         {
-         /*   try
-            {
-                var accessToken = context.Request.Query["access_token"];
+            /*   try
+               {
+                   var accessToken = context.Request.Query["access_token"];
+   
+                   var claimsPrincipal = await _tokenService.VerifyAccessTokenAsync(accessToken);
+                   var username = claimsPrincipal.Claims.First(claim => claim.Type == JwtRegisteredClaimNames.Sub).Value;
+   
+                   var user = await _userRepository.GetByUsernameAsync(username) ?? throw new InvalidCredentialsException();
+   
+                   Context.Items.Add("user", user);
+   
+                   var claims = user.Roles.Select(role => new Claim(ClaimTypes.Role, role.GetDisplayName()));
+   
+                   claimsPrincipal.Identities.First().AddClaims(claims);
+                   
+               }
+               catch (Exception)
+               {
+                   _logger.LogInformation($"Invalid authentication attempt.");
+                   return AuthenticateResult.Fail("Invalid token.");
+               }*/
 
-                var claimsPrincipal = await _tokenService.VerifyAccessTokenAsync(accessToken);
-                var username = claimsPrincipal.Claims.First(claim => claim.Type == JwtRegisteredClaimNames.Sub).Value;
+            var accessToken = context.Request.Query["access_token"];
 
-                var user = await _userRepository.GetByUsernameAsync(username) ?? throw new InvalidCredentialsException();
+            // If the request is for our hub...
+            var path = context.HttpContext.Request.Path;
+            if (!string.IsNullOrEmpty(accessToken) &&
+                    path.StartsWithSegments("/runs"))
+                // Read the token out of the query string
+                context.Token = accessToken;
 
-                Context.Items.Add("user", user);
-
-                var claims = user.Roles.Select(role => new Claim(ClaimTypes.Role, role.GetDisplayName()));
-
-                claimsPrincipal.Identities.First().AddClaims(claims);
-                
-            }
-            catch (Exception)
-            {
-                _logger.LogInformation($"Invalid authentication attempt.");
-                return AuthenticateResult.Fail("Invalid token.");
-            }*/
-         
-             var accessToken = context.Request.Query["access_token"];
-
-             // If the request is for our hub...
-             var path = context.HttpContext.Request.Path;
-             if (!string.IsNullOrEmpty(accessToken) &&
-                 (path.StartsWithSegments("/runs")))
-             {
-                 // Read the token out of the query string
-                 context.Token = accessToken;
-             }
-             return Task.CompletedTask;
+            return Task.CompletedTask;
         }
     }
 }

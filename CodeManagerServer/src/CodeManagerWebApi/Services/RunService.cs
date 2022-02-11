@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,12 +14,15 @@ namespace CodeManagerWebApi.Services
 {
     public class RunService : IRunService
     {
-        private readonly IRunRepository _runRepository;
-        private readonly IProjectRepository _projectRepository;
         private readonly IBusControl _busControl;
         private readonly IFileProcessorService<RunConfiguration> _fileProcessorService;
-        
-        public RunService(IRunRepository runRepository, IProjectRepository projectRepository, IBusControl busControl, IFileProcessorService<RunConfiguration> fileProcessorService)
+        private readonly IProjectRepository _projectRepository;
+        private readonly IRunRepository _runRepository;
+
+        public RunService(IRunRepository runRepository,
+                          IProjectRepository projectRepository,
+                          IBusControl busControl,
+                          IFileProcessorService<RunConfiguration> fileProcessorService)
         {
             _runRepository = runRepository ?? throw new ArgumentNullException(nameof(runRepository));
             _projectRepository = projectRepository ?? throw new ArgumentNullException(nameof(projectRepository));
@@ -32,7 +34,7 @@ namespace CodeManagerWebApi.Services
         public async Task<RunDataDto> GetRunAsync(long runId, User user)
         {
             var run = await _runRepository.GetAsync(runId) ?? throw new RunDoesNotExistException();
-            
+
             VerifyMembership(run.Project, user);
 
             return new RunDataDto
@@ -44,15 +46,15 @@ namespace CodeManagerWebApi.Services
                     FinishedDateTime = run.FinishedDateTime,
                     ExecutionTime = (long) (run.FinishedDateTime - run.StartedDateTime).TotalSeconds,
                     State = run.State,
-                    Jobs = run.Jobs.Count,
+                    Jobs = run.Jobs.Count
                 },
                 Jobs = run.Jobs.Select(job => new JobDto
                 {
                     Id = job.Id,
                     State = job.State,
-                    StartedDateTime = job.StartDateTime,
+                    StartedDateTime = job.StartedDateTime,
                     FinishedDateTime = job.FinishedDateTime,
-                    ExecutionTime = (long) (job.FinishedDateTime - job.StartDateTime).TotalSeconds,
+                    ExecutionTime = (long) (job.FinishedDateTime - job.StartedDateTime).TotalSeconds,
                     Name = job.Name,
                     JobContext = job.Context.ToString(),
                     Steps = job.Steps.Count
@@ -63,11 +65,11 @@ namespace CodeManagerWebApi.Services
         public async Task<JobDataDto> GetJobAsync(long runId, long jobId, User user)
         {
             var run = await _runRepository.GetAsync(runId) ?? throw new RunDoesNotExistException();
-            
+
             VerifyMembership(run.Project, user);
 
             var job = run.Jobs.FirstOrDefault(jobEntity => jobEntity.Id == jobId) ??
-                      throw new JobDoesNotExistException();
+                throw new JobDoesNotExistException();
 
             return new JobDataDto
             {
@@ -75,9 +77,9 @@ namespace CodeManagerWebApi.Services
                 {
                     Id = job.Id,
                     State = job.State,
-                    StartedDateTime = job.StartDateTime,
+                    StartedDateTime = job.StartedDateTime,
                     FinishedDateTime = job.FinishedDateTime,
-                    ExecutionTime = (long) (job.FinishedDateTime - job.StartDateTime).TotalSeconds,
+                    ExecutionTime = (long) (job.FinishedDateTime - job.StartedDateTime).TotalSeconds,
                     Name = job.Name,
                     JobContext = job.Context.ToString(),
                     Steps = job.Steps.Count
@@ -88,22 +90,23 @@ namespace CodeManagerWebApi.Services
                     Name = step.Name,
                     StartedDateTime = step.StartedDateTime,
                     FinishedDateTime = step.FinishedDateTime,
+                    ExecutionTime = (long) (step.FinishedDateTime - step.StartedDateTime).TotalSeconds,
                     State = step.State
                 })
             };
         }
 
-        public async Task<StepFileDto> GetStepFileAsync(long runId, long jobId, long stepId, User user)
+        public async Task<Stream> GetStepFileStreamAsync(long runId, long jobId, long stepId, User user)
         {
             var run = await _runRepository.GetAsync(runId) ?? throw new RunDoesNotExistException();
 
             VerifyMembership(run.Project, user);
 
             var step = run.Jobs
-                .FirstOrDefault(job => job.Id == jobId)
-                ?.Steps.FirstOrDefault(s => s.Id == stepId) ?? throw new StepDoesNotExistException();
-            
-            var file = await File.ReadAllLinesAsync(step.LogPath);
+                          .FirstOrDefault(job => job.Id == jobId)
+                          ?.Steps.FirstOrDefault(s => s.Id == stepId) ?? throw new StepDoesNotExistException();
+
+            /*var file = await File.ReadAllLinesAsync(step.LogPath);
 
             return new StepFileDto
             {
@@ -112,7 +115,9 @@ namespace CodeManagerWebApi.Services
                     Line = index,
                     Content = content
                 })
-            };
+            };*/
+            
+            return File.Open(step.LogPath, FileMode.Open, FileAccess.ReadWrite, FileShare.Read);
         }
 
         public async Task QueueRunAsync(long projectId, string instructions, User user)
@@ -122,7 +127,7 @@ namespace CodeManagerWebApi.Services
             var runConfiguration = await _fileProcessorService.ProcessAsync(instructions, project.Id);
 
             VerifyMembership(project, user);
-            
+
             await _busControl.Publish(new QueueRunCommand
             {
                 RunConfiguration = runConfiguration,
@@ -134,9 +139,7 @@ namespace CodeManagerWebApi.Services
         private static void VerifyMembership(Project project, User user)
         {
             if (project.Team.Members.All(member => member.User.Id != user.Id))
-            {
                 throw new UnauthorizedAccessException("You are not a member of this team.");
-            }
         }
     }
 }

@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Net;
 using System.Threading.Tasks;
 using CodeManager.Data.Entities;
 using CodeManagerWebApi.DataTransfer;
-using CodeManagerWebApi.Exceptions;
 using CodeManagerWebApi.Services;
-using MassTransit.Futures.Contracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -18,28 +15,29 @@ namespace CodeManagerWebApi.Controllers
     [Produces("application/json")]
     public class ProjectController : ControllerBase
     {
-        private readonly IProjectService _projectService;
         private readonly ILogger<ProjectController> _logger;
-        
+        private readonly IProjectService _projectService;
+
         public ProjectController(IProjectService projectService, ILogger<ProjectController> logger)
         {
             _projectService = projectService ?? throw new ArgumentNullException(nameof(projectService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
-        
+
         [HttpGet]
         public async Task<IActionResult> GetProjects()
         {
             var project = await _projectService.GetProjectsAsync();
             return Ok(project);
         }
-        
-        [HttpGet, Route("{id:long}", Name = nameof(GetProject))]
+
+        [HttpGet]
+        [Route("{id:long}", Name = nameof(GetProject))]
         public async Task<IActionResult> GetProject([FromRoute] long id)
         {
             var user = HttpContext.Items["user"] as User;
             var project = await _projectService.GetProjectAsync(id, user);
-            
+
             return Ok(project);
         }
 
@@ -50,10 +48,11 @@ namespace CodeManagerWebApi.Controllers
             var result = await _projectService.CreateProjectAsync(createProjectDto, user);
             _logger.LogInformation($"Project `{createProjectDto.Name}` has been created @ {DateTime.Now}");
 
-            return CreatedAtRoute( nameof(GetProject), new {result.Id}, result);
+            return CreatedAtRoute(nameof(GetProject), new {result.Id}, result);
         }
-        
-        [HttpPut, Route("{id:long}")]
+
+        [HttpPut]
+        [Route("{id:long}")]
         public async Task<IActionResult> Put([FromRoute] long id, [FromBody] CreateProjectDto projectDto)
         {
             var user = HttpContext.Items["user"] as User;
@@ -62,17 +61,17 @@ namespace CodeManagerWebApi.Controllers
 
             return Ok();
         }
-        
-        [HttpDelete, Route("{id:long}")]
+
+        [HttpDelete]
+        [Route("{id:long}")]
         public async Task<IActionResult> Delete([FromRoute] long id)
         {
             var user = HttpContext.Items["user"] as User;
-            
+
             await _projectService.DeleteProjectAsync(id, user);
             _logger.LogInformation($"Project with id `{id}` has been deleted @ {DateTime.Now}");
 
             return NoContent();
         }
-
     }
 }

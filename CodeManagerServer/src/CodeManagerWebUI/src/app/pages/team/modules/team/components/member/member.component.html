@@ -9,7 +9,7 @@
   </div>
   <div class="account-info">
     <div class="data">
-      <h1>Role</h1>
+      <h1>Permission</h1>
       <h2>{{getRoleFriendlyName(member?.permission ?? -1)}}</h2>
     </div>
     <div class="data">
@@ -20,7 +20,7 @@
   <div class="button-container" *ngIf="showKickButton">
     <div class="button reset" *ngIf="true" (click)="updateRole()">
       <i class="eva eva-award-outline"></i>
-      <p>Update role</p>
+      <p>Update permission</p>
     </div>
     <div class="button" *ngIf="true" (click)="kick()">
       <i class="eva eva-person-delete-outline"></i>

@@ -1,6 +1,4 @@
-﻿using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
-using FluentValidation;
+﻿using FluentValidation;
 
 namespace CodeManagerWebApi.DataTransfer
 {
@@ -10,15 +8,17 @@ namespace CodeManagerWebApi.DataTransfer
         public string Name { get; init; }
         public string Email { get; init; }
         public string Password { get; init; }
-        
     }
-    
-    public class CreateUserDtoValidator : AbstractValidator<CreateUserDto> {
-        public CreateUserDtoValidator() {
+
+    public class CreateUserDtoValidator : AbstractValidator<CreateUserDto>
+    {
+        public CreateUserDtoValidator()
+        {
             RuleFor(x => x.Username)
                 .NotNull()
                 .Matches("(^[a-zA-Z0-9]{1}([a-zA-Z0-9-_]{2,48})[a-zA-Z0-9]{1}$)")
-                .WithMessage("Field `username` must be between 4 and 50 characters, may only contain alphanumeric characters, hyphens and underscores.");
+                .WithMessage(
+                    "Field `username` must be between 4 and 50 characters, may only contain alphanumeric characters, hyphens and underscores.");
             RuleFor(x => x.Name)
                 .Length(1, 75)
                 .WithMessage("Field `name` must be between 1 and 75 characters.");

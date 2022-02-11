@@ -14,6 +14,11 @@ import { LoginGuard } from './guards/login.guard';
 
 const routes: Routes = [
   {
+    path: '',
+    redirectTo: 'login',
+    pathMatch: 'full',
+  },
+  {
     path: 'login',
     component: LoginComponent,
     loadChildren: () =>

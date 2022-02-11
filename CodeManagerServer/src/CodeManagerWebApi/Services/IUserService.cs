@@ -17,7 +17,7 @@ namespace CodeManagerWebApi.Services
 
         public Task<AuthTokenDto> LoginAsync(LoginDto userDto, HttpContext httpContext);
         public Task<AuthTokenDto> GenerateAuthTokensAsync(string username);
-        public Task UpdateUserAsync(long id,UpdateUserDto updateUserDto, User user);
+        public Task UpdateUserAsync(long id, UpdateUserDto updateUserDto, User user);
 
         public Task DeleteUserAsync(long id, User user);
     }

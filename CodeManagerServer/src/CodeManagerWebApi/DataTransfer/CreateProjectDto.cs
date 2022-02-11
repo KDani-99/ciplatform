@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using CodeManager.Data.Entities;
-using CodeManager.Data.Entities.CI;
-using FluentValidation;
+﻿using FluentValidation;
 
 namespace CodeManagerWebApi.DataTransfer
 {
@@ -14,9 +10,11 @@ namespace CodeManagerWebApi.DataTransfer
         public bool IsPrivateProject { get; set; }
         public long TeamId { get; set; } // owner team id
     }
-    
-    public class CreateProjectDtoValidator : AbstractValidator<CreateProjectDto> {
-        public CreateProjectDtoValidator() {
+
+    public class CreateProjectDtoValidator : AbstractValidator<CreateProjectDto>
+    {
+        public CreateProjectDtoValidator()
+        {
             RuleFor(x => x.Name)
                 .NotNull()
                 .Length(1, 50)

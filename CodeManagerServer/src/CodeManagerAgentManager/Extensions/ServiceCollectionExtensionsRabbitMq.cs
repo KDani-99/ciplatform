@@ -1,11 +1,6 @@
-﻿using System;
-using CodeManager.Data.Configuration;
+﻿using CodeManager.Data.Configuration;
 using CodeManagerAgentManager.Consumers.RabbitMq;
 using MassTransit;
-using MassTransit.JobService;
-using MassTransit.JobService.Components.StateMachines;
-using MassTransit.RabbitMqTransport.Topology.Entities;
-using RabbitMQ.Client;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -28,11 +23,11 @@ namespace CodeManagerAgentManager.Extensions
                 busConfigurator.UsingRabbitMq((context, cfg) =>
                 {
                     cfg.Host(massTransitConfiguration.Host, massTransitConfiguration.VirtualHost,
-                        h =>
-                        {
-                            h.Username(massTransitConfiguration.Username);
-                            h.Password(massTransitConfiguration.Password);
-                        });
+                             h =>
+                             {
+                                 h.Username(massTransitConfiguration.Username);
+                                 h.Password(massTransitConfiguration.Password);
+                             });
 
                     cfg.ReceiveEndpoint(massTransitConfiguration.Queues["QueueRunCommandQueue"], opts =>
                     {
@@ -41,11 +36,11 @@ namespace CodeManagerAgentManager.Extensions
                         //opts.SingleActiveConsumer
                     });
                     cfg.ReceiveEndpoint(massTransitConfiguration.Queues["StepResultEventQueue"],
-                        opts =>
-                        {
-                            opts.AutoDelete = true;
-                            opts.ConfigureConsumer<StepResultEventConsumer>(context);
-                        });
+                                        opts =>
+                                        {
+                                            opts.AutoDelete = true;
+                                            opts.ConfigureConsumer<StepResultEventConsumer>(context);
+                                        });
                 });
 
                 services.AddMassTransitHostedService(true);

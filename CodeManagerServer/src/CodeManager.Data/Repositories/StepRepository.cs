@@ -4,7 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using CodeManager.Data.Database;
-using CodeManager.Data.Entities.CI;
+using CodeManager.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace CodeManager.Data.Repositories
@@ -18,14 +18,14 @@ namespace CodeManager.Data.Repositories
         public override Task<Step> GetAsync(long id)
         {
             return DbContext
-                .Steps
-                .Include(x => x.Job)
-                .ThenInclude(x => x.Run)
-                .ThenInclude(x => x.Project)
-                .ThenInclude(x => x.Team)
-                .ThenInclude(x => x.Members)
-                .ThenInclude(x => x.User)
-                .FirstOrDefaultAsync(step => step.Id == id);
+                   .Steps
+                   .Include(x => x.Job)
+                   .ThenInclude(x => x.Run)
+                   .ThenInclude(x => x.Project)
+                   .ThenInclude(x => x.Team)
+                   .ThenInclude(x => x.Members)
+                   .ThenInclude<Step, TeamMember, User>(x => x.User)
+                   .FirstOrDefaultAsync(step => step.Id == id);
         }
 
         public override Task<List<Step>> GetAsync(Expression<Func<Step, bool>> expression)
@@ -56,7 +56,7 @@ namespace CodeManager.Data.Repositories
         {
             var entity = await GetAsync(id);
             DbContext.Steps.Remove(entity);
-            
+
             await DbContext.SaveChangesAsync();
         }
     }

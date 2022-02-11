@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using CodeManager.Data.Entities;
-using CodeManagerWebApi.Entities;
 using CodeManagerWebApi.Configuration;
 using CodeManagerWebApi.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Configuration;
-using Npgsql;
 
 namespace CodeManagerWebApi.Database
 {
@@ -16,6 +13,7 @@ namespace CodeManagerWebApi.Database
         public CodeManagerDbContext(DbContextOptions<CodeManagerDbContext> dbContextOptions) : base(dbContextOptions)
         {
         }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -25,27 +23,19 @@ namespace CodeManagerWebApi.Database
                 config.GetSection("ServiceAccountConfiguration").Get<ServiceAccountConfiguration>();
             var credentialManagerService = this.GetService<ICredentialManagerService>();
 
-            modelBuilder.Entity<Plan>()
-                .HasData(new Plan
-                {
-                    Id = 1,
-                    Name = "Basic",
-                    MaxCreatedTeamsPerUser = 5,
-                    MaxJoinedTeamsPerUser = 15
-                });
-
             if (serviceAccountConfiguration.IsEnabled)
                 modelBuilder.Entity<User>()
-                    .HasData(new User
-                    {
-                        Id = 1,
-                        Email = "admin.site@noreply",
-                        Username = serviceAccountConfiguration.Username,
-                        Password = credentialManagerService.CreateHashedPassword(serviceAccountConfiguration.Password),
-                        RegistrationTimestamp = DateTime.Now,
-                        Name = "Admin",
-                        Roles = new [] {Roles.Admin, Roles.User }
-                    });
+                            .HasData(new User
+                            {
+                                Id = 1,
+                                Email = "admin.site@noreply",
+                                Username = serviceAccountConfiguration.Username,
+                                Password = credentialManagerService.CreateHashedPassword(
+                                    serviceAccountConfiguration.Password),
+                                RegistrationTimestamp = DateTime.Now,
+                                Name = "Admin",
+                                Roles = new[] {Roles.Admin, Roles.User}
+                            });
         }
     }
 }

@@ -1,14 +1,11 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using CodeManager.Data.Commands;
 using CodeManager.Data.Entities;
+using CodeManagerWebApi.Exceptions;
 using CodeManagerWebApi.Services;
-using MassTransit;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CodeManagerWebApi.Controllers
@@ -25,7 +22,8 @@ namespace CodeManagerWebApi.Controllers
             _runService = runService ?? throw new ArgumentNullException(nameof(runService));
         }
 
-        [HttpGet, Route("{runId:long}")]
+        [HttpGet]
+        [Route("{runId:long}")]
         public async Task<IActionResult> GetRun([FromRoute] long runId)
         {
             var user = HttpContext.Items["user"] as User;
@@ -33,8 +31,9 @@ namespace CodeManagerWebApi.Controllers
 
             return Ok(result);
         }
-        
-        [HttpGet, Route("{runId:long}/{jobId:long}")]
+
+        [HttpGet]
+        [Route("{runId:long}/{jobId:long}")]
         public async Task<IActionResult> GetJob([FromRoute] long runId, [FromRoute] long jobId)
         {
             var user = HttpContext.Items["user"] as User;
@@ -42,29 +41,31 @@ namespace CodeManagerWebApi.Controllers
 
             return Ok(result);
         }
-        
-        [HttpGet, Route("{runId:long}/{jobId:long}/{stepId:long}")]
-        public async Task<IActionResult> GetStepFile([FromRoute] long runId, [FromRoute] long jobId, [FromRoute] long stepId)
+
+        [HttpGet]
+        [Route("{runId:long}/{jobId:long}/{stepId:long}")]
+        public async Task<IActionResult> GetStepFile([FromRoute] long runId,
+                                                     [FromRoute] long jobId,
+                                                     [FromRoute] long stepId)
         {
             var user = HttpContext.Items["user"] as User;
-            var result = await _runService.GetStepFileAsync(runId, jobId, stepId, user);
+            var stream = await _runService.GetStepFileStreamAsync(runId, jobId, stepId, user);
 
-            return Ok(result);
+            return File(stream, "text/plain");
         }
-        
-        [HttpPost, Route("{projectId:long}/start")]
+        [HttpPost]
+        [Route("{projectId:long}/start")]
         public async Task<IActionResult> StartRun([FromRoute] long projectId)
         {
             var user = HttpContext.Items["user"] as User;
-            var file = Request.Form.Files.FirstOrDefault() ?? throw new BadHttpRequestException("Instructions file is missing.");
-            
+            var file = Request.Form.Files.FirstOrDefault() ?? throw new InvalidInstructionFileException();
+
             using var streamReader = new StreamReader(file.OpenReadStream());
             var instructions = await streamReader.ReadToEndAsync();
 
             await _runService.QueueRunAsync(projectId, instructions, user);
-            
+
             return Ok();
         }
-        
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.Serialization;
 using CodeManager.Data.Entities;
 
 namespace CodeManagerWebApi.DataTransfer

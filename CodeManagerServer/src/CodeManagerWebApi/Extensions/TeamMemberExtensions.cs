@@ -8,7 +8,7 @@ namespace CodeManagerWebApi.Extensions
         {
             return teamMember.Permission is Permissions.ReadWrite or Permissions.Admin;
         }
-        
+
         public static bool IsAdmin(this TeamMember teamMember)
         {
             return teamMember.Permission is Permissions.Admin;

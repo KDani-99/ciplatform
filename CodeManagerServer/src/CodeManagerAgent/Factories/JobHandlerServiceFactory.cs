@@ -4,10 +4,6 @@ using CodeManager.Data.Configuration;
 using CodeManagerAgent.Configuration;
 using CodeManagerAgent.Entities;
 using CodeManagerAgent.Services;
-using CodeManagerAgent.WebSocket;
-using MassTransit;
-using Microsoft.AspNetCore.SignalR.Client;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace CodeManagerAgent.Factories
@@ -21,7 +17,8 @@ namespace CodeManagerAgent.Factories
             AgentConfiguration = agentConfiguration ?? throw new ArgumentNullException(nameof(agentConfiguration));
         }
 
-        public abstract IJobHandlerService Create(JobDetails jobDetails, JobConfiguration jobConfiguration,
-            CancellationToken cancellationToken = default);
+        public abstract IJobHandlerService Create(JobDetails jobDetails,
+                                                  JobConfiguration jobConfiguration,
+                                                  CancellationToken cancellationToken = default);
     }
 }

@@ -1,25 +1,17 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using CodeManagerAgent.WebSocket;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using System.Linq;
-using System.Net.NetworkInformation;
-using System.Net.Sockets;
-using System.Net.WebSockets;
-using Microsoft.AspNetCore.SignalR;
-using Microsoft.AspNetCore.SignalR.Client;
 
 namespace CodeManagerAgent
 {
     public class Worker : BackgroundService
     {
+        private readonly IHost _host;
         private readonly ILogger<Worker> _logger;
         private readonly IWorkerClient _workerClient;
-        private readonly IHost _host;
 
         public Worker(ILogger<Worker> logger, IWorkerClient workerClient, IHost host)
         {

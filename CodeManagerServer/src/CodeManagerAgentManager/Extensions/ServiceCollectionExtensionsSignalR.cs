@@ -8,12 +8,14 @@ namespace CodeManagerAgentManager.Extensions
 {
     public static partial class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddSignalRClient(this IServiceCollection serviceCollection, IConfiguration configuration)
+        public static IServiceCollection AddSignalRClient(this IServiceCollection serviceCollection,
+                                                          IConfiguration configuration)
         {
             var wsConfiguration = configuration.GetSection("WebSocketConfiguration").Get<WebSocketConfiguration>();
             var connection = new HubConnectionBuilder()
-                .WithUrl($"{wsConfiguration.Host}/{wsConfiguration.Hub}", options => options.AccessTokenProvider = () => Task.FromResult(""))
-                .Build();
+                             .WithUrl($"{wsConfiguration.Host}/{wsConfiguration.Hub}",
+                                      options => options.AccessTokenProvider = () => Task.FromResult(""))
+                             .Build();
 
             connection.StartAsync().Wait(); // TODO:
 

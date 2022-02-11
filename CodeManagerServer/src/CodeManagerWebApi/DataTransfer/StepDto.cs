@@ -10,5 +10,6 @@ namespace CodeManagerWebApi.DataTransfer
         public States State { get; set; }
         public DateTime StartedDateTime { get; set; }
         public DateTime FinishedDateTime { get; set; }
+        public long ExecutionTime { get; set; }
     }
 }

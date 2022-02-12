@@ -22,6 +22,20 @@ namespace CodeManagerWebApi.Hubs
             var x = Context.Features;
         }
 
+        [HubMethodName("SubscribeToStepResultChannel")]
+        public Task SubscribeToStepResultChannelAsync(long runId)
+        {
+            // TODO: verify whether the user is allowed to see the run details
+            return Groups.AddToGroupAsync(Context.ConnectionId, GetJobGroupName(runId));
+        }
+        
+        [HubMethodName("UnSubscribeFromStepResultChannel")]
+        public Task UnSubscribeFromStepResultChannelAsync(long runId)
+        {
+            // TODO: verify whether the user is allowed to see the run details
+            return Groups.RemoveFromGroupAsync(Context.ConnectionId, GetJobGroupName(runId));
+        }
+        
         [HubMethodName("SubscribeToChannel")]
         public Task SubscribeToChannelAsync(long runId, long jobId)
         {
@@ -58,9 +72,14 @@ namespace CodeManagerWebApi.Hubs
             }
         }
 
-        private static string GetGroupName(long runId, long jobId)
+        public static string GetGroupName(long runId, long jobId)
         {
             return $"{runId.ToString()}/{jobId.ToString()}";
+        }
+
+        public static string GetJobGroupName(long jobId)
+        {
+            return $"Job:{jobId}";
         }
     }
 }

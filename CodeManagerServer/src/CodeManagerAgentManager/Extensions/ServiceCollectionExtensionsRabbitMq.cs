@@ -1,5 +1,5 @@
 ﻿using CodeManager.Data.Configuration;
-using CodeManagerAgentManager.Consumers.RabbitMq;
+using CodeManagerAgentManager.Consumers;
 using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

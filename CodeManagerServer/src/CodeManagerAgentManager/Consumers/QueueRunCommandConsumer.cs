@@ -5,7 +5,7 @@ using CodeManagerAgentManager.Services;
 using MassTransit;
 using Microsoft.Extensions.Logging;
 
-namespace CodeManagerAgentManager.Consumers.RabbitMq
+namespace CodeManagerAgentManager.Consumers
 {
     public class QueueRunCommandConsumer : IConsumer<QueueRunCommand>
     {

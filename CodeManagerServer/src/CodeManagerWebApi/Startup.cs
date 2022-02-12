@@ -45,7 +45,7 @@ namespace CodeManagerWebApi
                 .AddFluentValidation()
                 .Configure<JwtConfiguration>(_configuration.GetSection("JwtConfiguration"))
                 .Configure<RedisConfiguration>(_configuration.GetSection("RedisConfiguration"))
-                .Configure<RedisConfiguration>(_configuration.GetSection("YmlConfiguration"))
+                .Configure<YmlConfiguration>(_configuration.GetSection("YmlConfiguration"))
                 .Configure<IConfiguration>(_configuration)
                 .AddDbContext<CodeManagerDbContext, Database.CodeManagerDbContext>(options =>
                     options.UseNpgsql(_configuration.GetValue<string>("ConnectionString")))

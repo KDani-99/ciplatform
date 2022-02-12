@@ -1,4 +1,5 @@
 ﻿using CodeManager.Data.Configuration;
+using CodeManagerWebApi.Consumers;
 using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,6 +16,7 @@ namespace CodeManagerWebApi.Extensions
                     configuration.GetSection("MassTransitConfiguration").Get<MassTransitConfiguration>();
 
                 //busConfigurator.AddRequestClient<QueueRunCommand>();
+                busConfigurator.AddConsumer<ProcessedStepResultEventConsumer>();
 
                 busConfigurator.SetKebabCaseEndpointNameFormatter();
 
@@ -26,6 +28,12 @@ namespace CodeManagerWebApi.Extensions
                                  h.Username(massTransitConfiguration.Username);
                                  h.Password(massTransitConfiguration.Password);
                              });
+                    cfg.ReceiveEndpoint(massTransitConfiguration.Queues["ProcessedStepResultEventQueue"],
+                                        opts =>
+                                        {
+                                            opts.AutoDelete = true;
+                                            opts.ConfigureConsumer<ProcessedStepResultEventConsumer>(context);
+                                        });
                 });
 
                 services.AddMassTransitHostedService(true);

@@ -15,9 +15,10 @@ namespace CodeManagerWebApi.Consumers
         {
             _runsHubContext = runsHubContext ?? throw new ArgumentNullException(nameof(runsHubContext));
         }
-        public async Task Consume(ConsumeContext<ProcessedStepResult> context)
+        public Task Consume(ConsumeContext<ProcessedStepResult> context)
         {
-            _runsHubContext.Clients.Group(context.Message.ProjectId.ToString(), )
+            return _runsHubContext.Clients.Group(RunsHub.GetJobGroupName(context.Message.JobId))
+                                  .SendAsync("ReceiveStepResultEvent", context.Message);
         }
     }
 }

@@ -11,7 +11,7 @@ using CodeManagerAgentManager.Services;
 using MassTransit;
 using Microsoft.Extensions.Logging;
 
-namespace CodeManagerAgentManager.Consumers.RabbitMq
+namespace CodeManagerAgentManager.Consumers
 {
     public class StepResultEventConsumer : IConsumer<StepResultEvent>
     {

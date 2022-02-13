@@ -50,15 +50,16 @@ export class RunService extends BaseDataService {
     });
   }
 
-  getFinishedTime(time: string, state: State): string {
-    return state === State.RUNNING ? '-' : new Date(time).toLocaleString();
+  getTime(time: string): string {
+    return time === null ? '' : new Date(time).toLocaleString();
   }
 
-  getStartedTime(time: string): string {
-    return new Date(time).toLocaleString();
-  }
-
-  getFormattedExecutionTime(seconds: number): string {
-    return new Date(seconds * 1000).toISOString().substr(11, 8);
+  getFormattedExecutionTime(
+    startDateTime: string,
+    finishedDateTime: string,
+  ): string {
+    const diff =
+      new Date(finishedDateTime).getTime() - new Date(startDateTime).getTime();
+    return new Date(diff).toISOString().substr(11, 8);
   }
 }

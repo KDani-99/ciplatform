@@ -33,7 +33,7 @@ export class SignalRService {
   }
 
   private registerMethods() {
-    this.hubConnection?.on('ReceiveLogs', this.receiveLogs);
+    //this.hubConnection?.on('ReceiveLogs', this.receiveLogs);
   }
 
   subscribeToChannel(runId: number, jobId: number) {
@@ -46,6 +46,30 @@ export class SignalRService {
 
   unSubscribeFromStepResultChannel(jobId: number) {
     this.hubConnection?.send('UnSubscribeFromStepResultChannel', jobId);
+  }
+
+  subscribeToJobResultChannel(runId: number) {
+    this.hubConnection?.send('SubscribeToJobResultChannel', runId);
+  }
+
+  unSubscribeFromJobResultChannel(runId: number) {
+    this.hubConnection?.send('UnSubscribeFromJobResultChannel', runId);
+  }
+
+  subscribeToRunResultChannel(projectId: number) {
+    this.hubConnection?.send('SubscribeToRunResultChannel', projectId);
+  }
+
+  unSubscribeFromRunResultChannel(projectId: number) {
+    this.hubConnection?.send('UnSubscribeFromRunResultChannel', projectId);
+  }
+
+  subscribeToLogsChannel(stepId: number) {
+    this.hubConnection?.send('SubscribeToLogsChannel', stepId);
+  }
+
+  unSubscribeFromLogsChannel(stepId: number) {
+    this.hubConnection?.send('UnSubscribeFromLogsChannel', stepId);
   }
 
   receiveLogs(logData: any) {

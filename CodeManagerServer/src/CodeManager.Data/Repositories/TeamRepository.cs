@@ -20,8 +20,10 @@ namespace CodeManager.Data.Repositories
             return DbContext.Teams
                             .Include(team => team.Owner)
                             .Include(team => team.Projects)
+                                .ThenInclude(project => project.Runs)
                             .Include(team => team.Members)
-                            .ThenInclude<Team, TeamMember, User>(member => member.User)
+                                .ThenInclude(member => member.User)
+                            .OrderBy(team => team.Id)
                             .FirstOrDefaultAsync(team => team.Id == id);
         }
 
@@ -30,8 +32,9 @@ namespace CodeManager.Data.Repositories
             return DbContext.Teams
                             .Include(team => team.Owner)
                             .Include(team => team.Projects)
+                                .ThenInclude(project => project.Runs)
                             .Include(team => team.Members)
-                            .ThenInclude<Team, TeamMember, User>(member => member.User)
+                                .ThenInclude(member => member.User)
                             .Where(expression)
                             .ToListAsync();
         }

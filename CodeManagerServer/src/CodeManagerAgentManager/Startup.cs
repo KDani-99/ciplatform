@@ -56,7 +56,7 @@ namespace CodeManagerAgentManager
                     .Configure<WebSocketConfiguration>(Configuration.GetSection("WebSocketConfiguration"))
                     .AddDbContext<CodeManagerDbContext>(options =>
                                                             options.UseNpgsql(
-                                                                Configuration.GetValue<string>("ConnectionString")))
+                                                                Configuration.GetValue<string>("ConnectionString"), builder => builder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)))
                     .AddSingleton<IConnectionCache, RedisConnectionCache>()
                     .AddSingleton<IManagerClient, ManagerClient>()
                     .AddScoped<IWorkerConnectionRepository, WorkerConnectionRepository>()

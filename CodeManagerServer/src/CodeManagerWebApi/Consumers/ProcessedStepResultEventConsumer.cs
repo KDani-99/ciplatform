@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace CodeManagerWebApi.Consumers
 {
-    public class ProcessedStepResultEventConsumer : IConsumer<ProcessedStepResult>
+    public class ProcessedStepResultEventConsumer : IConsumer<ProcessedStepResultEvent>
     {
         private readonly IHubContext<RunsHub> _runsHubContext;
 
@@ -15,7 +15,7 @@ namespace CodeManagerWebApi.Consumers
         {
             _runsHubContext = runsHubContext ?? throw new ArgumentNullException(nameof(runsHubContext));
         }
-        public Task Consume(ConsumeContext<ProcessedStepResult> context)
+        public Task Consume(ConsumeContext<ProcessedStepResultEvent> context)
         {
             return _runsHubContext.Clients.Group(RunsHub.GetJobGroupName(context.Message.JobId))
                                   .SendAsync("ReceiveStepResultEvent", context.Message);

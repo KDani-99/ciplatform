@@ -1,6 +1,7 @@
 import {
   Component,
   Input,
+  OnDestroy,
   OnInit,
   TemplateRef,
   ViewChild,
@@ -15,15 +16,20 @@ import { MemberPermission } from '../../../../services/team/team.interface';
 import { Select } from '@ngxs/store';
 import { Observable } from 'rxjs';
 import { RunService } from '../../../../services/run/run.service';
-import { State } from '../../../../services/run/run.interface';
+import { RunDto, State } from '../../../../services/run/run.interface';
 import { SignalRService } from '../../../../services/signalr/signalr.service';
+import { ProcessedRunResult } from '../../../../services/run/event-result.interface';
+import { BaseRunComponent } from '../../../../shared/components/base-run.component';
 
 @Component({
   selector: 'app-project',
   templateUrl: './project.component.html',
   styleUrls: ['./project.component.scss'],
 })
-export class ProjectComponent implements OnInit {
+export class ProjectComponent
+  extends BaseRunComponent
+  implements OnInit, OnDestroy
+{
   currentTemplate?: TemplateRef<any>;
 
   State = State;
@@ -38,13 +44,18 @@ export class ProjectComponent implements OnInit {
   @Select((state: any) => state.app.user.user.isAdmin)
   isAdmin?: Observable<boolean>;
 
+  elapsedExecutionTime: number = 0;
+  interval?: number = undefined;
+
   constructor(
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly projectService: ProjectService,
     private readonly signalrService: SignalRService,
-    readonly runService: RunService,
-  ) {}
+    runService: RunService,
+  ) {
+    super(runService);
+  }
 
   ngOnInit(): void {
     const id = parseInt(this.route.snapshot.paramMap.get('id')!, 10);
@@ -52,12 +63,51 @@ export class ProjectComponent implements OnInit {
       .getProject(id)
       .subscribe((projectData: ProjectDataDto) => {
         this.projectData = projectData;
-        // TODO: join group
-        this.signalrService.registerMethod(
-          'ReceiveStepResultEvent',
-          this.onReceiveStepResultEvent,
-        );
+        this.listen();
       });
+  }
+
+  ngOnDestroy(): void {
+    if (this.projectData) {
+      this.signalrService.unSubscribeFromRunResultChannel(
+        this.projectData.project!.id,
+      );
+    }
+    clearInterval(this.interval);
+  }
+
+  listen(): void {
+    this.signalrService.registerMethod('ReceiveRunResultEvent', (event: any) =>
+      this.onReceiveRunResultEvent(event),
+    );
+    this.signalrService.registerMethod('ReceiveRunQueuedEvent', (event: any) =>
+      this.onReceiveRunQueuedEvent(event),
+    );
+    this.signalrService.subscribeToRunResultChannel(
+      this.projectData!.project!.id,
+    );
+  }
+
+  onReceiveRunQueuedEvent(runDto: RunDto): void {
+    console.log('RUNDTO!', runDto);
+    this.projectData?.runs.push(runDto);
+  }
+
+  onReceiveRunResultEvent(runResultEvent: ProcessedRunResult): void {
+    const selectedRun = this.projectData?.runs.find(
+      (run) => run.id === runResultEvent.runId,
+    );
+
+    /*if (!selectedRun) {
+  return;
+}
+
+clearInterval(this.interval);
+if (runResultEvent.state === State.RUNNING) {
+  this.interval = setInterval(() => this.elapsedExecutionTime++, 1000);
+} else {
+}*/
+    super.onReceiveResultEvent(selectedRun, runResultEvent);
   }
 
   openDeleteWindow(): void {
@@ -104,10 +154,6 @@ export class ProjectComponent implements OnInit {
         .startRun(this.projectData!.project.id, file)
         .subscribe(() => this.toggleWindow(false));
     }
-  }
-
-  onReceiveStepResultEvent(stepResultEvent: any): void {
-    console.log('step result', stepResultEvent);
   }
 
   toggleWindow(show: boolean, template?: TemplateRef<any>): void {

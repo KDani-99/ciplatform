@@ -48,7 +48,7 @@ namespace CodeManagerWebApi
                 .Configure<YmlConfiguration>(_configuration.GetSection("YmlConfiguration"))
                 .Configure<IConfiguration>(_configuration)
                 .AddDbContext<CodeManagerDbContext, Database.CodeManagerDbContext>(options =>
-                    options.UseNpgsql(_configuration.GetValue<string>("ConnectionString")))
+                    options.UseNpgsql(_configuration.GetValue<string>("ConnectionString"), builder => builder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)))
                 .AddSingleton<ICredentialManagerService, CredentialManagerService>()
                 .AddSingleton(new JsonSerializerOptions
                 {

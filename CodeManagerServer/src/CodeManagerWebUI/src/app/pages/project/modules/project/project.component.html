@@ -44,7 +44,7 @@
       <th>ID</th>
       <th>Started</th>
       <th>Finished</th>
-      <th>Execution time</th>
+      <th>Overall time</th>
       <th>Jobs</th>
       <th>Status</th>
     </tr>
@@ -52,14 +52,15 @@
     <tbody>
     <tr *ngFor="let run of projectData?.runs" (click)="openRun(run.id)">
       <td>{{run.id}}</td>
-      <td>{{runService.getStartedTime(run.startedDateTime)}}</td>
-      <td>{{runService.getFinishedTime(run.finishedDateTime, run.state)}}</td>
-      <td>{{runService.getFormattedExecutionTime(run.executionTime)}}</td>
+      <td>{{runService.getTime(run.startedDateTime)}}</td>
+      <td>{{runService.getTime(run.finishedDateTime)}}</td>
+      <td>{{run.state == State.RUNNING ? elapsedExecutionTime : runService.getFormattedExecutionTime(run.startedDateTime, run.finishedDateTime)}}</td>
       <td>{{run.jobs}}</td>
       <td *ngIf="run.state == State.RUNNING || run.state == State.QUEUED" [className]="'running'"><i class="eva eva-loader-outline"></i></td>
       <td *ngIf="run.state == State.SUCCESSFUL" [className]="'successful'"><i class="eva eva-checkmark-circle-outline"></i></td>
       <td *ngIf="run.state == State.FAILED" [className]="'failed'"><i class="eva eva-alert-circle-outline"></i></td>
       <td *ngIf="run.state == State.SKIPPED" [className]="'skipped'"><i class="eva eva-slash-outline"></i></td>
+      <td *ngIf="run.state == State.NOT_RUN" [className]="'skipped'"><i class="eva eva-radio-button-off-outline"></i></td>
     </tr>
     </tbody>
   </table>

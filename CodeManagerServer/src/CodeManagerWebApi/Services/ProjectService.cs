@@ -29,7 +29,6 @@ namespace CodeManagerWebApi.Services
             var member = project.Team.Members.FirstOrDefault(teamMember => teamMember.User.Id == user.Id) ??
                 throw new UnauthorizedAccessWebException(
                     "The specified project does not exist or you are not allowed to view it.");
-            ;
 
             var projectDto = new ProjectDataDto
             {
@@ -38,16 +37,16 @@ namespace CodeManagerWebApi.Services
                     Id = project.Id,
                     Name = project.Name,
                     Description = project.Description,
-                    IsPrivateProject = project.IsPrivateProject
+                    IsPrivateProject = project.IsPrivateProject,
+                    Runs = project.Runs.Count
                 },
                 Runs = project.Runs.Select(run => new RunDto
                 {
                     Id = run.Id,
                     StartedDateTime = run.StartedDateTime,
                     FinishedDateTime = run.FinishedDateTime,
-                    ExecutionTime = (long) (run.FinishedDateTime - run.StartedDateTime).TotalSeconds,
                     State = run.State,
-                    Jobs = run.Jobs.Count
+                    Jobs = run.Jobs.Count,
                 }),
                 TeamId = project.Team.Id,
                 UserPermission = member.Permission,
@@ -74,7 +73,8 @@ namespace CodeManagerWebApi.Services
                 Description = project.Description,
                 IsPrivateProject = project.IsPrivateProject,
                 TeamName = project.Team.Name,
-                Owner = project.Team.Name
+                Owner = project.Team.Name,
+                Runs = project.Runs.Count
             });
         }
 
@@ -89,8 +89,6 @@ namespace CodeManagerWebApi.Services
                 throw new TeamDoesNotExistException();
             var member = team.Members.FirstOrDefault(teamMember => teamMember.User.Id == user.Id) ??
                 throw new UnauthorizedAccessWebException("You are not a member of this team.");
-            ;
-            ;
 
             if (!member.CanUpdateProjects() && !user.IsAdmin())
                 throw new UnauthorizedAccessWebException("You are not allowed to create projects.");
@@ -142,12 +140,9 @@ namespace CodeManagerWebApi.Services
         public async Task DeleteProjectAsync(long id, User user)
         {
             var project = await _projectRepository.GetAsync(id) ?? throw new TeamDoesNotExistException();
-            ;
-
+            
             var member = project.Team.Members.FirstOrDefault(teamMember => teamMember.User.Id == user.Id) ??
                 throw new UnauthorizedAccessWebException("Only team members can delete the project.");
-            ;
-
             if (!member.CanUpdateProjects() && !user.IsAdmin())
                 throw new UnauthorizedAccessWebException("You are not allowed to delete the project.");
 

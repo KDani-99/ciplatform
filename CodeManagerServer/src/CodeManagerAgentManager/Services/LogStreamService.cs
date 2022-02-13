@@ -31,15 +31,12 @@ namespace CodeManagerAgentManager.Services
 
         public async Task ProcessStreamAsync(ChannelReader<string> stream, long runId, long jobId, int stepIndex)
         {
-            var numberOfLines = 0;
-            var sizeInBytes = 0;
-
             var logPath = Path.GetFullPath(GetLogPath(runId, jobId, stepIndex));
             Directory.CreateDirectory(Path.GetDirectoryName(logPath)!);
 
             var run = await _runRepository.GetAsync(runId);
-            var job = run.Jobs.First(item => item.Id == jobId); // TODO: lazy load!!
-            var step = job.Steps.First(x => x.Index == stepIndex);                    // TODO: use step id instead of index
+            var job = run.Jobs.First(item => item.Id == jobId);
+            var step = job.Steps.First(x => x.Index == stepIndex);
 
             step.LogPath = logPath;
             await _runRepository.UpdateAsync(run);
@@ -47,22 +44,23 @@ namespace CodeManagerAgentManager.Services
             await using var outputStream =
                 new StreamWriter(File.Open(logPath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read));
 
+            await StreamDataAsync(step.Id, logPath, outputStream, stream);
+        }
+
+        private async Task StreamDataAsync(long stepId, string logPath, StreamWriter outputStream, ChannelReader<string> stream)
+        {
+            var numberOfLines = 0;
+            var sizeInBytes = 0;
+
             var channel = Channel.CreateUnbounded<string>();
-            await _managerClient.HubConnection.SendAsync("StreamLogToChannel", channel.Reader, runId, jobId, stepIndex);
+            await _managerClient.HubConnection.SendAsync("StreamLogToChannel", channel.Reader, stepId);
 
             while (await stream.WaitToReadAsync())
             while (stream.TryRead(out var line))
             {
-                if (_logStreamServiceConfiguration.MaxLinePerFile != 0 &&
-                    numberOfLines >= _logStreamServiceConfiguration.MaxLinePerFile)
-                    throw new LogStreamException(
-                        $"Unable to write more data to file {logPath}. Log file has reached the maximum number of lines (Max.:{_logStreamServiceConfiguration.MaxLinePerFile}).");
-
-                if (sizeInBytes >= _logStreamServiceConfiguration.MaxFileSize)
-                    throw new LogStreamException(
-                        $"Unable to write more data to file {logPath}. Log file has reached the maximum size (Max.:{_logStreamServiceConfiguration.MaxFileSize}).");
-
-                await channel.Writer.WriteAsync(line); //TEST
+                CheckConstraints(numberOfLines, sizeInBytes, logPath);
+                
+                await channel.Writer.WriteAsync(line);
 
                 await outputStream.WriteAsync(line);
                 await outputStream.FlushAsync();
@@ -74,6 +72,18 @@ namespace CodeManagerAgentManager.Services
             channel.Writer.Complete();
             
             outputStream.Close();
+        }
+
+        private void CheckConstraints(int numberOfLines, int sizeInBytes, string logPath)
+        {
+            if (_logStreamServiceConfiguration.MaxLinePerFile != 0 &&
+                numberOfLines >= _logStreamServiceConfiguration.MaxLinePerFile)
+                throw new LogStreamException(
+                    $"Unable to write more data to file {logPath}. Log file has reached the maximum number of lines (Max.:{_logStreamServiceConfiguration.MaxLinePerFile}).");
+
+            if (sizeInBytes >= _logStreamServiceConfiguration.MaxFileSize)
+                throw new LogStreamException(
+                    $"Unable to write more data to file {logPath}. Log file has reached the maximum size (Max.:{_logStreamServiceConfiguration.MaxFileSize}).");
         }
 
         private string GetLogPath(long runId, long jobId, int step)

@@ -20,12 +20,12 @@ namespace CodeManager.Data.Repositories
             return DbContext
                    .Projects
                    .Include(x => x.Runs)
-                   .ThenInclude<Project, Run, List<Job>>(x => x.Jobs)
+                   .ThenInclude(x => x.Jobs)
                    .Include(x => x.Team)
                    .ThenInclude(x => x.Members)
-                   .ThenInclude<Project, TeamMember, User>(x => x.User)
-                   //   .ThenInclude(x => x.Name)
-                   .FirstOrDefaultAsync(project => project.Id == id);
+                   .ThenInclude(x => x.User)
+                   .OrderBy(x => x.Id)
+                   .FirstOrDefaultAsync(x => x.Id == id);
         }
 
         public override Task<List<Project>> GetAsync(Expression<Func<Project, bool>> expression)
@@ -33,7 +33,7 @@ namespace CodeManager.Data.Repositories
             return DbContext
                    .Projects
                    .Include(x => x.Runs)
-                   .ThenInclude<Project, Run, List<Job>>(x => x.Jobs)
+                   .ThenInclude(x => x.Jobs)
                    .Include(x => x.Team)
                    .ThenInclude(x => x.Members)
                    .Where(expression)

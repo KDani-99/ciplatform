@@ -12,6 +12,7 @@ using CodeManagerAgentManager.Exceptions;
 using CodeManagerAgentManager.WebSocket;
 using MassTransit;
 using Microsoft.AspNetCore.SignalR.Client;
+using Microsoft.OpenApi.Extensions;
 
 namespace CodeManagerAgentManager.Services
 {
@@ -48,18 +49,18 @@ namespace CodeManagerAgentManager.Services
 
             var step = job.Steps.First(s => s.Index == context.StepIndex);
             
-            ProcessStep(job, step, context.State);
-            ProcessJob(job, context.StepIndex, step.State);
-            ProcessRun(run, job, context.StepIndex, step.State);
+            await ProcessStepAsync(run, job, step, context.State);
+            await ProcessJobAsync(runId, job, context.StepIndex, step.State);
+            await ProcessRunAsync(run.Project.Id, run, step.State);
 
             await UpdateWorkerStateAsync(connectionId);
 
             await _runRepository.UpdateAsync(run);
 
-            await NotifyWebApi(run.Project.Id, run.Id, job.Id, context.StepIndex, context.State);
+            await SendStepResultNotificationAsync(jobId, step.Id, context.State, DateTime.Now); // TODO: do not send date if the state is Skipped
         }
 
-        private static void ProcessStep(Job job, Step step, States state)
+        private async Task ProcessStepAsync(Run run, Job job, Step step, States state)
         {
             step.State = state;
 
@@ -69,21 +70,25 @@ namespace CodeManagerAgentManager.Services
             {
                 case States.Failed:
                 {
-                    foreach(var notRunStep in job.Steps.Where(x => x.Index > step.Index))
+                    var collection = job.Steps.Where(x => x.Index > step.Index).ToList();
+                    foreach (var notRunStep in collection)
+                    {
                         notRunStep.State = States.Skipped; // mark the rest as skipped
+                        await SendStepResultNotificationAsync(job.Id, notRunStep.Id, States.Skipped, null);
+                    }
+
+                    run.NumberOfCompletedSteps += collection.Count + 1;
                     break;
                 }
                 case States.Running:
                     step.StartedDateTime = DateTime.Now;
                     break;
-                case States.NotRun:
-                    break;
                 case States.Successful:
-                    break;
                 case States.Cancelled:
-                    break;
                 case States.Skipped:
+                    run.NumberOfCompletedSteps += 1;
                     break;
+                case States.NotRun:
                 case States.Queued:
                     break;
                 default:
@@ -91,28 +96,54 @@ namespace CodeManagerAgentManager.Services
             }
         }
 
-        private static void ProcessJob(Job job, int stepIndex, States state)
+        private async Task ProcessJobAsync(long runId, Job job, int stepIndex, States state)
         {
+            if (job.State is States.NotRun && state is States.Running)
+            {
+                await SendJobResultNotificationAsync(runId, job.Id, state, DateTime.Now);
+            }
+            
             job.State = state switch
             {
                 States.Failed => States.Failed,
                 States.Successful when stepIndex == job.Steps.Count - 1 => States.Successful,
                 _ => job.State
             };
-            
-            if (job.State is not States.Running and not States.Queued) job.FinishedDateTime = DateTime.Now;
+
+            if (job.State is States.Failed or States.Successful)
+            {
+                job.FinishedDateTime = DateTime.Now;
+                await SendJobResultNotificationAsync(runId, job.Id, state, job.FinishedDateTime);
+            }
         }
 
-        private static void ProcessRun(Run run, Job job, int stepIndex, States state)
+        private async Task ProcessRunAsync(long projectId, Run run, States state)
         {
-            run.State = state switch
+            if (run.State is States.Queued && state is States.Running)
             {
-                States.Failed => States.Failed,
-                States.Successful when stepIndex == job.Steps.Count - 1 => States.Successful,
-                _ => run.State
-            };
+                run.State = state;
+                run.StartedDateTime = DateTime.Now;
+                await SendRunResultNotificationAsync(projectId, run.Id, run.State, run.StartedDateTime);
+            }
 
-            if (run.State is not States.Running and not States.Queued) run.FinishedDateTime = DateTime.Now;
+            if (state is States.Successful && IsLastStep(run) && run.State != States.Failed)
+            {
+                // make sure that it is the last step of the last job
+                run.State = States.Successful;
+                await SendRunResultNotificationAsync(projectId, run.Id, run.State, null);
+            }
+            
+            if (run.State is not States.Failed && state is States.Failed)
+            {
+                run.State = state;
+                await SendRunResultNotificationAsync(projectId, run.Id, run.State, null);
+            }
+            
+            if (IsLastStep(run))
+            {
+                run.FinishedDateTime = DateTime.Now;
+                await SendRunResultNotificationAsync(projectId, run.Id, run.State, run.FinishedDateTime);
+            }
         }
 
         private async Task UpdateWorkerStateAsync(string connectionId)
@@ -122,17 +153,45 @@ namespace CodeManagerAgentManager.Services
             await _workerConnectionService.UpdateWorkerConnectionAsync(workerConnectionData);
         }
 
-        private Task NotifyWebApi(long projectId, long runId, long jobId, long stepIndex, States state)
+        private Task SendStepResultNotificationAsync(long jobId, long stepId, States state, DateTime? dateTime)
         {
-            var processed = new ProcessedStepResult
+            var processed = new ProcessedStepResultEvent
             {
-                StepIndex = stepIndex,
                 JobId = jobId,
-                RunId = runId,
+                StepId = stepId,
                 State = state,
-                ProjectId = projectId
+                DateTime = dateTime
             };
             return _busControl.Publish(processed);
+        }
+        
+        private Task SendJobResultNotificationAsync(long runId, long jobId, States state, DateTime? dateTime)
+        {
+            var processed = new ProcessedJobResultEvent
+            {
+                RunId = runId,
+                JobId = jobId,
+                State = state,
+                DateTime = dateTime
+            };
+            return _busControl.Publish(processed);
+        }
+        
+        private Task SendRunResultNotificationAsync(long projectId, long runId, States state, DateTime? dateTime)
+        {
+            var processed = new ProcessedRunResultEvent
+            {
+                ProjectId = projectId,
+                RunId = runId,
+                State = state,
+                DateTime = dateTime
+            };
+            return _busControl.Publish(processed);
+        }
+
+        private static bool IsLastStep(Run run)
+        {
+            return run.NumberOfCompletedSteps == run.NumberOfSteps;
         }
     }
 }

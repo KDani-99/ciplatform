@@ -17,6 +17,9 @@ namespace CodeManagerWebApi.Extensions
 
                 //busConfigurator.AddRequestClient<QueueRunCommand>();
                 busConfigurator.AddConsumer<ProcessedStepResultEventConsumer>();
+                busConfigurator.AddConsumer<ProcessedJobResultEventConsumer>();
+                busConfigurator.AddConsumer<ProcessedRunResultEventConsumer>();
+                busConfigurator.AddConsumer<RunQueuedEventConsumer>();
 
                 busConfigurator.SetKebabCaseEndpointNameFormatter();
 
@@ -33,6 +36,24 @@ namespace CodeManagerWebApi.Extensions
                                         {
                                             opts.AutoDelete = true;
                                             opts.ConfigureConsumer<ProcessedStepResultEventConsumer>(context);
+                                        });
+                    cfg.ReceiveEndpoint(massTransitConfiguration.Queues["ProcessedJobResultEventQueue"],
+                                        opts =>
+                                        {
+                                            opts.AutoDelete = true;
+                                            opts.ConfigureConsumer<ProcessedJobResultEventConsumer>(context);
+                                        });
+                    cfg.ReceiveEndpoint(massTransitConfiguration.Queues["ProcessedRunResultEventQueue"],
+                                        opts =>
+                                        {
+                                            opts.AutoDelete = true;
+                                            opts.ConfigureConsumer<ProcessedRunResultEventConsumer>(context);
+                                        });
+                    cfg.ReceiveEndpoint(massTransitConfiguration.Queues["RunQueuedEventQueue"],
+                                        opts =>
+                                        {
+                                            opts.AutoDelete = true;
+                                            opts.ConfigureConsumer<RunQueuedEventConsumer>(context);
                                         });
                 });
 

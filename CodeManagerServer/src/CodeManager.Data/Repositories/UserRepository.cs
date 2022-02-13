@@ -19,6 +19,7 @@ namespace CodeManager.Data.Repositories
         {
             return DbContext.Users
                             .Include(user => user.Teams)
+                            .OrderBy(user => user.Id)
                             .FirstOrDefaultAsync(user => user.Username == username);
         }
 
@@ -26,6 +27,7 @@ namespace CodeManager.Data.Repositories
         {
             return DbContext.Users
                             .Include(user => user.Teams)
+                            .OrderBy(user => user.Id)
                             .FirstOrDefaultAsync(user => user.Email == email);
         }
 
@@ -33,6 +35,7 @@ namespace CodeManager.Data.Repositories
         {
             return DbContext.Users
                             .Include(user => user.Teams)
+                            .OrderBy(user => user.Id)
                             .FirstOrDefaultAsync(user => user.Id == id);
         }
 

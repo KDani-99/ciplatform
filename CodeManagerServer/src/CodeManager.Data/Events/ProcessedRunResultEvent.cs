@@ -3,10 +3,10 @@ using CodeManager.Data.Configuration;
 
 namespace CodeManager.Data.Entities
 {
-    public class ProcessedStepResultEvent
+    public class ProcessedRunResultEvent
     {
-        public long JobId { get; set; }
-        public long StepId { get; set; }
+        public long ProjectId { get; set; }
+        public long RunId { get; set; }
         public States State { get; set; }
         public DateTime? DateTime { get; set; }
     }

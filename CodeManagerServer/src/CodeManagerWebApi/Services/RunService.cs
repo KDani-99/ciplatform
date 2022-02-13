@@ -31,6 +31,20 @@ namespace CodeManagerWebApi.Services
                 fileProcessorService ?? throw new ArgumentNullException(nameof(fileProcessorService));
         }
 
+        public async Task<RunDto> GetRunAsync(long runId)
+        {
+            var run = await _runRepository.GetAsync(runId) ?? throw new RunDoesNotExistException();
+
+            return new RunDto
+            {
+                Id = run.Id,
+                StartedDateTime = run.StartedDateTime,
+                FinishedDateTime = run.FinishedDateTime,
+                State = run.State,
+                Jobs = run.Jobs.Count,
+            };
+        }
+
         public async Task<RunDataDto> GetRunAsync(long runId, User user)
         {
             var run = await _runRepository.GetAsync(runId) ?? throw new RunDoesNotExistException();
@@ -44,7 +58,6 @@ namespace CodeManagerWebApi.Services
                     Id = run.Id,
                     StartedDateTime = run.StartedDateTime,
                     FinishedDateTime = run.FinishedDateTime,
-                    ExecutionTime = (long) (run.FinishedDateTime - run.StartedDateTime).TotalSeconds,
                     State = run.State,
                     Jobs = run.Jobs.Count
                 },
@@ -54,7 +67,6 @@ namespace CodeManagerWebApi.Services
                     State = job.State,
                     StartedDateTime = job.StartedDateTime,
                     FinishedDateTime = job.FinishedDateTime,
-                    ExecutionTime = (long) (job.FinishedDateTime - job.StartedDateTime).TotalSeconds,
                     Name = job.Name,
                     JobContext = job.Context.ToString(),
                     Steps = job.Steps.Count
@@ -79,7 +91,6 @@ namespace CodeManagerWebApi.Services
                     State = job.State,
                     StartedDateTime = job.StartedDateTime,
                     FinishedDateTime = job.FinishedDateTime,
-                    ExecutionTime = (long) (job.FinishedDateTime - job.StartedDateTime).TotalSeconds,
                     Name = job.Name,
                     JobContext = job.Context.ToString(),
                     Steps = job.Steps.Count
@@ -90,7 +101,6 @@ namespace CodeManagerWebApi.Services
                     Name = step.Name,
                     StartedDateTime = step.StartedDateTime,
                     FinishedDateTime = step.FinishedDateTime,
-                    ExecutionTime = (long) (step.FinishedDateTime - step.StartedDateTime).TotalSeconds,
                     State = step.State
                 })
             };
@@ -117,7 +127,7 @@ namespace CodeManagerWebApi.Services
                 })
             };*/
             
-            return File.Open(step.LogPath, FileMode.Open, FileAccess.ReadWrite, FileShare.Read);
+            return File.Open(step.LogPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite); // third param allows concurrent access to the file
         }
 
         public async Task QueueRunAsync(long projectId, string instructions, User user)

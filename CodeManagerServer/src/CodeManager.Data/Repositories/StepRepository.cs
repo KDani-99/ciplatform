@@ -24,7 +24,8 @@ namespace CodeManager.Data.Repositories
                    .ThenInclude(x => x.Project)
                    .ThenInclude(x => x.Team)
                    .ThenInclude(x => x.Members)
-                   .ThenInclude<Step, TeamMember, User>(x => x.User)
+                   .ThenInclude(x => x.User)
+                   .OrderBy(x => x.Id)
                    .FirstOrDefaultAsync(step => step.Id == id);
         }
 

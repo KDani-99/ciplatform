@@ -16,6 +16,7 @@ using CodeManagerAgentManager.Configuration;
 using CodeManagerAgentManager.Exceptions;
 using CodeManagerAgentManager.WebSocket;
 using CodeManagerAgentManager.WebSocket.Hubs;
+using MassTransit;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Options;
@@ -27,23 +28,24 @@ namespace CodeManagerAgentManager.Services
         private readonly AgentManagerConfiguration _agentManagerConfiguration;
 
         // Single unit of work, run and dispose
+        private readonly IBusControl _busControl;
         private readonly IHubContext<AgentHub, IAgentClient> _hubContext;
         private readonly JsonSerializerOptions _jsonSerializerOptions;
-        private readonly IManagerClient _managerClient;
         private readonly IProjectRepository _projectRepository;
         private readonly IRunRepository _runRepository;
         private readonly ITokenService<JwtSecurityToken> _tokenService;
         private readonly IWorkerConnectionService _workerConnectionService;
 
-        public RunService(JsonSerializerOptions jsonSerializerOptions,
+        public RunService(IBusControl busControl,
+                          JsonSerializerOptions jsonSerializerOptions,
                           IRunRepository runRepository,
                           IProjectRepository projectRepository,
                           IOptions<AgentManagerConfiguration> agentManagerConfiguration,
                           IHubContext<AgentHub, IAgentClient> hubContext,
-                          IManagerClient managerClient,
                           IWorkerConnectionService workerConnectionService,
                           ITokenService<JwtSecurityToken> tokenService)
         {
+            _busControl = busControl ?? throw new ArgumentNullException(nameof(busControl));
             _jsonSerializerOptions =
                 jsonSerializerOptions ?? throw new ArgumentNullException(nameof(jsonSerializerOptions));
             _runRepository = runRepository ?? throw new ArgumentNullException(nameof(runRepository));
@@ -51,7 +53,6 @@ namespace CodeManagerAgentManager.Services
             _agentManagerConfiguration = agentManagerConfiguration.Value ??
                 throw new ArgumentNullException(nameof(agentManagerConfiguration));
             _hubContext = hubContext ?? throw new ArgumentNullException(nameof(hubContext));
-            _managerClient = managerClient ?? throw new ArgumentNullException(nameof(managerClient));
             _workerConnectionService = workerConnectionService ??
                 throw new ArgumentNullException(nameof(workerConnectionService));
             _tokenService = tokenService ?? throw new ArgumentNullException(nameof(tokenService));
@@ -64,13 +65,17 @@ namespace CodeManagerAgentManager.Services
             InsertInitialStep(cmd.RunConfiguration, project);
             
             var run = await SaveRunConfigurationAsync(cmd.Repository, project, cmd.RunConfiguration);
-            run.State = States.Running;
+          //  run.State = States.Running;
+
+            await SendRunQueuedNotification(project.Id, run.Id);
 
             foreach (var job in run.Jobs)
                 await QueueJobAsync(run, job);
 
-            run.State = States.Queued;
+           // run.State = States.Queued;
             await _runRepository.UpdateAsync(run);
+            
+            // TODO: send event to update status
 
             return run.Id;
         }
@@ -94,7 +99,7 @@ namespace CodeManagerAgentManager.Services
             var workerConnectionId =
                 (await _workerConnectionService.GetAvailableWorkerConnectionIdsOfTypeAsync(job.Context))
                 .FirstOrDefault();
-
+            // TODO: wait until a worker is available??
             if (workerConnectionId == null) throw new WorkersNotAvailableException();
 
             var jobConfiguration =
@@ -125,16 +130,10 @@ namespace CodeManagerAgentManager.Services
 
             await UpdateWorkerStateAsync(workerConnectionId);
 
-            /*job.Steps.Insert(0, new Step
-            {
-                Name = "Checkout repository (setup)",
-                Index = 0
-            });*/
-
             job.State = States.Running;
             job.StartedDateTime = DateTime.Now;
-
-            await NotifyWebApi(job);
+            
+            
         }
 
         private async Task UpdateWorkerStateAsync(string connectionId)
@@ -148,25 +147,29 @@ namespace CodeManagerAgentManager.Services
                                                           Project project,
                                                           RunConfiguration runConfiguration)
         {
+            var numberOfSteps = runConfiguration.Jobs.Aggregate(0, (result, current) => result + current.Value.Steps.Count);
             var run = new Run
             {
                 Repository = repository,
-                Jobs = runConfiguration.Jobs.Select(job => new Job
+                Jobs = runConfiguration.Jobs.Select((job, jobIndex) => new Job
                 {
                     JsonContext = JsonSerializer.Serialize(job.Value, _jsonSerializerOptions),
                     Context = job.Value.Context,
                     Name = job.Key,
-                    Steps = job.Value.Steps.Select((step, index) => new Step
+                    Index = jobIndex,
+                    Steps = job.Value.Steps.Select((step, stepIndex) => new Step
                     {
                         Name = step.Name,
                         State = States.NotRun,
                         LogPath = null,
-                        Index = index
+                        Index = stepIndex
                     }).ToList(),
                     State = States.NotRun
                 }).ToList(),
-                StartedDateTime = DateTime.Now,
-                State = States.NotRun,
+                StartedDateTime = null,
+                FinishedDateTime = null,
+                State = States.Queued,
+                NumberOfSteps = numberOfSteps,
                 Project = project
             };
 
@@ -174,14 +177,15 @@ namespace CodeManagerAgentManager.Services
 
             return run;
         }
-
-        private Task NotifyWebApi(Job job)
+        
+        private Task SendRunQueuedNotification(long projectId, long runId)
         {
-            var processed = new ProcessedJobRequest
+            var processed = new RunQueuedEvent
             {
-                JobId = job.Id
+                ProjectId = projectId,
+                RunId = runId
             };
-            return _managerClient.HubConnection.SendAsync(CommonWebApiMethods.JobQueueResponse, processed);
+            return _busControl.Publish(processed);
         }
     }
 }

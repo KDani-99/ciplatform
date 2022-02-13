@@ -87,7 +87,6 @@ namespace CodeManagerWebApi.Services
 
         public Task<bool> ExistsAsync(long id)
         {
-            // TODO: throw exception if it does not exist
             return _userRepository.ExistsAsync(user => user.Id == id);
         }
 
@@ -102,8 +101,6 @@ namespace CodeManagerWebApi.Services
 
             var accessToken = await _tokenService.CreateAccessTokenAsync(user);
             var refreshToken = await _tokenService.CreateRefreshTokenAsync(user);
-
-            user.RefreshTokenSignature = refreshToken.Id; // TODO -> remove from database
 
             await _userRepository.UpdateAsync(user);
 

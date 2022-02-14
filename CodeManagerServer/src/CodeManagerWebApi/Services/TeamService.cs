@@ -7,87 +7,50 @@ using CodeManager.Data.Repositories;
 using CodeManagerWebApi.DataTransfer;
 using CodeManagerWebApi.Exceptions;
 using CodeManagerWebApi.Extensions;
+using CodeManagerWebApi.Extensions.Entities;
 
 namespace CodeManagerWebApi.Services
 {
     public class TeamService : ITeamService
     {
-        private readonly IProjectRepository _projectRepository;
         private readonly ITeamRepository _teamRepository;
         private readonly IUserRepository _userRepository;
 
         public TeamService(ITeamRepository teamRepository,
-                           IUserRepository userRepository,
-                           IProjectRepository projectRepository)
+                           IUserRepository userRepository)
         {
             _teamRepository = teamRepository ?? throw new ArgumentNullException(nameof(teamRepository));
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
-            _projectRepository = projectRepository ?? throw new ArgumentNullException(nameof(projectRepository));
         }
 
         public async Task<IEnumerable<TeamDto>> GetTeamsAsync(User user)
         {
             var teams = await _teamRepository.GetAsync(_ => true);
 
-            return teams.Select(team => new TeamDto
-            {
-                Name = team.Name,
-                Description = team.Description,
-                Id = team.Id,
-                Owner = team.Owner.Username,
-                IsMember = team.Members.Any(member => member.User.Id == user.Id),
-                Image = team.Image,
-                IsPublic = team.IsPublic,
-                Members = team.Members?.Count ?? 0,
-                Projects = team.Projects?.Count ?? 0
-            });
+            return teams.Select(team => team.ToDto(user.Id));
         }
 
         public async Task<TeamDataDto> GetTeamAsync(long id, User user)
         {
             var team = await _teamRepository.GetAsync(id) ?? throw new TeamDoesNotExistException();
-            ;
 
             var member = team.Members.FirstOrDefault(teamMember => teamMember.User.Id == user.Id);
 
             if (member == default)
+            {
                 throw new UnauthorizedAccessWebException(
                     "The specified team does not exist or you are not allowed to view it.");
+            }
 
-            return new TeamDataDto
-            {
-                Id = team.Id,
-                Name = team.Name,
-                Description = team.Description,
-                Image = team.Image,
-                IsPublic = team.IsPublic,
-                Owner = team.Owner.Username,
-                Members = team.Members.Select(teamMember => new TeamMemberDto
-                {
-                    Id = teamMember.User.Id,
-                    Name = teamMember.User.Name,
-                    Username = teamMember.User.Username,
-                    JoinTime = teamMember.JoinTime,
-                    Permission = teamMember.Permission
-                }),
-                Projects = team.Projects.Select(project => new ProjectDto
-                {
-                    Id = project.Id,
-                    Name = project.Name,
-                    Description = project.Description,
-                    Owner = project.Team.Name,
-                    TeamName = project.Team.Name, // TODO:
-                    IsPrivateProject = project.IsPrivateProject,
-                    Runs = project.Runs?.Count ?? 0
-                }),
-                UserPermission = member.Permission
-            };
+            return team.ToDataDto(member.Permission);
         }
 
         public async Task<TeamDto> CreateTeamAsync(TeamDto teamDto, User user)
         {
             if (await _teamRepository.ExistsAsync(teamEntity => teamEntity.Name == teamDto.Name))
+            {
                 throw new TeamAlreadyExistsException();
+            }
 
             var team = new Team
             {
@@ -124,12 +87,16 @@ namespace CodeManagerWebApi.Services
             var member = team.Members.FirstOrDefault(teamMember => teamMember.User.Id == user.Id);
 
             if (!member.IsAdmin() && !user.IsAdmin())
+            {
                 throw new UnauthorizedAccessWebException(
                     $"Only members with {nameof(Permissions.Admin)} can update the team.");
+            }
 
             if (teamDto.Name != team.Name &&
                 await _teamRepository.ExistsAsync(teamEntity => teamEntity.Name == teamDto.Name))
+            {
                 throw new TeamAlreadyExistsException();
+            }
 
             team.Name = teamDto.Name;
             team.Description = teamDto.Description;
@@ -144,14 +111,9 @@ namespace CodeManagerWebApi.Services
             var team = await _teamRepository.GetAsync(id) ?? throw new TeamDoesNotExistException();
 
             if (team.Owner.Id != user.Id && !user.IsAdmin())
-                throw new UnauthorizedAccessWebException("Only the owner can delete the team.");
-
-            /* TODO: remove team members
-
-            foreach (var project in team.Projects)
             {
-                await _projectRepository.DeleteAsync(project.Id);
-            }*/
+                throw new UnauthorizedAccessWebException("Only the owner can delete the team.");
+            }
 
             await _teamRepository.DeleteAsync(id);
         }
@@ -166,9 +128,14 @@ namespace CodeManagerWebApi.Services
                 throw new UserNotInTeamException($"Member with id {memberId} is not in this team.");
 
             if (team.Owner.Id == memberToKick.Id)
+            {
                 throw new UnauthorizedAccessWebException("Team owners can't be kicked.");
+            }
 
-            if (!member.IsAdmin()) throw new UnauthorizedAccessWebException("You are not allowed to kick members.");
+            if (!member.IsAdmin())
+            {
+                throw new UnauthorizedAccessWebException("You are not allowed to kick members.");
+            }
 
             team.Members = team.Members.Where(teamMember => teamMember.User.Id != memberId).ToList();
 
@@ -187,10 +154,14 @@ namespace CodeManagerWebApi.Services
                 throw new UserNotInTeamException("You must be in the team to kick members.");
 
             if (team.Members.Any(teamMember => teamMember.User.Id == userToAdd.Id))
+            {
                 throw new UserAlreadyInTeamException();
+            }
 
             if (!member.IsAdmin() && !team.IsPublic)
+            {
                 throw new UnauthorizedAccessWebException("You are not allowed to add members.");
+            }
 
             team.Members.Add(new TeamMember
             {
@@ -213,9 +184,14 @@ namespace CodeManagerWebApi.Services
                 throw new UserNotInTeamException($"Member with id {updateRoleDto.UserId} is not in this team.");
 
             if (team.Owner.Id == memberToUpdate.Id)
+            {
                 throw new UnauthorizedAccessWebException("Team owner's role can't be changes.");
+            }
 
-            if (!member.IsAdmin()) throw new UnauthorizedAccessWebException("You are not allowed to update roles.");
+            if (!member.IsAdmin())
+            {
+                throw new UnauthorizedAccessWebException("You are not allowed to update roles.");
+            }
 
             memberToUpdate.Permission = updateRoleDto.Role;
 
@@ -226,10 +202,15 @@ namespace CodeManagerWebApi.Services
         {
             var team = await _teamRepository.GetAsync(teamId) ?? throw new TeamDoesNotExistException();
 
-            if (team.Members.Any(teamMember => teamMember.User.Id == user.Id)) throw new UserAlreadyInTeamException();
+            if (team.Members.Any(teamMember => teamMember.User.Id == user.Id))
+            {
+                throw new UserAlreadyInTeamException();
+            }
 
             if (!user.IsAdmin() && !team.IsPublic)
+            {
                 throw new UnauthorizedAccessWebException("You are not allowed to join a private team.");
+            }
 
             team.Members.Add(new TeamMember
             {

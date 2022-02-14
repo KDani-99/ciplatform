@@ -4,8 +4,8 @@ namespace CodeManager.Data.Commands
 {
     public class QueueRunCommand
     {
-        public string Repository { get; init; }
-        public RunConfiguration RunConfiguration { get; init; }
-        public long ProjectId { get; init; }
+        public string Repository { get; set; }
+        public RunConfiguration RunConfiguration { get; set; }
+        public long ProjectId { get; set; }
     }
 }

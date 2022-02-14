@@ -10,9 +10,10 @@ using CodeManagerWebApi.Cache;
 using CodeManagerWebApi.Configuration;
 using CodeManagerWebApi.DataTransfer;
 using CodeManagerWebApi.Extensions;
-using CodeManagerWebApi.Hubs;
+using CodeManagerWebApi.Extensions.Services;
 using CodeManagerWebApi.Repositories;
 using CodeManagerWebApi.Services;
+using CodeManagerWebApi.WebSocket.Hubs;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -40,16 +41,62 @@ namespace CodeManagerWebApi
 
         public void ConfigureServices(IServiceCollection services)
         {
+            // Required services
             services
                 .AddCors()
                 .AddFluentValidation()
+                .AddDbContext<CodeManagerDbContext, Database.CodeManagerDbContext>(options =>
+                    options.UseNpgsql(_configuration.GetValue<string>("ConnectionString"),
+                                      builder => builder.UseQuerySplittingBehavior(
+                                          QuerySplittingBehavior.SplitQuery)))
+                .AddAntiforgery()
+                .AddRabbitMq(_configuration)
+                .AddControllers().Services
+                .AddSignalR().Services
+                .AddSwaggerGen(c =>
+                {
+                    c.SwaggerDoc("v1", new OpenApiInfo { Title = "CodeManagerWebApi", Version = "v1" });
+                })
+                .AddAuthentication("JwtAuthToken")
+                .AddJwtBearer(options =>
+                {
+                    options.MapInboundClaims = false;
+
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            var accessToken = context.Request.Query["access_token"];
+
+                            var path = context.HttpContext.Request.Path;
+                            if (!string.IsNullOrEmpty(accessToken) &&
+                                path.StartsWithSegments("/runs"))
+                            {
+                                context.Token = accessToken;
+                            }
+
+                            return Task.CompletedTask;
+                        }
+                    };
+                })
+                .AddScheme<JwtAuthenticationTokenSchemeOptions, JwtAuthenticationHandler>("JwtAuthToken", null).Services
+                .AddHealthChecks();
+
+            // Configuration
+            services
                 .Configure<JwtConfiguration>(_configuration.GetSection("JwtConfiguration"))
                 .Configure<RedisConfiguration>(_configuration.GetSection("RedisConfiguration"))
                 .Configure<YmlConfiguration>(_configuration.GetSection("YmlConfiguration"))
                 .Configure<IConfiguration>(_configuration)
-                .AddDbContext<CodeManagerDbContext, Database.CodeManagerDbContext>(options =>
-                    options.UseNpgsql(_configuration.GetValue<string>("ConnectionString"), builder => builder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)))
-                .AddSingleton<ICredentialManagerService, CredentialManagerService>()
+                .Configure<FormOptions>(options =>
+                {
+                    options.ValueCountLimit = 2;
+                    options.ValueLengthLimit = int.MaxValue;
+                    options.MultipartBodyLengthLimit = long.MaxValue;
+                });
+
+            // Services with singleton lifetime
+            services
                 .AddSingleton(new JsonSerializerOptions
                 {
                     Converters =
@@ -57,11 +104,15 @@ namespace CodeManagerWebApi
                         new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)
                     }
                 })
+                .AddSingleton<ICredentialManagerService, CredentialManagerService>()
+                .AddSingleton<ITokenCache, RedisTokenCache>();
+
+            // Services with scoped lifetime
+            services
                 .AddScoped(_ => new DeserializerBuilder()
                                 .WithNamingConvention(LowerCaseNamingConvention.Instance)
                                 .Build())
                 .AddScoped<ITokenService<JwtSecurityToken>, TokenService>()
-                .AddSingleton<ITokenCache, RedisTokenCache>()
                 .AddScoped<IUserRepository, UserRepository>()
                 .AddScoped<IUserService, UserService>()
                 .AddScoped<ITeamRepository, TeamRepository>()
@@ -71,52 +122,15 @@ namespace CodeManagerWebApi
                 .AddScoped<ITokenRepository, TokenRepository>()
                 .AddScoped<IRunRepository, RunRepository>()
                 .AddScoped<IRunService, RunService>()
-                .AddScoped<IFileProcessorService<RunConfiguration>, YmlFileProcessorService>()
-                .AddAntiforgery()
-                .AddRabbitMq(_configuration)
-                .AddControllers().Services
-                .AddSignalR().Services
-                .AddSwaggerGen(c =>
-                {
-                    c.SwaggerDoc("v1", new OpenApiInfo {Title = "CodeManagerWebApi", Version = "v1"});
-                })
-                .AddHealthChecks();
+                .AddScoped<IFileProcessorService<RunConfiguration>, YmlFileProcessorService>();
 
+            // Services with transient lifetime
             services
                 .AddTransient<IValidator<CreateProjectDto>, CreateProjectDtoValidator>()
                 .AddTransient<IValidator<TeamDto>, TeamDtoValidator>()
                 .AddTransient<IValidator<LoginDto>, LoginDtoValidator>()
                 .AddTransient<IValidator<CreateUserDto>, CreateUserDtoValidator>()
                 .AddTransient<IValidator<UpdateUserDto>, UpdateUserDtoValidator>();
-
-            services.Configure<FormOptions>(options =>
-            {
-                options.ValueCountLimit = 2;
-                options.ValueLengthLimit = int.MaxValue;
-                options.MultipartBodyLengthLimit = long.MaxValue;
-            });
-
-            services.AddAuthentication("JwtAuthToken")
-                    .AddJwtBearer(options =>
-                    {
-                        options.MapInboundClaims = false;
-
-                        options.Events = new JwtBearerEvents
-                        {
-                            OnMessageReceived = context =>
-                            {
-                                var accessToken = context.Request.Query["access_token"];
-
-                                var path = context.HttpContext.Request.Path;
-                                if (!string.IsNullOrEmpty(accessToken) &&
-                                    path.StartsWithSegments("/runs"))
-                                    context.Token = accessToken;
-
-                                return Task.CompletedTask;
-                            }
-                        };
-                    })
-                    .AddScheme<JwtAuthenticationTokenSchemeOptions, JwtAuthenticationHandler>("JwtAuthToken", null);
         }
 
         public void Configure(IApplicationBuilder app,

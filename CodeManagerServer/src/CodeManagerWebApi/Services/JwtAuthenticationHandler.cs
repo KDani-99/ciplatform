@@ -35,7 +35,10 @@ namespace CodeManagerWebApi.Services
 
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {
-            if (!Request.Headers.ContainsKey("Authorization")) return AuthenticateResult.Fail("Invalid token.");
+            if (!Request.Headers.ContainsKey("Authorization"))
+            {
+                return AuthenticateResult.Fail("Invalid token.");
+            }
 
             try
             {
@@ -100,7 +103,9 @@ namespace CodeManagerWebApi.Services
             if (!string.IsNullOrEmpty(accessToken) &&
                     path.StartsWithSegments("/runs"))
                 // Read the token out of the query string
+            {
                 context.Token = accessToken;
+            }
 
             return Task.CompletedTask;
         }

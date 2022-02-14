@@ -9,8 +9,9 @@ namespace CodeManagerWebApi.Exceptions
                                                         (int) HttpStatusCode.BadRequest)
         {
         }
+
         public InvalidInstructionFileException(string msg) : base(msg,
-                                                        (int) HttpStatusCode.BadRequest)
+                                                                  (int) HttpStatusCode.BadRequest)
         {
         }
     }

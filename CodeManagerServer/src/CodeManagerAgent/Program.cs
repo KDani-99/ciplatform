@@ -43,7 +43,7 @@ namespace CodeManagerAgent
                                    break;
                                default:
                                    throw new ArgumentOutOfRangeException(
-                                       "The agent context must be one of the following types: 'Linux', 'Windows', 'Docker'");
+                                       nameof(agentConfiguration.Context));
                            }
 
                            services.Configure<WebSocketConfiguration>(

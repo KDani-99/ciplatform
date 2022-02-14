@@ -4,7 +4,7 @@ using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace CodeManagerWebApi.Extensions
+namespace CodeManagerWebApi.Extensions.Services
 {
     public static class ServiceCollectionExtensions
     {

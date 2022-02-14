@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using CodeManager.Data.Entities;
 
-namespace CodeManagerWebApi.Extensions
+namespace CodeManagerWebApi.Extensions.Entities
 {
     public static class UserExtensions
     {

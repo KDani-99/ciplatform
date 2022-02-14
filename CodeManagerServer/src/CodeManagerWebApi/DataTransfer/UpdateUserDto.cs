@@ -27,7 +27,7 @@ namespace CodeManagerWebApi.DataTransfer
                 .EmailAddress()
                 .Length(1, 255)
                 .WithMessage("Field `email` is invalid.");
-            When(x => x.Password is {Length: > 0}, () =>
+            When(x => x.Password is { Length: > 0 }, () =>
             {
                 RuleFor(x => x.Password)
                     .Length(8, 255)

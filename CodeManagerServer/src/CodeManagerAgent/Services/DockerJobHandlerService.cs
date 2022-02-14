@@ -35,7 +35,7 @@ namespace CodeManagerAgent.Services
         {
             await base.PrepareEnvironmentAsync();
 
-            var (from, tag) = JobConfiguration.Image.Split(":") switch {var result => (result[0], result[1])};
+            var (from, tag) = JobConfiguration.Image.Split(":") switch { var result => (result[0], result[1]) };
 
             await _dockerClient.Images.CreateImageAsync(
                 new ImagesCreateParameters
@@ -49,18 +49,19 @@ namespace CodeManagerAgent.Services
             var container = await _dockerClient.Containers.CreateContainerAsync(new CreateContainerParameters
             {
                 Image = JobConfiguration.Image,
-                //Name = JobConfiguration.AgentId, // TODO: decode jwt and get id
                 Env = JobConfiguration.Environment,
                 AttachStdout = true,
                 AttachStderr = true,
-                Tty = true // keep detached container running
+                Tty = true // keeps detached container running
             });
 
             _containerId = container.ID;
 
             if (!await _dockerClient.Containers.StartContainerAsync(_containerId, new ContainerStartParameters()))
+            {
                 throw new StepFailedException(
                     $"Failed to start {nameof(JobContext.Docker)} container. Container id: {_containerId}");
+            }
         }
 
         public override async Task ExecuteStepAsync(ChannelWriter<string> channelWriter,
@@ -87,7 +88,10 @@ namespace CodeManagerAgent.Services
 
             var exitCode = (await _dockerClient.Exec.InspectContainerExecAsync(execCreateResponse.ID)).ExitCode;
             await channelWriter.WriteAsync($"Exit code: {exitCode}{Environment.NewLine}");
-            if (exitCode != 0) throw new StepFailedException {Name = step.Name, ExitCode = exitCode};
+            if (exitCode != 0)
+            {
+                throw new StepFailedException { Name = step.Name, ExitCode = exitCode };
+            }
         }
 
         private async Task ProcessOutputStreamAsync(ChannelWriter<string> channelWriter, MultiplexedStream stream)
@@ -102,19 +106,24 @@ namespace CodeManagerAgent.Services
             {
                 log.Append(Encoding.UTF8.GetString(new ArraySegment<byte>(buffer, 0, result.Count)));
 
-                await foreach (var line in ProcessStringBuilder(log)) await channelWriter.WriteAsync(line);
+                await foreach (var line in ProcessStringBuilder(log))
+                {
+                    await channelWriter.WriteAsync(line);
+                }
                 // TODO: log stream type
 
                 CancellationToken.ThrowIfCancellationRequested();
             }
 
-            await foreach (var line in ProcessStringBuilder(log)) await channelWriter.WriteAsync(line); // the rest
+            await foreach (var line in ProcessStringBuilder(log))
+            {
+                await channelWriter.WriteAsync(line); // the rest
+            }
 
             // in case there is something left in the string builder
+            // stream rest of the lines
             var dataToStream = log.ToString();
             await channelWriter.WriteAsync(dataToStream);
-            // TODO: send to signalr stream
-            // stream rest of the lines
         }
 
         private static async IAsyncEnumerable<string> ProcessStringBuilder(StringBuilder sb)
@@ -122,7 +131,11 @@ namespace CodeManagerAgent.Services
             for (var i = 0; i < sb.Length; i++)
             {
                 // stream lines only
-                if (sb[i] != '\n') continue;
+                if (sb[i] != '\n')
+                {
+                    continue;
+                }
+
                 await Task.Yield();
                 yield return sb.ToString(0, i + 1);
                 sb.Remove(0, i + 1);
@@ -139,15 +152,21 @@ namespace CodeManagerAgent.Services
         private void Dispose(bool disposing)
         {
             if (disposing)
+            {
                 _dockerClient?.Containers.StopContainerAsync(_containerId, new ContainerStopParameters()).Wait();
+            }
+
             _dockerClient?.Dispose();
         }
 
         public override async ValueTask DisposeAsync()
         {
             if (_dockerClient?.Containers != null)
+            {
                 await _dockerClient.Containers.StopContainerAsync(_containerId, new ContainerStopParameters())
                                    .ConfigureAwait(false);
+            }
+
             Dispose(false);
             GC.SuppressFinalize(this);
         }

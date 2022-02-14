@@ -35,42 +35,54 @@ namespace CodeManagerAgentManager
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc(
-                    "v1", new OpenApiInfo {Title = "CodeManagerAgentManager", Version = "v1"});
-            });
-            services.AddSingleton(new JsonSerializerOptions
+            // Required services
+            services
+                .AddSwaggerGen(c =>
+                {
+                    c.SwaggerDoc(
+                        "v1", new OpenApiInfo {Title = "CodeManagerAgentManager", Version = "v1"});
+                })
+                .AddControllers().Services
+                .AddDbContext<CodeManagerDbContext>(options =>
+                                                        options.UseNpgsql(
+                                                            Configuration.GetValue<string>("ConnectionString"),
+                                                            builder => builder.UseQuerySplittingBehavior(
+                                                                QuerySplittingBehavior.SplitQuery)))
+                .AddSignalR().Services
+                .AddRabbitMq(Configuration);
+
+            // Configuration
+            services
+                .Configure<TokenServiceConfiguration>(
+                    Configuration.GetSection("TokenConfiguration"))
+                .Configure<LogStreamServiceConfiguration>(
+                    Configuration.GetSection("LogStreamServiceConfiguration"))
+                .Configure<RedisConfiguration>(Configuration.GetSection("RedisConfiguration"))
+                .Configure<WebSocketConfiguration>(Configuration.GetSection("WebSocketConfiguration"));
+
+            // Services with singleton lifetime
+            services
+                .AddSingleton<IConnectionCache, RedisConnectionCache>()
+                .AddSingleton<IManagerClient, ManagerClient>()
+                .AddSingleton(new JsonSerializerOptions
+                {
+                    Converters =
                     {
-                        Converters =
-                        {
-                            new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)
-                        }
-                    })
-                    .Configure<TokenServiceConfiguration>(
-                        Configuration.GetSection("TokenConfiguration"))
-                    .Configure<LogStreamServiceConfiguration>(
-                        Configuration.GetSection("LogStreamServiceConfiguration"))
-                    .Configure<RedisConfiguration>(Configuration.GetSection("RedisConfiguration"))
-                    .Configure<WebSocketConfiguration>(Configuration.GetSection("WebSocketConfiguration"))
-                    .AddDbContext<CodeManagerDbContext>(options =>
-                                                            options.UseNpgsql(
-                                                                Configuration.GetValue<string>("ConnectionString"), builder => builder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)))
-                    .AddSingleton<IConnectionCache, RedisConnectionCache>()
-                    .AddSingleton<IManagerClient, ManagerClient>()
-                    .AddScoped<IWorkerConnectionRepository, WorkerConnectionRepository>()
-                    .AddScoped<IRunRepository, RunRepository>()
-                    .AddScoped<IProjectRepository, ProjectRepository>()
-                    .AddScoped<IRunService, RunService>()
-                    .AddScoped<ITokenService<JwtSecurityToken>, TokenService>()
-                    .AddScoped<IRunRepository, RunRepository>()
-                    .AddScoped<ILogStreamService, LogStreamService>()
-                    .AddScoped<IWorkerConnectionService, WorkerConnectionService>()
-                    .AddScoped<IStepService<StepResultEvent>, StepService>()
-                    .AddSignalR().Services
-                    .AddRabbitMq(Configuration);
-            //.AddSignalRClient(Configuration);
+                        new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)
+                    }
+                });
+
+            // Services with scoped lifetime
+            services
+                .AddScoped<IWorkerConnectionRepository, WorkerConnectionRepository>()
+                .AddScoped<IRunRepository, RunRepository>()
+                .AddScoped<IProjectRepository, ProjectRepository>()
+                .AddScoped<IRunService, RunService>()
+                .AddScoped<ITokenService<JwtSecurityToken>, TokenService>()
+                .AddScoped<IRunRepository, RunRepository>()
+                .AddScoped<ILogStreamService, LogStreamService>()
+                .AddScoped<IWorkerConnectionService, WorkerConnectionService>()
+                .AddScoped<IStepService<StepResultEvent>, StepService>();
 
             services.AddHostedService<Manager>();
         }

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using CodeManager.Data.Entities;
-using CodeManagerWebApi.Hubs;
+using CodeManagerWebApi.WebSocket.Hubs;
 using MassTransit;
 using Microsoft.AspNetCore.SignalR;
 
@@ -15,6 +15,7 @@ namespace CodeManagerWebApi.Consumers
         {
             _runsHubContext = runsHubContext ?? throw new ArgumentNullException(nameof(runsHubContext));
         }
+
         public Task Consume(ConsumeContext<ProcessedStepResultEvent> context)
         {
             return _runsHubContext.Clients.Group(RunsHub.GetJobGroupName(context.Message.JobId))

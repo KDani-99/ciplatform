@@ -89,7 +89,8 @@ namespace CodeManagerAgent.WebSocket
             {
                 JobContext.Docker => CommonHubMethods.QueueDockerJob,
                 JobContext.Linux => CommonHubMethods.QueueLinuxJob,
-                JobContext.Windows => CommonHubMethods.QueueWindowsJob
+                JobContext.Windows => CommonHubMethods.QueueWindowsJob,
+                _ => throw new ArgumentOutOfRangeException()
             };
 
             HubConnection.On<QueueJobCommand>(methodName,

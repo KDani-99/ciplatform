@@ -5,8 +5,9 @@ using CodeManager.Data.Entities;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 
-namespace CodeManagerWebApi.Hubs
+namespace CodeManagerWebApi.WebSocket.Hubs
 {
+    [Obsolete]
     public class ManagerHub : Hub
     {
         private readonly ILogger<ManagerHub> _logger;
@@ -30,23 +31,6 @@ namespace CodeManagerWebApi.Hubs
                 //await _runsHubContext.Clients.Group(GetGroupName(runId, jobId)).SendAsync("ReceiveLogs", item); // why send? because thats the only way to ""stream"" it to multiple clients
                 // as regular streaming involves only a single client
             }
-        }
-
-        [HubMethodName("NotifyStepResult")]
-        public async Task NotifyStepResultAsync(ProcessedStepResultEvent processedStepResultEvent)
-        {
-            // TODO:
-        }
-
-        [HubMethodName("NotifyJobQueueResponse")]
-        public async Task NotifyJobQueueResponseAsync(ProcessedJobRequest processedJobRequest)
-        {
-            // TODO:
-        }
-
-        private static string GetGroupName(long runId, long jobId)
-        {
-            return $"{runId.ToString()}/{jobId.ToString()}";
         }
     }
 }

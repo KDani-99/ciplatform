@@ -8,6 +8,7 @@ using CodeManager.Data.Entities;
 using CodeManager.Data.Repositories;
 using CodeManagerWebApi.DataTransfer;
 using CodeManagerWebApi.Exceptions;
+using CodeManagerWebApi.Extensions.Entities;
 using MassTransit;
 
 namespace CodeManagerWebApi.Services
@@ -35,14 +36,7 @@ namespace CodeManagerWebApi.Services
         {
             var run = await _runRepository.GetAsync(runId) ?? throw new RunDoesNotExistException();
 
-            return new RunDto
-            {
-                Id = run.Id,
-                StartedDateTime = run.StartedDateTime,
-                FinishedDateTime = run.FinishedDateTime,
-                State = run.State,
-                Jobs = run.Jobs.Count,
-            };
+            return run.ToDto();
         }
 
         public async Task<RunDataDto> GetRunAsync(long runId, User user)
@@ -51,27 +45,7 @@ namespace CodeManagerWebApi.Services
 
             VerifyMembership(run.Project, user);
 
-            return new RunDataDto
-            {
-                Run = new RunDto
-                {
-                    Id = run.Id,
-                    StartedDateTime = run.StartedDateTime,
-                    FinishedDateTime = run.FinishedDateTime,
-                    State = run.State,
-                    Jobs = run.Jobs.Count
-                },
-                Jobs = run.Jobs.Select(job => new JobDto
-                {
-                    Id = job.Id,
-                    State = job.State,
-                    StartedDateTime = job.StartedDateTime,
-                    FinishedDateTime = job.FinishedDateTime,
-                    Name = job.Name,
-                    JobContext = job.Context.ToString(),
-                    Steps = job.Steps.Count
-                })
-            };
+            return run.ToDataDto();
         }
 
         public async Task<JobDataDto> GetJobAsync(long runId, long jobId, User user)
@@ -83,27 +57,7 @@ namespace CodeManagerWebApi.Services
             var job = run.Jobs.FirstOrDefault(jobEntity => jobEntity.Id == jobId) ??
                 throw new JobDoesNotExistException();
 
-            return new JobDataDto
-            {
-                Job = new JobDto
-                {
-                    Id = job.Id,
-                    State = job.State,
-                    StartedDateTime = job.StartedDateTime,
-                    FinishedDateTime = job.FinishedDateTime,
-                    Name = job.Name,
-                    JobContext = job.Context.ToString(),
-                    Steps = job.Steps.Count
-                },
-                Steps = job.Steps.Select(step => new StepDto
-                {
-                    Id = step.Id,
-                    Name = step.Name,
-                    StartedDateTime = step.StartedDateTime,
-                    FinishedDateTime = step.FinishedDateTime,
-                    State = step.State
-                })
-            };
+            return job.ToDataDto();
         }
 
         public async Task<Stream> GetStepFileStreamAsync(long runId, long jobId, long stepId, User user)
@@ -116,18 +70,8 @@ namespace CodeManagerWebApi.Services
                           .FirstOrDefault(job => job.Id == jobId)
                           ?.Steps.FirstOrDefault(s => s.Id == stepId) ?? throw new StepDoesNotExistException();
 
-            /*var file = await File.ReadAllLinesAsync(step.LogPath);
-
-            return new StepFileDto
-            {
-                StepLogs = file.Select((content, index) => new StepLogDto
-                {
-                    Line = index,
-                    Content = content
-                })
-            };*/
-            
-            return File.Open(step.LogPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite); // third param allows concurrent access to the file
+            return File.Open(step.LogPath, FileMode.Open, FileAccess.Read,
+                             FileShare.ReadWrite); // third param allows concurrent access to the file
         }
 
         public async Task QueueRunAsync(long projectId, string instructions, User user)
@@ -149,7 +93,9 @@ namespace CodeManagerWebApi.Services
         private static void VerifyMembership(Project project, User user)
         {
             if (project.Team.Members.All(member => member.User.Id != user.Id))
+            {
                 throw new UnauthorizedAccessException("You are not a member of this team.");
+            }
         }
     }
 }

@@ -65,14 +65,12 @@ namespace CodeManagerAgentManager.Services
             InsertInitialStep(cmd.RunConfiguration, project);
             
             var run = await SaveRunConfigurationAsync(cmd.Repository, project, cmd.RunConfiguration);
-          //  run.State = States.Running;
 
             await SendRunQueuedNotification(project.Id, run.Id);
 
             foreach (var job in run.Jobs)
                 await QueueJobAsync(run, job);
-
-           // run.State = States.Queued;
+            
             await _runRepository.UpdateAsync(run);
             
             // TODO: send event to update status
@@ -80,7 +78,7 @@ namespace CodeManagerAgentManager.Services
             return run.Id;
         }
 
-        private void InsertInitialStep(RunConfiguration runConfiguration, Project project)
+        private static void InsertInitialStep(RunConfiguration runConfiguration, Project project)
         {
             foreach (var job in runConfiguration.Jobs)
             {
@@ -147,6 +145,7 @@ namespace CodeManagerAgentManager.Services
                                                           Project project,
                                                           RunConfiguration runConfiguration)
         {
+            // TODO: let web API create the config
             var numberOfSteps = runConfiguration.Jobs.Aggregate(0, (result, current) => result + current.Value.Steps.Count);
             var run = new Run
             {

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using CodeManager.Data.Configuration;
 using CodeManagerWebApi.Configuration;
@@ -26,39 +25,53 @@ namespace CodeManagerWebApi.Services
             var result = _deserializer.Deserialize<RunConfiguration>(data);
 
             ValidateConfiguration(result);
-            
+
             return Task.FromResult(result);
         }
 
         private void ValidateConfiguration(RunConfiguration configuration)
         {
             if (configuration.Jobs?.Count > _ymlConfiguration.MaxJobCount)
-                throw new InvalidInstructionFileException("The configuration file exceeds the maximum number of allowed jobs.");
+            {
+                throw new InvalidInstructionFileException(
+                    "The configuration file exceeds the maximum number of allowed jobs.");
+            }
 
             ValidateJobConfigurations(configuration.Jobs);
         }
 
         private void ValidateJobConfigurations(Dictionary<string, JobConfiguration> jobConfigurations)
         {
-            foreach (var jobConfig in jobConfigurations)
+            foreach (var (key, value) in jobConfigurations)
             {
-                if (jobConfig.Value.Steps.Count > _ymlConfiguration.MaxStepPerJobCount)
-                    throw new InvalidInstructionFileException("The configuration file exceeds the maximum number of steps per job.");
-                if (jobConfig.Key.Length > 25 || jobConfig.Key.Length < 2)
+                if (value.Steps.Count > _ymlConfiguration.MaxStepPerJobCount)
+                {
+                    throw new InvalidInstructionFileException(
+                        "The configuration file exceeds the maximum number of steps per job.");
+                }
+
+                if (key.Length is > 25 or < 2)
+                {
                     throw new InvalidInstructionFileException("Job name must be between 1 and 25 characters.");
-                
-                ValidateStepConfigurations(jobConfig.Value.Steps);
+                }
+
+                ValidateStepConfigurations(value.Steps);
             }
         }
 
-        private void ValidateStepConfigurations(IEnumerable<StepConfiguration> stepConfigurations)
+        private static void ValidateStepConfigurations(IEnumerable<StepConfiguration> stepConfigurations)
         {
             foreach (var stepConfig in stepConfigurations)
             {
-                if (stepConfig.Name.Length > 50 || stepConfig.Name.Length < 1)
+                if (stepConfig.Name.Length is > 50 or < 1)
+                {
                     throw new InvalidInstructionFileException("Step name must be between 1 and 50 characters");
+                }
+
                 if (stepConfig.Cmd.Length > 999 || stepConfig.Cmd.Length < 1)
+                {
                     throw new InvalidInstructionFileException("Step command must be between 1 and 999 characters");
+                }
             }
         }
     }

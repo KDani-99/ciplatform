@@ -70,17 +70,24 @@ namespace CodeManagerWebApi.Services
         public async Task<ClaimsPrincipal> VerifyRefreshTokenAsync(string token)
         {
             var claimsPrincipal = await VerifyTokenAsync(token);
-            var jti = claimsPrincipal.Claims.FirstOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Jti).Value;
+            var jti = claimsPrincipal.Claims.FirstOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Jti)?.Value;
             var username = claimsPrincipal.Claims.FirstOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Sub)
-                                          .Value;
-            var exp = claimsPrincipal.Claims.FirstOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Exp).Value;
-            ;
+                                          ?.Value;
+            var exp = claimsPrincipal.Claims.FirstOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Exp)?.Value;
+
+            if (jti == default || username == default || exp == default)
+            {
+                throw new UnauthorizedAccessWebException("Invalid refresh token provided.");
+            }
 
             ValidateTokenLifetime(long.Parse(exp));
 
             var storedJti = await _tokenRepository.GetRefreshTokenAsync(username);
 
-            if (jti != storedJti) throw new UnauthorizedAccessWebException("Invalid refresh token provided.");
+            if (jti != storedJti)
+            {
+                throw new UnauthorizedAccessWebException("Invalid refresh token provided.");
+            }
 
             return claimsPrincipal;
         }
@@ -88,24 +95,32 @@ namespace CodeManagerWebApi.Services
         public async Task<ClaimsPrincipal> VerifyAccessTokenAsync(string token)
         {
             var claimsPrincipal = await VerifyTokenAsync(token);
-            var jti = claimsPrincipal.Claims.FirstOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Jti).Value;
+            
+            var jti = claimsPrincipal.Claims.FirstOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Jti)?.Value;
             var username = claimsPrincipal.Claims.FirstOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Sub)
-                                          .Value;
-            var exp = claimsPrincipal.Claims.FirstOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Exp).Value;
-            ;
+                                          ?.Value;
+            var exp = claimsPrincipal.Claims.FirstOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Exp)?.Value;
+            
+            if (jti == default || username == default || exp == default)
+            {
+                throw new UnauthorizedAccessWebException("Invalid refresh token provided.");
+            }
 
             ValidateTokenLifetime(long.Parse(exp));
 
             var storedJti = await _tokenRepository.GetAccessTokenAsync(username);
 
-            if (jti != storedJti) throw new UnauthorizedAccessWebException("Invalid access token provided.");
+            if (jti != storedJti)
+            {
+                throw new UnauthorizedAccessWebException("Invalid access token provided.");
+            }
 
             return claimsPrincipal;
         }
 
         private Task<ClaimsPrincipal> VerifyTokenAsync(string token)
         {
-            var tokenHandler = new JwtSecurityTokenHandler {MapInboundClaims = false};
+            var tokenHandler = new JwtSecurityTokenHandler { MapInboundClaims = false };
             var validationParameters = new TokenValidationParameters
             {
                 ValidateLifetime = true,
@@ -147,7 +162,9 @@ namespace CodeManagerWebApi.Services
         private void ValidateTokenLifetime(double expires)
         {
             if ((DateTime.UnixEpoch.AddSeconds(expires) - DateTime.Now).TotalSeconds <= 0)
+            {
                 throw new SecurityTokenExpiredException();
+            }
         }
     }
 }

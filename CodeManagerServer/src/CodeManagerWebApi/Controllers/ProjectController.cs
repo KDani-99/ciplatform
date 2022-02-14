@@ -48,7 +48,7 @@ namespace CodeManagerWebApi.Controllers
             var result = await _projectService.CreateProjectAsync(createProjectDto, user);
             _logger.LogInformation($"Project `{createProjectDto.Name}` has been created @ {DateTime.Now}");
 
-            return CreatedAtRoute(nameof(GetProject), new {result.Id}, result);
+            return CreatedAtRoute(nameof(GetProject), new { result.Id }, result);
         }
 
         [HttpPut]

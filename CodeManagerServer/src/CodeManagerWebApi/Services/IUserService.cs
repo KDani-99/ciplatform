@@ -13,8 +13,6 @@ namespace CodeManagerWebApi.Services
         public Task<UserDto> GetUserAsync(long id, User user);
         public Task<IEnumerable<UserDto>> GetUsersAsync(User user);
 
-        public Task<bool> ExistsAsync(long id);
-
         public Task<AuthTokenDto> LoginAsync(LoginDto userDto, HttpContext httpContext);
         public Task<AuthTokenDto> GenerateAuthTokensAsync(string username);
         public Task UpdateUserAsync(long id, UpdateUserDto updateUserDto, User user);

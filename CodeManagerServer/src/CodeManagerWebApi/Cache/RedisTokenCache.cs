@@ -23,7 +23,7 @@ namespace CodeManagerWebApi.Cache
         {
             _connectionMultiplexer = ConnectionMultiplexer.Connect(new ConfigurationOptions
             {
-                EndPoints = {_redisConfiguration.ConnectionString},
+                EndPoints = { _redisConfiguration.ConnectionString },
                 Password = _redisConfiguration.Password,
                 DefaultDatabase = _redisConfiguration.Database
             });

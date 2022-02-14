@@ -9,6 +9,7 @@ using CodeManager.Data.Repositories;
 using CodeManagerWebApi.DataTransfer;
 using CodeManagerWebApi.Exceptions;
 using CodeManagerWebApi.Extensions;
+using CodeManagerWebApi.Extensions.Entities;
 using Microsoft.AspNetCore.Http;
 
 namespace CodeManagerWebApi.Services
@@ -32,10 +33,14 @@ namespace CodeManagerWebApi.Services
         public async Task CreateUser(CreateUserDto createUserDto)
         {
             if (await _userRepository.GetByUsernameAsync(createUserDto.Username) is not null)
+            {
                 throw new UsernameTakenException();
+            }
 
             if (await _userRepository.GetByEmailAsync(createUserDto.Email) is not null)
+            {
                 throw new EmailAlreadyInUseException();
+            }
 
             var user = new User
             {
@@ -43,7 +48,7 @@ namespace CodeManagerWebApi.Services
                 Name = createUserDto.Name,
                 Email = createUserDto.Email,
                 Password = _credentialManagerService.CreateHashedPassword(createUserDto.Password),
-                Roles = new[] {Roles.User},
+                Roles = new[] { Roles.User },
                 RegistrationTimestamp = DateTime.Now
             };
 
@@ -53,7 +58,9 @@ namespace CodeManagerWebApi.Services
         public async Task<UserDto> GetUserAsync(long id, User user)
         {
             if (user.Id != id && user.IsAdmin())
+            {
                 throw new UnauthorizedAccessWebException("You are not allowed to perform this action.");
+            }
 
             var selectedUser = await _userRepository.GetAsync(id);
 
@@ -85,19 +92,19 @@ namespace CodeManagerWebApi.Services
             });
         }
 
-        public Task<bool> ExistsAsync(long id)
-        {
-            return _userRepository.ExistsAsync(user => user.Id == id);
-        }
-
         public async Task<AuthTokenDto> LoginAsync(LoginDto loginDto, HttpContext httpContext)
         {
             var user = await _userRepository.GetByUsernameAsync(loginDto.Username);
 
-            if (user is null) throw new InvalidCredentialsException();
+            if (user is null)
+            {
+                throw new InvalidCredentialsException();
+            }
 
             if (!_credentialManagerService.VerifyPassword(loginDto.Password, user.Password))
+            {
                 throw new InvalidCredentialsException();
+            }
 
             var accessToken = await _tokenService.CreateAccessTokenAsync(user);
             var refreshToken = await _tokenService.CreateRefreshTokenAsync(user);
@@ -115,7 +122,10 @@ namespace CodeManagerWebApi.Services
         {
             var user = await _userRepository.GetByUsernameAsync(username);
 
-            if (user is null) throw new UserDoesNotExistException();
+            if (user is null)
+            {
+                throw new UserDoesNotExistException();
+            }
 
             var accessToken = await _tokenService.CreateAccessTokenAsync(user);
             var refreshToken = await _tokenService.CreateRefreshTokenAsync(user);
@@ -135,9 +145,11 @@ namespace CodeManagerWebApi.Services
             userToUpdate.Name = updateUserDto.Name;
             userToUpdate.Username = updateUserDto.Username;
             if (updateUserDto.Password != null)
+            {
                 userToUpdate.Password = _credentialManagerService.CreateHashedPassword(updateUserDto.Password);
+            }
 
-            userToUpdate.Roles = updateUserDto.IsAdmin ? new[] {Roles.User, Roles.Admin} : new[] {Roles.User};
+            userToUpdate.Roles = updateUserDto.IsAdmin ? new[] { Roles.User, Roles.Admin } : new[] { Roles.User };
 
             await _userRepository.UpdateAsync(userToUpdate);
         }
@@ -147,9 +159,14 @@ namespace CodeManagerWebApi.Services
             var userToDelete = await _userRepository.GetAsync(id) ?? throw new UserDoesNotExistException();
 
             if (userToDelete.IsAdmin())
+            {
                 throw new UnauthorizedAccessWebException("You are not allowed to delete admin users");
+            }
 
-            if (userToDelete.Id == user.Id) throw new UnauthorizedAccessWebException("You can not delete yourself.");
+            if (userToDelete.Id == user.Id)
+            {
+                throw new UnauthorizedAccessWebException("You can not delete yourself.");
+            }
 
             await _userRepository.DeleteAsync(id);
         }

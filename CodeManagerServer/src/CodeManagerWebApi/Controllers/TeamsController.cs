@@ -50,7 +50,7 @@ namespace CodeManagerWebApi.Controllers
             var result = await _teamService.CreateTeamAsync(teamDto, user);
             _logger.LogInformation($"Team `{teamDto.Name}` has been created @ {DateTime.Now}");
 
-            return CreatedAtRoute(nameof(Get), new {result.Id}, result);
+            return CreatedAtRoute(nameof(Get), new { result.Id }, result);
         }
 
         [HttpPut]

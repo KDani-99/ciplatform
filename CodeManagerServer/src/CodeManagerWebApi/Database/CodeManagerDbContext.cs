@@ -24,6 +24,7 @@ namespace CodeManagerWebApi.Database
             var credentialManagerService = this.GetService<ICredentialManagerService>();
 
             if (serviceAccountConfiguration.IsEnabled)
+            {
                 modelBuilder.Entity<User>()
                             .HasData(new User
                             {
@@ -34,8 +35,9 @@ namespace CodeManagerWebApi.Database
                                     serviceAccountConfiguration.Password),
                                 RegistrationTimestamp = DateTime.Now,
                                 Name = "Admin",
-                                Roles = new[] {Roles.Admin, Roles.User}
+                                Roles = new[] { Roles.Admin, Roles.User }
                             });
+            }
         }
     }
 }

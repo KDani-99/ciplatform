@@ -37,4 +37,8 @@
       <ProjectReference Include="..\CodeManager.Data\CodeManager.Data.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="WebSocket" />
+    </ItemGroup>
+
 </Project>

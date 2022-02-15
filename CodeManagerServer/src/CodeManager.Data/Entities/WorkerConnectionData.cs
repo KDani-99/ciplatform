@@ -8,6 +8,5 @@ namespace CodeManager.Data.Entities
         public string ConnectionId { get; set; }
         public JobContext JobContext { get; set; }
         public AgentState AgentState { get; set; }
-        public HostMachineInformation HostMachineInformation { get; set; }
     }
 }

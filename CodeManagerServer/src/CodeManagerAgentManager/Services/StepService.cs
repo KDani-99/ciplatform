@@ -56,13 +56,14 @@ namespace CodeManagerAgentManager.Services
             await UpdateWorkerStateAsync(connectionId);
 
             await _runRepository.UpdateAsync(run);
-
-            await SendStepResultNotificationAsync(jobId, step.Id, context.State, DateTime.Now); // TODO: do not send date if the state is Skipped
+            
         }
 
         private async Task ProcessStepAsync(Run run, Job job, Step step, States state)
         {
             step.State = state;
+            
+            await SendStepResultNotificationAsync(job.Id, step.Id, state, state is States.Skipped ? null : DateTime.Now);
 
             if (step.State is States.Successful or States.Failed) step.FinishedDateTime = DateTime.Now;
 

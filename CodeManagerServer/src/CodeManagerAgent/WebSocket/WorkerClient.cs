@@ -67,7 +67,7 @@ namespace CodeManagerAgent.WebSocket
 
         public Task ConfigureAsync()
         {
-            return HubConnection.SendAsync("Configure", new HostMachineInformation(), AgentState.Available);
+            return HubConnection.SendAsync("Configure", AgentState.Available);
         }
 
         public Task StreamLogAsync(long runId, long jobId, long stepIndex, ChannelReader<string> stream)

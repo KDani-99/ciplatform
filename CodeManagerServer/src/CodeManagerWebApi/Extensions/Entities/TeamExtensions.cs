@@ -8,7 +8,7 @@ namespace CodeManagerWebApi.Extensions.Entities
     {
         public static TeamDto ToDto(this Team team, long userId)
         {
-            return new() // nyelvi elemeknek koszonhetoen igy adhatjuk meg
+            return new()
             {
                 Name = team.Name,
                 Description = team.Description,

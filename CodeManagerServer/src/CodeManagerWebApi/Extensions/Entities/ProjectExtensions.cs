@@ -1,7 +1,6 @@
 ﻿using System.Linq;
 using CodeManager.Data.Entities;
 using CodeManagerWebApi.DataTransfer;
-using Microsoft.VisualBasic.CompilerServices;
 
 namespace CodeManagerWebApi.Extensions.Entities
 {

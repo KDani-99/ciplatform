@@ -21,19 +21,13 @@ export class SignalRService {
     this.hubConnection = new signalr.HubConnectionBuilder()
       .withUrl(this.configService.getWsAddress('runs')!, {
         async accessTokenFactory(): Promise<string> {
-          // we can't access the this context here
+          // we can't access the 'this' context here
           return firstValueFrom(ctx.accessToken);
         },
       })
       .build();
 
-    this.registerMethods();
-
     return this.hubConnection.start();
-  }
-
-  private registerMethods() {
-    //this.hubConnection?.on('ReceiveLogs', this.receiveLogs);
   }
 
   subscribeToChannel(runId: number, jobId: number) {

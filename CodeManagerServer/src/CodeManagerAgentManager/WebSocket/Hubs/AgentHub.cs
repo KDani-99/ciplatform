@@ -46,7 +46,6 @@ namespace CodeManagerAgentManager.WebSocket.Hubs
                 await _workerConnectionService.AddWorkerConnectionOfTypeAsync(new WorkerConnectionData
                 {
                     AgentState = AgentState.Offline, // must be configured first
-                    HostMachineInformation = null,
                     ConnectionId = Context.ConnectionId,
                     JobContext = jobContext
                 });
@@ -69,14 +68,12 @@ namespace CodeManagerAgentManager.WebSocket.Hubs
         }
 
         [HubMethodName("Configure")]
-        public async Task ConfigureWorkerAsync(HostMachineInformation hostMachineInformation, AgentState agentState)
+        public async Task ConfigureWorkerAsync(AgentState agentState)
         {
             try
             {
-                // TODO: validate data?
                 await _workerConnectionService.UpdateWorkerConnectionAsync(new WorkerConnectionData
                 {
-                    HostMachineInformation = hostMachineInformation,
                     AgentState = agentState,
                     ConnectionId = Context.ConnectionId // jobcontext wont be updated
                 });
@@ -84,7 +81,7 @@ namespace CodeManagerAgentManager.WebSocket.Hubs
             catch (Exception exception)
             {
                 _logger.LogError($"Failed to configure worker. Error: {exception.Message}");
-                // TODO: disconnect worker?
+                Context.Abort();
             }
         }
 
@@ -128,7 +125,5 @@ namespace CodeManagerAgentManager.WebSocket.Hubs
 
             return Task.CompletedTask;
         }
-
-        // TODO: add other type of stream processor
     }
 }

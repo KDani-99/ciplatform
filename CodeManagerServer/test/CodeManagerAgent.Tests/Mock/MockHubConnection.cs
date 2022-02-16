@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.SignalR.Protocol;
 using Microsoft.Extensions.Logging;
 using Moq;
 
-namespace CodeManagerAgent.Tests.Mocks
+namespace CIPlatformWorker.Tests.Mocks
 {
     public class MockHubConnection : HubConnection
     {

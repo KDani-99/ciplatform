@@ -6,20 +6,21 @@ using System.Threading.Channels;
 using System.Threading.Tasks;
 using AutoFixture;
 using AutoFixture.AutoMoq;
-using CodeManager.Data.Configuration;
-using CodeManagerAgent.Configuration;
-using CodeManagerAgent.Entities;
-using CodeManagerAgent.Exceptions;
-using CodeManagerAgent.Services;
-using CodeManagerAgent.Tests.Mocks;
-using CodeManagerAgent.WebSocket;
+using CIPlatformWorker.Configuration;
+using CIPlatformWorker.Entities;
+using CIPlatformWorker.Exceptions;
+using CIPlatformWorker.Services;
+using CIPlatformWorker.Tests.Mocks;
+using CIPlatformWorker.WebSocket;
+using CIPlatform.Data.Configuration;
+using CIPlatform.Data.Events;
 using Docker.DotNet;
 using Docker.DotNet.Models;
 using Microsoft.Extensions.Options;
 using Moq;
 using NUnit.Framework;
 
-namespace CodeManagerAgent.Tests
+namespace CIPlatformWorker.Tests
 {
     public class DockerJobHandlerServiceTests
     {

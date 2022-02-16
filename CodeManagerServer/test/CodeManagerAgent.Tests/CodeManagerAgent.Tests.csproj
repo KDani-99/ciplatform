@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\CodeManagerAgent\CodeManagerAgent.csproj" />
+    <ProjectReference Include="..\..\src\CIPlatformWorker\CIPlatformWorker.csproj" />
   </ItemGroup>
 
 </Project>

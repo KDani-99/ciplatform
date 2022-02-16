@@ -2,15 +2,15 @@
 using System.Threading;
 using AutoFixture;
 using AutoFixture.AutoMoq;
-using CodeManager.Data.Configuration;
-using CodeManagerAgent.Configuration;
-using CodeManagerAgent.Entities;
-using CodeManagerAgent.Factories;
-using CodeManagerAgent.Services;
+using CIPlatformWorker.Configuration;
+using CIPlatformWorker.Entities;
+using CIPlatformWorker.Factories;
+using CIPlatformWorker.Services;
+using CIPlatform.Data.Configuration;
 using Microsoft.Extensions.Options;
 using NUnit.Framework;
 
-namespace CodeManagerAgent.Tests
+namespace CIPlatformWorker.Tests
 {
     public class LinuxJobHandlerServiceFactoryTests
     {

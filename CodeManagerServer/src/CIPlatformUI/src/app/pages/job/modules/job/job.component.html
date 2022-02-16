@@ -1,0 +1,46 @@
+<shared-primary-page [disableHeader]="true">
+
+  <ng-template #buttonsTemplate>
+    <div [className]="'button-container'">
+    </div>
+  </ng-template>
+  <ng-template #imageTemplate>
+    <i class="eva eva-cube-outline"></i>
+  </ng-template>
+
+  <shared-topbar [buttonsTemplate]="buttonsTemplate" [imageTemplate]="imageTemplate" [header]="'Job #' + jobDto?.job?.id ?? 'N/A'"></shared-topbar>
+
+  <ng-template #jobConsole>
+    <job-console [log]="log" (onClose)="toggleWindow(false)"></job-console>
+  </ng-template>
+
+  <shared-popup *ngIf="showWindow" [contentTemplate]="currentTemplate"></shared-popup>
+
+  <table [className]="'run-table'">
+    <thead>
+    <tr>
+      <th>No.</th>
+      <th>Name</th>
+      <th>Started</th>
+      <th>Finished</th>
+      <th>Overall time</th>
+      <th>Status</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let step of jobDto?.steps; index as stepIndex" (click)="openConsoleWindow(step.id)">
+      <td>#{{stepIndex + 1}}</td>
+      <td>{{step.name}}</td>
+      <td>{{runService.getTime(step.startedDateTime)}}</td>
+      <td>{{runService.getTime(step.finishedDateTime)}}</td>
+      <td>{{runService.getFormattedExecutionTime(step.startedDateTime, step.finishedDateTime)}}</td>
+      <td *ngIf="step.state == State.QUEUED" [className]="'running'"><i class="eva eva-clock-outline"></i></td>
+      <td *ngIf="step.state == State.RUNNING" [className]="'running'"><i class="eva eva-loader-outline"></i></td>
+      <td *ngIf="step.state == State.SUCCESSFUL" [className]="'successful'"><i class="eva eva-checkmark-circle-outline"></i></td>
+      <td *ngIf="step.state == State.FAILED" [className]="'failed'"><i class="eva eva-alert-circle-outline"></i></td>
+      <td *ngIf="step.state == State.SKIPPED" [className]="'skipped'"><i class="eva eva-slash-outline"></i></td>
+      <td *ngIf="step.state == State.NOT_RUN" [className]="'skipped'"><i class="eva eva-radio-button-off-outline"></i></td>
+    </tr>
+    </tbody>
+  </table>
+</shared-primary-page>

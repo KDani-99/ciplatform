@@ -2,18 +2,18 @@
 using System.Threading;
 using AutoFixture;
 using AutoFixture.AutoMoq;
-using CodeManager.Data.Configuration;
-using CodeManagerAgent.Configuration;
-using CodeManagerAgent.Entities;
-using CodeManagerAgent.Factories;
-using CodeManagerAgent.Services;
-using CodeManagerAgent.WebSocket;
+using CIPlatformWorker.Configuration;
+using CIPlatformWorker.Entities;
+using CIPlatformWorker.Factories;
+using CIPlatformWorker.Services;
+using CIPlatformWorker.WebSocket;
+using CIPlatform.Data.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 using NUnit.Framework;
 
-namespace CodeManagerAgent.Tests
+namespace CIPlatformWorker.Tests
 {
     public class WindowsJobHandlerServiceFactoryTests
     {

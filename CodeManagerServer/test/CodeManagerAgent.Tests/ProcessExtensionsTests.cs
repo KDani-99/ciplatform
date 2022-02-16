@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using CodeManagerAgent.Extensions;
+using CIPlatformWorker.Extensions;
 using NUnit.Framework;
 
-namespace CodeManagerAgent.Tests
+namespace CIPlatformWorker.Tests
 {
     public class ProcessExtensionsTests
     {

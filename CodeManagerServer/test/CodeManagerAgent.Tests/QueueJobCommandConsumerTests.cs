@@ -5,21 +5,21 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using CodeManager.Data.Configuration;
-using CodeManager.Data.Events;
-using CodeManager.Data.Extensions;
-using CodeManager.Data.JsonWebTokens;
-using CodeManagerAgent.Entities;
-using CodeManagerAgent.Factories;
-using CodeManagerAgent.Services;
-using CodeManagerAgent.WebSocket;
-using CodeManagerAgent.WebSocket.Consumers;
+using CIPlatformWorker.Entities;
+using CIPlatformWorker.Factories;
+using CIPlatformWorker.Services;
+using CIPlatformWorker.WebSocket;
+using CIPlatformWorker.WebSocket.Consumers;
+using CIPlatform.Data.Configuration;
+using CIPlatform.Data.Events;
+using CIPlatform.Data.Extensions;
+using CIPlatform.Data.JsonWebTokens;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Moq;
 using NUnit.Framework;
 
-namespace CodeManagerAgent.Tests
+namespace CIPlatformWorker.Tests
 {
     public class QueueJobCommandConsumerTests
     {

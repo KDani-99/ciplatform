@@ -1,0 +1,51 @@
+<shared-primary-page [disableHeader]="true">
+
+  <ng-template #buttonsTemplate>
+    <div [className]="'button-container'">
+      <shared-button [text]="'Delete'" theme="error" (onClick)="openDeleteWindow()"></shared-button>
+    </div>
+  </ng-template>
+  <ng-template #imageTemplate>
+    <i class="eva eva-cube-outline"></i>
+  </ng-template>
+
+  <ng-template #deleteRunTemplate>
+    <run-delete (onCancel)="toggleWindow(false)" [runId]="runData?.run?.id" (onDelete)="onDelete()"></run-delete>
+  </ng-template>
+
+  <shared-popup *ngIf="showWindow" [contentTemplate]="currentTemplate"></shared-popup>
+
+  <shared-topbar [buttonsTemplate]="buttonsTemplate" [imageTemplate]="imageTemplate" [header]="'Run #' + runData?.run?.id ?? 'NA'"></shared-topbar>
+
+  <table [className]="'run-table'">
+    <thead>
+      <tr>
+        <th>No.</th>
+        <th>Context</th>
+        <th>Name</th>
+        <th>Started</th>
+        <th>Finished</th>
+        <th>Overall time</th>
+        <th>Steps</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let job of runData?.jobs; index as jobIndex" (click)="openJob(job.id)">
+        <td>#{{jobIndex + 1}}</td>
+        <td>{{job.jobContext}}</td>
+        <td>{{job.name}}</td>
+        <td>{{runService.getTime(job.startedDateTime)}}</td>
+        <td>{{runService.getTime(job.finishedDateTime)}}</td>
+        <td>{{runService.getFormattedExecutionTime(job.startedDateTime, job.finishedDateTime)}}</td>
+        <td>{{job.steps}}</td>
+        <td *ngIf="job.state == State.QUEUED" [className]="'running'"><i class="eva eva-clock-outline"></i></td>
+        <td *ngIf="job.state == State.RUNNING" [className]="'running'"><i class="eva eva-loader-outline"></i></td>
+        <td *ngIf="job.state == State.SUCCESSFUL" [className]="'successful'"><i class="eva eva-checkmark-circle-outline"></i></td>
+        <td *ngIf="job.state == State.FAILED" [className]="'failed'"><i class="eva eva-alert-circle-outline"></i></td>
+        <td *ngIf="job.state == State.SKIPPED" [className]="'skipped'"><i class="eva eva-slash-outline"></i></td>
+        <td *ngIf="job.state == State.NOT_RUN" [className]="'skipped'"><i class="eva eva-radio-button-off-outline"></i></td>
+      </tr>
+    </tbody>
+  </table>
+</shared-primary-page>

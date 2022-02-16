@@ -1,6 +1,6 @@
 using NUnit.Framework;
 
-namespace CodeManagerAgentManager.Tests
+namespace CIPlatformManager.Tests
 {
     public class LogStreamServiceTests
     {

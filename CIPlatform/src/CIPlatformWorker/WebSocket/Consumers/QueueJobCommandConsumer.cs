@@ -5,7 +5,6 @@ using System.Threading.Channels;
 using System.Threading.Tasks;
 using CIPlatformWorker.Entities;
 using CIPlatformWorker.Exceptions;
-using CIPlatformWorker.Factories;
 using CIPlatformWorker.Services;
 using CIPlatform.Core.Hubs.Consumers;
 using CIPlatform.Data.Agent;
@@ -19,17 +18,17 @@ namespace CIPlatformWorker.WebSocket.Consumers
 {
     public class QueueJobCommandConsumer : IConsumer<QueueJobCommand>
     {
-        private readonly IJobHandlerServiceFactory _jobHandlerServiceFactory;
         private readonly ILogger<QueueJobCommandConsumer> _logger;
         private readonly IWorkerClient _workerClient;
+        private readonly IJobHandlerService _jobHandlerService;
         private int _stepIndex = 0;
 
-        public QueueJobCommandConsumer(IJobHandlerServiceFactory jobHandlerServiceFactory,
-                                       ILogger<QueueJobCommandConsumer> logger,
-                                       IWorkerClient workerClient)
+        public QueueJobCommandConsumer(ILogger<QueueJobCommandConsumer> logger,
+                                       IWorkerClient workerClient,
+                                       IJobHandlerService jobHandlerService)
         {
-            _jobHandlerServiceFactory = jobHandlerServiceFactory ??
-                throw new ArgumentNullException(nameof(jobHandlerServiceFactory));
+            _jobHandlerService = jobHandlerService ??
+                throw new ArgumentNullException(nameof(jobHandlerService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _workerClient = workerClient ?? throw new ArgumentNullException(nameof(workerClient));
         }
@@ -46,8 +45,8 @@ namespace CIPlatformWorker.WebSocket.Consumers
             }
             catch (OperationCanceledException)
             {
-                _logger.LogError("Job was cancelled remotely.");
-                await _workerClient.SendStepResult(new StepResultEvent
+                _logger.LogError("Job was cancelled.");
+                await _workerClient.SendStepResultAsync(new StepResultEvent
                 {
                     State = States.Failed,
                     StepIndex = _stepIndex,
@@ -57,7 +56,7 @@ namespace CIPlatformWorker.WebSocket.Consumers
             catch (StepFailedException exception)
             {
                 _logger.LogError($"Step '{exception.Name}' failed. Exit code was {exception.ExitCode}.");
-                await _workerClient.SendStepResult(new StepResultEvent
+                await _workerClient.SendStepResultAsync(new StepResultEvent
                 {
                     State = States.Failed,
                     StepIndex = _stepIndex,
@@ -67,7 +66,7 @@ namespace CIPlatformWorker.WebSocket.Consumers
             catch (Exception exception)
             {
                 _logger.LogError($"An unexpected error has occured. Error: {exception.Message}");
-                await _workerClient.SendStepResult(new StepResultEvent
+                await _workerClient.SendStepResultAsync(new StepResultEvent
                 {
                     State = States.Failed,
                     StepIndex = _stepIndex,
@@ -87,11 +86,7 @@ namespace CIPlatformWorker.WebSocket.Consumers
         {
             var beforeExecutionDateTime = DateTime.Now;
 
-            await using var jobHandler = _jobHandlerServiceFactory.Create(jobDetails,
-                                                                          jobConfiguration,
-                                                                          cancellationToken);
-
-            await jobHandler.PrepareEnvironmentAsync();
+            await _jobHandlerService.PrepareEnvironmentAsync();
 
             for (var i = 0; i < jobConfiguration.Steps.Count; i++)
             {
@@ -103,7 +98,7 @@ namespace CIPlatformWorker.WebSocket.Consumers
                     _ = _workerClient.StreamLogAsync(jobDetails.RunId, jobDetails.JobId, i,
                                                      channel.Reader); // do not await!
 
-                    await ProcessStepAsync(channel, i, jobHandler, jobConfiguration.Steps[i], jobDetails);
+                    await ProcessStepAsync(channel, i, _jobHandlerService, jobConfiguration.Steps[i], jobDetails);
                 }
                 finally // try-finally to make sure the channel write gets completed
                 {
@@ -127,7 +122,7 @@ namespace CIPlatformWorker.WebSocket.Consumers
         {
             _logger.LogInformation($"Executing step {step.Name}...");
 
-            await _workerClient.SendStepResult(new StepResultEvent
+            await _workerClient.SendStepResultAsync(new StepResultEvent
             {
                 State = States.Running,
                 StepIndex = stepIndex,
@@ -137,7 +132,7 @@ namespace CIPlatformWorker.WebSocket.Consumers
             await jobHandlerService.ExecuteStepAsync(channelWriter, step, stepIndex);
 
             _logger.LogInformation($"Successfully executed step {step.Name}.");
-            await _workerClient.SendStepResult(new StepResultEvent
+            await _workerClient.SendStepResultAsync(new StepResultEvent
             {
                 State = States.Successful,
                 StepIndex = stepIndex,

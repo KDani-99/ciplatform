@@ -14,7 +14,7 @@ namespace CIPlatformWorker.Services
 {
     public abstract class JobHandlerService : IJobHandlerService
     {
-        private readonly AgentConfiguration _agentConfiguration;
+        private readonly WorkerConfiguration _workerConfiguration;
         private readonly JobDetails _jobDetails;
 
         protected readonly CancellationToken CancellationToken;
@@ -25,11 +25,11 @@ namespace CIPlatformWorker.Services
 
         protected JobHandlerService(JobDetails jobDetails,
                                     JobConfiguration jobConfiguration,
-                                    IOptions<AgentConfiguration> agentConfiguration,
+                                    IOptions<WorkerConfiguration> agentConfiguration,
                                     CancellationToken cancellationToken)
         {
             _jobDetails = jobDetails ?? throw new ArgumentNullException(nameof(jobDetails));
-            _agentConfiguration =
+            _workerConfiguration =
                 agentConfiguration.Value ?? throw new ArgumentNullException(nameof(agentConfiguration));
             JobConfiguration = jobConfiguration ?? throw new ArgumentNullException(nameof(jobConfiguration));
             CancellationToken = cancellationToken;
@@ -42,7 +42,7 @@ namespace CIPlatformWorker.Services
         public virtual Task PrepareEnvironmentAsync()
         {
             var initialStep = JobConfiguration.Steps.First();
-            initialStep.Cmd = initialStep.Cmd.Replace("[wd]", _agentConfiguration.WorkingDirectory);
+            initialStep.Cmd = initialStep.Cmd.Replace("[wd]", _workerConfiguration.WorkingDirectory);
 
             _isEnvironmentPrepared = true;
 

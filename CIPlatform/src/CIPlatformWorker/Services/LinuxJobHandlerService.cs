@@ -18,7 +18,7 @@ namespace CIPlatformWorker.Services
         // unit of work
         public LinuxJobHandlerService(JobDetails jobDetails,
                                       JobConfiguration jobConfiguration,
-                                      IOptions<AgentConfiguration> agentConfiguration,
+                                      IOptions<WorkerConfiguration> agentConfiguration,
                                       CancellationToken cancellationToken)
             : base(jobDetails, jobConfiguration, agentConfiguration,
                    cancellationToken)

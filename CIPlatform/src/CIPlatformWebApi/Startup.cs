@@ -14,6 +14,7 @@ using CIPlatformWebApi.Services;
 using CIPlatformWebApi.WebSocket.Hubs;
 using CIPlatformWebApi.Extensions;
 using CIPlatformWebApi.Extensions.Services;
+using CIPlatformWebApi.Strategies;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -123,6 +124,7 @@ namespace CIPlatformWebApi
                 .AddScoped<ITokenRepository, TokenRepository>()
                 .AddScoped<IRunRepository, RunRepository>()
                 .AddScoped<IRunService, RunService>()
+                .AddScoped<IResultChannelConnectionHandlerFactory, ResultChannelConnectionHandlerFactory>()
                 .AddScoped<IFileProcessorService<RunConfiguration>, YmlFileProcessorService>();
 
             // Services with transient lifetime

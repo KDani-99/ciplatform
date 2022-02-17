@@ -43,7 +43,7 @@ namespace CIPlatformWorker.Tests
             {
                 ID = "test-docker-container-id"
             };
-            var agentConfiguration = fixture.Create<IOptions<AgentConfiguration>>();
+            var agentConfiguration = fixture.Create<IOptions<WorkerConfiguration>>();
             ;
             var workerClient = new Mock<IWorkerClient>();
             var dockerClient = new Mock<IDockerClient>();
@@ -95,7 +95,7 @@ namespace CIPlatformWorker.Tests
             {
                 ID = "test-docker-container-id"
             };
-            var agentConfiguration = fixture.Create<IOptions<AgentConfiguration>>();
+            var agentConfiguration = fixture.Create<IOptions<WorkerConfiguration>>();
             ;
             var workerClient = new Mock<IWorkerClient>();
             var dockerClient = new Mock<IDockerClient>();
@@ -156,7 +156,7 @@ namespace CIPlatformWorker.Tests
             };
             var jobDetails = new Mock<JobDetails>();
             var cancellationToken = CancellationToken.None;
-            var agentConfiguration = fixture.Create<IOptions<AgentConfiguration>>();
+            var agentConfiguration = fixture.Create<IOptions<WorkerConfiguration>>();
             ;
             var dockerClient = new Mock<IDockerClient>();
             var channelWriter = new Mock<ChannelWriter<string>>();
@@ -199,7 +199,7 @@ namespace CIPlatformWorker.Tests
             {
                 ExitCode = 0
             };
-            var agentConfiguration = fixture.Create<IOptions<AgentConfiguration>>();
+            var agentConfiguration = fixture.Create<IOptions<WorkerConfiguration>>();
             ;
             var workerClient = new Mock<IWorkerClient>();
             var dockerClient = new Mock<IDockerClient>();
@@ -293,7 +293,7 @@ namespace CIPlatformWorker.Tests
             {
                 ExitCode = exitCode
             };
-            var agentConfiguration = fixture.Create<IOptions<AgentConfiguration>>();
+            var agentConfiguration = fixture.Create<IOptions<WorkerConfiguration>>();
             ;
             var workerClient = new Mock<IWorkerClient>();
             var dockerClient = new Mock<IDockerClient>();

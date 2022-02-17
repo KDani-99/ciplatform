@@ -12,6 +12,7 @@ namespace CIPlatformManager.Services
         public Task RemoveWorkerConnectionAsync(string connectionId);
         public Task UpdateWorkerConnectionAsync(WorkerConnectionData workerConnectionData);
         public Task<IEnumerable<string>> GetAvailableWorkerConnectionIdsOfTypeAsync(JobContext jobContext);
+        public Task KeepWorkerConnectionAsync(string connectionId);
         public Task<IEnumerable<WorkerConnectionData>> GetAvailableWorkerConnectionsAsync();
     }
 }

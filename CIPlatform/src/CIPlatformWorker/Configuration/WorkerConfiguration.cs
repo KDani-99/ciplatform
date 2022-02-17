@@ -2,7 +2,7 @@
 
 namespace CIPlatformWorker.Configuration
 {
-    public class AgentConfiguration
+    public class WorkerConfiguration
     {
         public JobContext Context { get; set; }
         public string WorkingDirectory { get; set; }

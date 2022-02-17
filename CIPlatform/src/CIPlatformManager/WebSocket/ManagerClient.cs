@@ -21,6 +21,7 @@ namespace CIPlatformManager.WebSocket
             HubConnection = new HubConnectionBuilder()
                             .WithUrl($"{wsConfiguration.Host}/{wsConfiguration.Hub}",
                                      options => { options.AccessTokenProvider = () => Task.FromResult(""); })
+                            .WithAutomaticReconnect()
                             .Build();
 
             HubConnection.Reconnecting += OnReconnection;

@@ -23,7 +23,7 @@ namespace CIPlatformWorker.Services
         // unit of work
         public DockerJobHandlerService(JobDetails jobDetails,
                                        JobConfiguration jobConfiguration,
-                                       IOptions<AgentConfiguration> agentConfiguration,
+                                       IOptions<WorkerConfiguration> agentConfiguration,
                                        IDockerClient dockerClient,
                                        CancellationToken cancellationToken) :
             base(jobDetails, jobConfiguration, agentConfiguration,

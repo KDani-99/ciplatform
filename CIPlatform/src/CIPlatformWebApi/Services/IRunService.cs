@@ -13,5 +13,8 @@ namespace CIPlatformWebApi.Services
         public Task<Stream> GetStepFileStreamAsync(long runId, long jobId, long stepId, User user);
         public Task QueueRunAsync(long projectId, string instructions, User user);
         public Task DeleteRunAsync(long runId, User user);
+        public Task<bool> IsAllowedRun(long runId, User user);
+        public Task<bool> IsAllowedJob(long jobId, User user);
+        public Task<bool> IsAllowedStep(long stepId, User user);
     }
 }

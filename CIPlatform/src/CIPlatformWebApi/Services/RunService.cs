@@ -105,6 +105,24 @@ namespace CIPlatformWebApi.Services
             await _runRepository.DeleteAsync(runId);
         }
 
+        public async Task<bool> IsAllowedRun(long runId, User user)
+        {
+            var run = await _runRepository.GetAsync(runId) ?? throw new RunDoesNotExistException();
+            return run.Project.Team.Members.Any(member => member.Id == user.Id);
+        }
+
+        public async Task<bool> IsAllowedJob(long jobId, User user)
+        {
+            var result = (await _runRepository.GetAsync(run => run.Jobs.Any(job => job.Id == jobId))).FirstOrDefault() ?? throw new RunDoesNotExistException();
+            return result.Project.Team.Members.Any(member => member.Id == user.Id);
+        }
+
+        public async Task<bool> IsAllowedStep(long stepId, User user)
+        {
+            var result = (await _runRepository.GetAsync(run => run.Jobs.Any(job => job.Steps.Any(step => step.Id == stepId)))).FirstOrDefault() ?? throw new RunDoesNotExistException();
+            return result.Project.Team.Members.Any(member => member.Id == user.Id);
+        }
+
         private static void VerifyMembership(Project project, User user)
         {
             if (project.Team.Members.All(member => member.User.Id != user.Id))

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Threading.Channels;
 using System.Threading.Tasks;
-using CIPlatform.Data.Entities;
-using CIPlatform.Data.Events;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 
@@ -25,10 +23,9 @@ namespace CIPlatformWebApi.WebSocket.Hubs
             while (await stream.WaitToReadAsync())
             while (stream.TryRead(out var item))
             {
-                await _runsHubContext.Clients.Group(RunsHub.AvailableResultsChannels["step"](stepId)).SendAsync("ReceiveLogs", item);
-                //await _runsHubContext.Clients.All.SendAsync("ReceiveLogs", item);
+                await _runsHubContext.Clients.Group(RunsHub.AvailableResultsChannels["step"](stepId))
+                    .SendAsync("ReceiveLogs", item);
                 //await _runsHubContext.Clients.Group(GetGroupName(runId, jobId)).SendAsync("ReceiveLogs", item); // why send? because thats the only way to ""stream"" it to multiple clients
-                // as regular streaming involves only a single client
             }
         }
     }

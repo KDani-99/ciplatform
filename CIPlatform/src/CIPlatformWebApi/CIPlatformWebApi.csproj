@@ -37,8 +37,4 @@
       <ProjectReference Include="..\CIPlatform.Data\CIPlatform.Data.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="WebSocket" />
-    </ItemGroup>
-
 </Project>

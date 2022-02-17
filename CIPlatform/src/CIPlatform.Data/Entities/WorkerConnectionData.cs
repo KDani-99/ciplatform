@@ -1,4 +1,5 @@
-﻿using CIPlatform.Data.Agent;
+﻿using System;
+using CIPlatform.Data.Agent;
 using CIPlatform.Data.Configuration;
 
 namespace CIPlatform.Data.Entities
@@ -8,5 +9,6 @@ namespace CIPlatform.Data.Entities
         public string ConnectionId { get; set; }
         public JobContext JobContext { get; set; }
         public AgentState AgentState { get; set; }
+        public DateTime LastPing { get; set; }
     }
 }

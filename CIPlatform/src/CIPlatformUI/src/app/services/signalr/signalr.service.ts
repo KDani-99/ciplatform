@@ -32,7 +32,9 @@ export class SignalRService {
           return firstValueFrom(ctx.accessToken);
         },
       })
+      .withAutomaticReconnect()
       .build();
+
 
     return this.hubConnection.start();
   }

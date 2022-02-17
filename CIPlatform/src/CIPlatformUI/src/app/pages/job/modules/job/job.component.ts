@@ -98,7 +98,7 @@ export class JobComponent
     this.runService
       .getStepFile(this.runId, this.jobId, stepId)
       .subscribe((content: string) => {
-        this.log = content?.split('\n'); // TODO: remove
+        this.log = content?.split('\n');
         this.toggleWindow(true, this.jobConsole);
       });
     this.signalrService.subscribeToResultsChannel(ResultsChannel.STEP, stepId);

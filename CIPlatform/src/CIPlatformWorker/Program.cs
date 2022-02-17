@@ -1,12 +1,12 @@
 using System;
 using System.Runtime.InteropServices;
 using CIPlatformWorker.Configuration;
-using CIPlatformWorker.Factories;
 using CIPlatformWorker.WebSocket;
 using CIPlatformWorker.WebSocket.Consumers;
 using CIPlatform.Core.Hubs.Consumers;
 using CIPlatform.Data.Configuration;
 using CIPlatform.Data.Events;
+using CIPlatformWorker.Services;
 using Docker.DotNet;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,51 +26,50 @@ namespace CIPlatformWorker
             return Host.CreateDefaultBuilder(args)
                        .ConfigureServices((hostContext, services) =>
                        {
-                           var agentConfiguration = hostContext.Configuration.GetSection("AgentConfiguration")
-                                                               .Get<AgentConfiguration>();
+                           var agentConfiguration = hostContext.Configuration.GetSection("WorkerConfiguration")
+                                                               .Get<WorkerConfiguration>();
                            VerifyContext(agentConfiguration);
 
                            switch (agentConfiguration.Context)
                            {
                                case JobContext.Linux:
-                                   services.AddScoped<IJobHandlerServiceFactory, LinuxJobHandlerServiceFactory>();
+                                   services.AddScoped<IJobHandlerService, LinuxJobHandlerService>();
                                    break;
                                case JobContext.Windows:
-                                   services.AddScoped<IJobHandlerServiceFactory, WindowsJobHandlerServiceFactory>();
+                                   services.AddScoped<IJobHandlerService, WindowsJobHandlerService>();
                                    break;
                                case JobContext.Docker:
-                                   services.AddScoped<IJobHandlerServiceFactory, DockerJobHandlerServiceFactory>();
+                                   services.AddScoped<IJobHandlerService, DockerJobHandlerService>();
                                    break;
                                default:
                                    throw new ArgumentOutOfRangeException(
                                        nameof(agentConfiguration.Context));
                            }
 
-                           services.Configure<WebSocketConfiguration>(
-                               hostContext.Configuration.GetSection("WebSocketConfiguration"));
-                           services.Configure<AgentConfiguration>(
-                               hostContext.Configuration.GetSection("AgentConfiguration"));
+                           services
+                               .Configure<WebSocketConfiguration>(
+                               hostContext.Configuration.GetSection("WebSocketConfiguration"))
+                               .Configure<WorkerConfiguration>(
+                               hostContext.Configuration.GetSection("WorkerConfiguration"));
+                           
                            services.AddSingleton<IWorkerClient, WorkerClient>();
                            services.AddScoped<IDockerClient>(_ => new DockerClientConfiguration().CreateClient());
                            services.AddTransient<IConsumer<QueueJobCommand>, QueueJobCommandConsumer>();
+
+                           services.AddHostedService<KeepAliveService>();
                            services.AddHostedService<Worker>();
-                           // transient services = 1 unit of work, each invocation returns a new service => like a factory
-                           /*  services.AddTransient<IConsumer<QueueDockerJobEvent>, QueueDockerJobEventConsumer>();
-                             services.AddTransient<IConsumer<QueueLinuxJobEvent>, QueueLinuxJobEventConsumer>();
-                             services.AddTransient<IConsumer<QueueWindowsJobEvent>, QueueWindowsJobEventConsumer>();
-                             services.AddRabbitMq(hostContext.Configuration);*/
                        });
         }
 
-        private static void VerifyContext(AgentConfiguration agentConfiguration)
+        private static void VerifyContext(WorkerConfiguration workerConfiguration)
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && agentConfiguration.Context != JobContext.Linux &&
-                agentConfiguration.Context != JobContext.Docker)
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && workerConfiguration.Context != JobContext.Linux &&
+                workerConfiguration.Context != JobContext.Docker)
                 throw new InvalidOperationException(
                     "The agent context may only be either 'Docker' or 'Linux' on this machine");
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) &&
-                agentConfiguration.Context != JobContext.Windows && agentConfiguration.Context != JobContext.Docker)
+                workerConfiguration.Context != JobContext.Windows && workerConfiguration.Context != JobContext.Docker)
                 throw new InvalidOperationException(
                     "The agent context may only be either 'Docker' or 'Windows' on this machine");
         }

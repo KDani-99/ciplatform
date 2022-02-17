@@ -84,6 +84,7 @@ namespace CIPlatformManager
                 .AddScoped<IWorkerConnectionService, WorkerConnectionService>()
                 .AddScoped<IStepService<StepResultEvent>, StepService>();
 
+            services.AddHostedService<WorkerManagerService>();
             services.AddHostedService<Manager>();
         }
 
@@ -106,7 +107,7 @@ namespace CIPlatformManager
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapHub<AgentHub>("/agent");
+                endpoints.MapHub<WorkerHub>("/worker");
                 endpoints.MapHub<WebApiHub>("/webapi");
             });
         }

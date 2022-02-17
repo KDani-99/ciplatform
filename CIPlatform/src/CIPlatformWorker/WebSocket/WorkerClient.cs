@@ -2,7 +2,6 @@
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using CIPlatformWorker.Configuration;
-using CIPlatform.Core.Hubs.Common;
 using CIPlatform.Core.Hubs.Consumers;
 using CIPlatform.Data.Agent;
 using CIPlatform.Data.Configuration;
@@ -17,20 +16,20 @@ namespace CIPlatformWorker.WebSocket
 {
     public class WorkerClient : IWorkerClient, IDisposable
     {
-        private readonly AgentConfiguration _agentConfiguration;
+        private readonly WorkerConfiguration _workerConfiguration;
         private readonly ILogger<WorkerClient> _logger;
 
         private readonly IServiceProvider _serviceProvider;
 
         public WorkerClient(IServiceProvider serviceProvider,
                             IOptions<WebSocketConfiguration> webSocketConfiguration,
-                            IOptions<AgentConfiguration> agentConfiguration,
+                            IOptions<WorkerConfiguration> agentConfiguration,
                             ILogger<WorkerClient> logger)
         {
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-            _agentConfiguration =
+            _workerConfiguration =
                 agentConfiguration.Value ?? throw new ArgumentNullException(nameof(agentConfiguration));
             var wsConfiguration = webSocketConfiguration.Value ??
                 throw new ArgumentNullException(nameof(webSocketConfiguration));
@@ -40,8 +39,9 @@ namespace CIPlatformWorker.WebSocket
                                      options =>
                                      {
                                          options.AccessTokenProvider = () => Task.FromResult(string.Empty);
-                                         options.Headers.Add("W-JobContext", _agentConfiguration.Context.ToString());
+                                         options.Headers.Add("W-JobContext", _workerConfiguration.Context.ToString());
                                      })
+                            .WithAutomaticReconnect()
                             .Build();
 
             HubConnection.Reconnecting += OnReconnection;
@@ -72,19 +72,24 @@ namespace CIPlatformWorker.WebSocket
         public Task StreamLogAsync(long runId, long jobId, long stepIndex, ChannelReader<string> stream)
         {
             return HubConnection.SendAsync("UploadLogStream", stream, runId, jobId,
-                                           stepIndex); // TODO: CommonHubMethods const in Attribute
+                                           stepIndex);
         }
 
-        public Task SendStepResult(StepResultEvent stepResultEvent)
+        public Task SendStepResultAsync(StepResultEvent stepResultEvent)
         {
-            return HubConnection.SendAsync(CommonAgentManagerHubMethods.StepResultEvent, stepResultEvent);
+            return HubConnection.SendAsync("StepResultEvent", stepResultEvent);
+        }
+
+        public Task PingAsync()
+        {
+            return HubConnection.SendAsync("Ping");
         }
 
         private void RegisterMethods()
         {
             _logger.LogInformation("Registering worker events...");
 
-            var methodName = _agentConfiguration.Context switch
+            var methodName = _workerConfiguration.Context switch
             {
                 JobContext.Docker => CommonHubMethods.QueueDockerJob,
                 JobContext.Linux => CommonHubMethods.QueueLinuxJob,
@@ -112,7 +117,7 @@ namespace CIPlatformWorker.WebSocket
         private Task OnReconnected(string _)
         {
             _logger.LogError("Reconnected to remote host.");
-            return Task.CompletedTask;
+            return ConfigureAsync();
         }
     }
 }

@@ -134,5 +134,11 @@ namespace CIPlatformWebApi.Services
 
             await _projectRepository.DeleteAsync(id);
         }
+
+        public async Task<bool> IsAllowedAsync(long id, User user)
+        {
+            var project = await _projectRepository.GetAsync(id) ?? throw new ProjectDoesNotExistException();
+            return project.Team.Members.Any(teamMember => teamMember.User.Id == user.Id);
+        }
     }
 }

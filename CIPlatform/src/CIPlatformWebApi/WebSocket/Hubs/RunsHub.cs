@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using CIPlatform.Data.Entities;
 using CIPlatformWebApi.Exceptions;
+using CIPlatformWebApi.Strategies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
@@ -20,23 +21,28 @@ namespace CIPlatformWebApi.WebSocket.Hubs
             { "step", entityId => $"Step:{entityId}" }
         };
         private readonly ILogger<RunsHub> _logger;
+        private readonly IResultChannelConnectionHandlerFactory _resultChannelConnectionHandlerFactory;
 
-        public RunsHub(ILogger<RunsHub> logger)
+        public RunsHub(IResultChannelConnectionHandlerFactory resultChannelConnectionHandlerFactory, ILogger<RunsHub> logger)
         {
+            _resultChannelConnectionHandlerFactory = resultChannelConnectionHandlerFactory ??
+                throw new ArgumentNullException(nameof(resultChannelConnectionHandlerFactory));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
         
         [HubMethodName("SubscribeToResultsChannel")]
-        public Task SubscribeToResultsChannelAsync(string resultsChannel, long entityId)
+        public async Task SubscribeToResultsChannelAsync(string resultsChannel, long entityId)
         {
             var user = Context.GetHttpContext().Items["user"] as User;
-            // TODO: 
-            if (!AvailableResultsChannels.ContainsKey(resultsChannel))
+
+            var handler = _resultChannelConnectionHandlerFactory.Create(resultsChannel);
+
+            if (!await handler.VerifyAsync(entityId, user))
             {
-                throw new ChannelDoesNotExistException(resultsChannel);
+                throw new UnauthorizedAccessWebException("You are not allowed to enter to this channel.");
             }
 
-            return Groups.AddToGroupAsync(Context.ConnectionId, AvailableResultsChannels[resultsChannel](entityId));
+            await Groups.AddToGroupAsync(Context.ConnectionId, AvailableResultsChannels[resultsChannel](entityId));
         }
         
         [HubMethodName("UnSubscribeFromResultsChannel")]

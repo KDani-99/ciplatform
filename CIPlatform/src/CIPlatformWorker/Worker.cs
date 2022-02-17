@@ -1,4 +1,5 @@
 using System;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using CIPlatformWorker.WebSocket;
@@ -25,7 +26,7 @@ namespace CIPlatformWorker
             try
             {
                 _logger.LogInformation("Starting worker...");
-                await _workerClient.HubConnection.StartAsync(stoppingToken);
+                await ConnectWithRetryAsync(5, 15, stoppingToken);
                 _logger.LogInformation("Connected to remote host.");
                 await _workerClient.ConfigureAsync();
             }
@@ -35,6 +36,32 @@ namespace CIPlatformWorker
                 Environment.ExitCode = 1;
                 await _host.StopAsync();
             }
+        }
+
+        private async Task ConnectWithRetryAsync(int retry, int delay, CancellationToken stoppingToken = default)
+        {
+            var retryCount = 0;
+
+            Exception exception = null;
+            
+            while (retryCount < retry)
+            {
+                try
+                {
+                    await _workerClient.HubConnection.StartAsync(stoppingToken);
+                    return;
+                }
+                catch (HttpRequestException e)
+                {
+                    _logger.LogError($"Failed to connect to remote host... (Attempt: {retryCount + 1}/{retry} | Delay: {delay} second(s))");
+                    exception = e;
+                }
+
+                await Task.Delay(TimeSpan.FromSeconds(delay), stoppingToken);
+                retryCount++;
+            }
+
+            throw exception;
         }
     }
 }

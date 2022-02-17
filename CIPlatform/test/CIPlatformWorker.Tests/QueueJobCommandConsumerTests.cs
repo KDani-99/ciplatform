@@ -6,7 +6,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using CIPlatformWorker.Entities;
-using CIPlatformWorker.Factories;
 using CIPlatformWorker.Services;
 using CIPlatformWorker.WebSocket;
 using CIPlatformWorker.WebSocket.Consumers;
@@ -51,31 +50,25 @@ namespace CIPlatformWorker.Tests
             }).ToBase64String();
             var queueJobCommand = new QueueJobCommand
             {
-                Token = token
+                Token = token,
+                JobConfiguration = new JobConfiguration
+                {
+                    Context = JobContext.Docker
+                }
             };
-            var jobHandlerServiceFactory = new Mock<IJobHandlerServiceFactory>();
             var logger = new Mock<ILogger<QueueJobCommandConsumer>>();
             var jobHandlerService = new Mock<IJobHandlerService>();
             var workerClient = new Mock<IWorkerClient>();
+            
 
-            jobHandlerServiceFactory
-                .Setup(x => x.Create(It.IsAny<JobDetails>(), It.IsAny<JobConfiguration>(),
-                                     It.IsAny<CancellationToken>()))
-                .Returns(jobHandlerService.Object);
-
-            var consumer = new QueueJobCommandConsumer(jobHandlerServiceFactory.Object,
-                                                       logger.Object, workerClient.Object);
+            var consumer = new QueueJobCommandConsumer(logger.Object, workerClient.Object, jobHandlerService.Object);
 
             // Act
             await consumer.ConsumeAsync(queueJobCommand);
 
             // Assert
-            jobHandlerServiceFactory.Verify(x => x.Create(It.IsAny<JobDetails>(), It.IsAny<JobConfiguration>(),
-                                                          It.IsAny<CancellationToken>()), Times.Exactly(1));
             jobHandlerService
                 .Verify(x => x.PrepareEnvironmentAsync(), Times.Exactly(1));
-            jobHandlerService
-                .Verify(x => x.DisposeAsync(), Times.Exactly(1));
         }
     }
 }

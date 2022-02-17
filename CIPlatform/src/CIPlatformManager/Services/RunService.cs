@@ -4,7 +4,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
-using CIPlatform.Core.Hubs.Clients;
 using CIPlatform.Data.Agent;
 using CIPlatform.Data.Commands;
 using CIPlatform.Data.Configuration;
@@ -16,6 +15,7 @@ using CIPlatformManager.Configuration;
 using CIPlatformManager.Exceptions;
 using CIPlatformManager.WebSocket.Hubs;
 using CIPlatformManager.WebSocket;
+using IPlatformManager.WebSocket;
 using MassTransit;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.SignalR.Client;
@@ -29,7 +29,7 @@ namespace CIPlatformManager.Services
 
         // Single unit of work, run and dispose
         private readonly IBusControl _busControl;
-        private readonly IHubContext<AgentHub, IAgentClient> _hubContext;
+        private readonly IHubContext<WorkerHub, IWorkerClient> _hubContext;
         private readonly JsonSerializerOptions _jsonSerializerOptions;
         private readonly IProjectRepository _projectRepository;
         private readonly IRunRepository _runRepository;
@@ -41,7 +41,7 @@ namespace CIPlatformManager.Services
                           IRunRepository runRepository,
                           IProjectRepository projectRepository,
                           IOptions<AgentManagerConfiguration> agentManagerConfiguration,
-                          IHubContext<AgentHub, IAgentClient> hubContext,
+                          IHubContext<WorkerHub, IWorkerClient> hubContext,
                           IWorkerConnectionService workerConnectionService,
                           ITokenService<JwtSecurityToken> tokenService)
         {

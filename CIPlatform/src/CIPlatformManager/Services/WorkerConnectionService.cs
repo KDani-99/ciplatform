@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 using CIPlatform.Data.Configuration;
 using CIPlatform.Data.Entities;
 using CIPlatformManager.Repositories;
+using CIPlatformManager.WebSocket.Hubs;
+using IPlatformManager.WebSocket;
+using Microsoft.AspNetCore.SignalR;
 
 namespace CIPlatformManager.Services
 {
@@ -41,9 +44,15 @@ namespace CIPlatformManager.Services
         public async Task RemoveWorkerConnectionAsync(string connectionId)
         {
             var jsonString = await _workerConnectionRepository.GetAsync(connectionId);
+
+            if (jsonString is null)
+            {
+                return;
+            }
+            
             var workerConnectionData =
                 JsonSerializer.Deserialize<WorkerConnectionData>(jsonString, _jsonSerializerOptions);
-            await _workerConnectionRepository.RemoveFromPoolAsync(workerConnectionData.JobContext, connectionId);
+            await _workerConnectionRepository.RemoveFromPoolAsync(workerConnectionData!.JobContext, connectionId);
             await _workerConnectionRepository.RemoveAsync(connectionId);
         }
 
@@ -54,7 +63,7 @@ namespace CIPlatformManager.Services
                 JsonSerializer.Deserialize<WorkerConnectionData>(
                     jsonString, _jsonSerializerOptions);
 
-            workerConnectionData.JobContext = stored.JobContext;
+            workerConnectionData.JobContext = stored!.JobContext;
 
             var serialized = JsonSerializer.Serialize(workerConnectionData, _jsonSerializerOptions);
             await _workerConnectionRepository.UpdateAsync(workerConnectionData.ConnectionId, serialized);
@@ -63,6 +72,19 @@ namespace CIPlatformManager.Services
         public Task<IEnumerable<string>> GetAvailableWorkerConnectionIdsOfTypeAsync(JobContext jobContext)
         {
             return _workerConnectionRepository.GetAllAsync(jobContext);
+        }
+
+        public async Task KeepWorkerConnectionAsync(string connectionId)
+        {
+            var jsonString = await _workerConnectionRepository.GetAsync(connectionId);
+            var stored =
+                JsonSerializer.Deserialize<WorkerConnectionData>(
+                    jsonString, _jsonSerializerOptions);
+            
+            stored!.LastPing = DateTime.Now;
+            
+            var serialized = JsonSerializer.Serialize(stored, _jsonSerializerOptions);
+            await _workerConnectionRepository.UpdateAsync(connectionId, serialized);
         }
 
         public Task<IEnumerable<WorkerConnectionData>> GetAvailableWorkerConnectionsAsync()

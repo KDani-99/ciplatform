@@ -12,5 +12,6 @@ namespace CIPlatformWebApi.Services
         public Task UpdateProjectAsync(long id, CreateProjectDto createProjectDto, User user);
         public Task<ProjectDto> CreateProjectAsync(CreateProjectDto createProjectDto, User user);
         public Task DeleteProjectAsync(long id, User user);
+        public Task<bool> IsAllowedAsync(long id, User user);
     }
 }

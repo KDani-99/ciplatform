@@ -17,7 +17,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "CodeManagerWebApi": {
+    "CIPlatformWebApi": {
       "commandName": "Project",
       "dotnetRunMessages": "true",
       "launchBrowser": false,

@@ -3,7 +3,7 @@ using CIPlatform.Data.Events;
 
 namespace CIPlatform.Core.Hubs.Clients
 {
-    public interface IAgentClient
+    public interface IWorkerClient
     {
         public Task QueueDockerJob(QueueJobCommand queueDockerJobCommand);
         public Task QueueWindowsJob(QueueJobCommand queueWindowsJobCommand);

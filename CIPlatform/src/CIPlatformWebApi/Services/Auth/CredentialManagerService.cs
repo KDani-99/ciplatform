@@ -1,6 +1,6 @@
 ﻿using static BCrypt.Net.BCrypt;
 
-namespace CIPlatformWebApi.Services
+namespace CIPlatformWebApi.Services.Auth
 {
     public class CredentialManagerService : ICredentialManagerService
     {

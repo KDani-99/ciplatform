@@ -1,7 +1,7 @@
 ﻿using System;
 using CIPlatform.Data.Entities;
 
-namespace CIPlatformWebApi.DataTransfer
+namespace CIPlatformWebApi.DataTransfer.Team
 {
     public class TeamMemberDto
     {

@@ -2,12 +2,12 @@
 using System.Threading.Tasks;
 using CIPlatform.Data.Entities;
 
-namespace CIPlatformWebApi.Services
+namespace CIPlatformWebApi.Services.Auth
 {
     public interface ITokenService<T>
     {
-        public Task<T> CreateAccessTokenAsync(User user);
-        public Task<T> CreateRefreshTokenAsync(User user);
+        public Task<T> CreateAccessTokenAsync(UserEntity user);
+        public Task<T> CreateRefreshTokenAsync(UserEntity user);
         public Task InvalidateAccessTokenAsync(string username);
         public Task InvalidRefreshTokenAsync(string username);
         public Task<ClaimsPrincipal> VerifyRefreshTokenAsync(string token);

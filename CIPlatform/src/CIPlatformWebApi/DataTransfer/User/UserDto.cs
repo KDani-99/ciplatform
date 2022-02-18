@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CIPlatformWebApi.DataTransfer
+namespace CIPlatformWebApi.DataTransfer.User
 {
     public class UserDto
     {

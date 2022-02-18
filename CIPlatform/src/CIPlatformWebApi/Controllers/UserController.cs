@@ -3,7 +3,9 @@ using System.Net;
 using System.Threading.Tasks;
 using CIPlatform.Data.Entities;
 using CIPlatformWebApi.DataTransfer;
+using CIPlatformWebApi.DataTransfer.User;
 using CIPlatformWebApi.Services;
+using CIPlatformWebApi.Services.User;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -29,7 +31,7 @@ namespace CIPlatformWebApi.Controllers
         [Route("{id:long}")]
         public async Task<IActionResult> GetUserByIdAsync([FromRoute] long id)
         {
-            var user = HttpContext.Items["user"] as User;
+            var user = HttpContext.Items["user"] as UserEntity;
 
             var userDto = await _userService.GetUserAsync(id, user);
 
@@ -40,7 +42,7 @@ namespace CIPlatformWebApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetUserAsync()
         {
-            var user = HttpContext.Items["user"] as User;
+            var user = HttpContext.Items["user"] as UserEntity;
             var userDto = await _userService.GetUserAsync(user.Id, user);
 
             return Ok(userDto);
@@ -51,7 +53,7 @@ namespace CIPlatformWebApi.Controllers
         [Route("{id:long}")]
         public async Task<IActionResult> UpdateUserAsync([FromRoute] long id, [FromBody] UpdateUserDto updateUserDto)
         {
-            var user = HttpContext.Items["user"] as User;
+            var user = HttpContext.Items["user"] as UserEntity;
             await _userService.UpdateUserAsync(id, updateUserDto, user);
 
             return NoContent();
@@ -62,7 +64,7 @@ namespace CIPlatformWebApi.Controllers
         [Route("{id:long}")]
         public async Task<IActionResult> DeleteUserAsync([FromRoute] long id)
         {
-            var user = HttpContext.Items["user"] as User;
+            var user = HttpContext.Items["user"] as UserEntity;
             await _userService.DeleteUserAsync(id, user);
 
             return NoContent();
@@ -73,7 +75,7 @@ namespace CIPlatformWebApi.Controllers
         [Route("/api/users")]
         public async Task<IActionResult> GetUsersAsync()
         {
-            var user = HttpContext.Items["user"] as User;
+            var user = HttpContext.Items["user"] as UserEntity;
             var usersDto = await _userService.GetUsersAsync(user);
 
             return Ok(usersDto);

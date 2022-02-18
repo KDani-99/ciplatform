@@ -22,8 +22,8 @@ namespace CIPlatformManager.Consumers
         {
             try
             {
-                var runId = await _runService.QueueAsync(context.Message);
-                _logger.LogInformation($"Queued run with id `{runId}`. (Project id: `{context.Message.ProjectId}`)");
+                await _runService.QueueAsync(context.Message);
+                _logger.LogInformation($"Queued run with id `{context.Message.RunId}`.");
             }
             catch (Exception exception)
             {

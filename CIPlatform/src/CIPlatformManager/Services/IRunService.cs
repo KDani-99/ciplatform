@@ -5,6 +5,6 @@ namespace CIPlatformManager.Services
 {
     public interface IRunService
     {
-        public Task<long> QueueAsync(QueueRunCommand cmd);
+        public Task QueueAsync(QueueRunCommand cmd);
     }
 }

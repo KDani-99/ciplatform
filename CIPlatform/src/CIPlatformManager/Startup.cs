@@ -62,7 +62,8 @@ namespace CIPlatformManager
 
             // Services with singleton lifetime
             services
-                .AddSingleton<IConnectionCache, RedisConnectionCache>()
+                .AddSingleton<IRedisConnectionCache, RedisCache>()
+                .AddSingleton<IRedisJobQueueCache, RedisJobQueueCache>()
                 .AddSingleton<IManagerClient, ManagerClient>()
                 .AddSingleton(new JsonSerializerOptions
                 {
@@ -82,9 +83,13 @@ namespace CIPlatformManager
                 .AddScoped<IRunRepository, RunRepository>()
                 .AddScoped<ILogStreamService, LogStreamService>()
                 .AddScoped<IWorkerConnectionService, WorkerConnectionService>()
-                .AddScoped<IStepService<StepResultEvent>, StepService>();
+                .AddScoped<IStepService<StepResultEvent>, StepService>()
+                .AddScoped<IJobService, JobService>()
+                .AddScoped<IJobQueueService, JobQueueService>()
+                .AddScoped<IJobQueueRepository, JobQueueRepository>();
 
-            services.AddHostedService<WorkerManagerService>();
+            services.AddHostedService<QueueService>();
+            services.AddHostedService<WorkerCleanupService>();
             services.AddHostedService<Manager>();
         }
 

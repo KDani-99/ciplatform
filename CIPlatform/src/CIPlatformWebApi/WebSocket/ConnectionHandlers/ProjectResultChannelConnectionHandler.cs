@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using CIPlatform.Data.Entities;
 using CIPlatform.Data.Repositories;
 using CIPlatformWebApi.Services;
+using CIPlatformWebApi.Services.Project;
 
 namespace CIPlatformWebApi.Strategies
 {
@@ -15,7 +16,7 @@ namespace CIPlatformWebApi.Strategies
             _projectService = projectService ?? throw new ArgumentNullException(nameof(projectService));
         }
         
-        public Task<bool> VerifyAsync(long entityId, User user)
+        public Task<bool> VerifyAsync(long entityId, UserEntity user)
         {
             return _projectService.IsAllowedAsync(entityId, user);
         }

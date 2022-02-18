@@ -4,7 +4,7 @@ using CIPlatform.Data.Configuration;
 
 namespace CIPlatform.Data.Entities
 {
-    public class Run : Entity
+    public class RunEntity : Entity
     {
         public string Repository { get; set; }
         public List<JobEntity> Jobs { get; set; }

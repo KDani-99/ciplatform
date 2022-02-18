@@ -1,12 +1,13 @@
 ﻿using System.Linq;
 using CIPlatform.Data.Entities;
 using CIPlatformWebApi.DataTransfer;
+using CIPlatformWebApi.DataTransfer.Project;
 
 namespace CIPlatformWebApi.Extensions.Entities
 {
     public static class ProjectExtensions
     {
-        public static ProjectDto ToDto(this Project project)
+        public static ProjectDto ToDto(this ProjectEntity project)
         {
             return new()
             {
@@ -20,7 +21,7 @@ namespace CIPlatformWebApi.Extensions.Entities
             };
         }
 
-        public static ProjectDataDto ToDataDto(this Project project, Permissions memberPermission)
+        public static ProjectDataDto ToDataDto(this ProjectEntity project, Permissions memberPermission)
         {
             return new()
             {

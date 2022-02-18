@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
+using CIPlatformWebApi.DataTransfer.Step;
 
-namespace CIPlatformWebApi.DataTransfer
+namespace CIPlatformWebApi.DataTransfer.Job
 {
     public class JobDataDto
     {

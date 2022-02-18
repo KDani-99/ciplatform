@@ -12,6 +12,7 @@ using CIPlatform.Data.Configuration;
 using CIPlatform.Data.Events;
 using CIPlatform.Data.Extensions;
 using CIPlatform.Data.JsonWebTokens;
+using CIPlatformWorker.Factories;
 using Microsoft.Extensions.Logging;
 
 namespace CIPlatformWorker.WebSocket.Consumers
@@ -20,15 +21,14 @@ namespace CIPlatformWorker.WebSocket.Consumers
     {
         private readonly ILogger<QueueJobCommandConsumer> _logger;
         private readonly IWorkerClient _workerClient;
-        private readonly IJobHandlerService _jobHandlerService;
+        private readonly IJobHandlerServiceFactory _jobHandlerServiceFactory;
         private int _stepIndex = 0;
 
-        public QueueJobCommandConsumer(ILogger<QueueJobCommandConsumer> logger,
-                                       IWorkerClient workerClient,
-                                       IJobHandlerService jobHandlerService)
+        public QueueJobCommandConsumer(IJobHandlerServiceFactory jobHandlerServiceFactory, ILogger<QueueJobCommandConsumer> logger,
+                                       IWorkerClient workerClient)
         {
-            _jobHandlerService = jobHandlerService ??
-                throw new ArgumentNullException(nameof(jobHandlerService));
+            _jobHandlerServiceFactory = jobHandlerServiceFactory ??
+                throw new ArgumentNullException(nameof(jobHandlerServiceFactory));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _workerClient = workerClient ?? throw new ArgumentNullException(nameof(workerClient));
         }
@@ -77,6 +77,7 @@ namespace CIPlatformWorker.WebSocket.Consumers
             finally
             {
                 _logger.LogInformation($"Finished job: {jobDetails.JobId} (Run: {jobDetails.RunId}).");
+                await _workerClient.FinishJobAsync();
             }
         }
 
@@ -86,7 +87,8 @@ namespace CIPlatformWorker.WebSocket.Consumers
         {
             var beforeExecutionDateTime = DateTime.Now;
 
-            await _jobHandlerService.PrepareEnvironmentAsync();
+            await using var jobHandlerService = _jobHandlerServiceFactory.Create(jobConfiguration, cancellationToken);
+            await jobHandlerService.PrepareEnvironmentAsync();
 
             for (var i = 0; i < jobConfiguration.Steps.Count; i++)
             {
@@ -98,7 +100,7 @@ namespace CIPlatformWorker.WebSocket.Consumers
                     _ = _workerClient.StreamLogAsync(jobDetails.RunId, jobDetails.JobId, i,
                                                      channel.Reader); // do not await!
 
-                    await ProcessStepAsync(channel, i, _jobHandlerService, jobConfiguration.Steps[i], jobDetails);
+                    await ProcessStepAsync(channel, i, jobHandlerService, jobConfiguration.Steps[i], jobDetails);
                 }
                 finally // try-finally to make sure the channel write gets completed
                 {

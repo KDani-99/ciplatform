@@ -33,7 +33,7 @@ namespace CIPlatformWebApi.WebSocket.Hubs
         [HubMethodName("SubscribeToResultsChannel")]
         public async Task SubscribeToResultsChannelAsync(string resultsChannel, long entityId)
         {
-            var user = Context.GetHttpContext().Items["user"] as User;
+            var user = Context.GetHttpContext().Items["user"] as UserEntity;
 
             var handler = _resultChannelConnectionHandlerFactory.Create(resultsChannel);
 

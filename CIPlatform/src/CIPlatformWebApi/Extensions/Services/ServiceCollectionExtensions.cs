@@ -18,7 +18,6 @@ namespace CIPlatformWebApi.Extensions.Services
                 busConfigurator.AddConsumer<ProcessedStepResultEventConsumer>();
                 busConfigurator.AddConsumer<ProcessedJobResultEventConsumer>();
                 busConfigurator.AddConsumer<ProcessedRunResultEventConsumer>();
-                busConfigurator.AddConsumer<RunQueuedEventConsumer>();
 
                 busConfigurator.SetKebabCaseEndpointNameFormatter();
 
@@ -47,12 +46,6 @@ namespace CIPlatformWebApi.Extensions.Services
                         {
                             opts.AutoDelete = true;
                             opts.ConfigureConsumer<ProcessedRunResultEventConsumer>(context);
-                        });
-                    cfg.ReceiveEndpoint(massTransitConfiguration.Queues["RunQueuedEventQueue"],
-                        opts =>
-                        {
-                            opts.AutoDelete = true;
-                            opts.ConfigureConsumer<RunQueuedEventConsumer>(context);
                         });
                 });
 

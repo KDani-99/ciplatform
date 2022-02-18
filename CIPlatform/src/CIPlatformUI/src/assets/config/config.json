@@ -62,7 +62,7 @@
         "authRequired": false
       },
       "uploadRunInstructions": {
-        "url": "api/runs/{0}/start",
+        "url": "api/runs/{0}/create",
         "authRequired": true
       },
       "runs": {

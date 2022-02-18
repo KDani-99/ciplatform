@@ -12,7 +12,7 @@ using CIPlatformWebApi.Repositories;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
-namespace CIPlatformWebApi.Services
+namespace CIPlatformWebApi.Services.Auth
 {
     public class TokenService : ITokenService<JwtSecurityToken>
     {
@@ -25,7 +25,7 @@ namespace CIPlatformWebApi.Services
             _jwtConfiguration = configuration?.Value ?? throw new ArgumentNullException(nameof(configuration));
         }
 
-        public async Task<JwtSecurityToken> CreateAccessTokenAsync(User user)
+        public async Task<JwtSecurityToken> CreateAccessTokenAsync(UserEntity user)
         {
             var jti = Guid.NewGuid().ToString();
             var claims = new[]
@@ -41,7 +41,7 @@ namespace CIPlatformWebApi.Services
                                  SecurityAlgorithms.HmacSha256Signature);
         }
 
-        public async Task<JwtSecurityToken> CreateRefreshTokenAsync(User user)
+        public async Task<JwtSecurityToken> CreateRefreshTokenAsync(UserEntity user)
         {
             var jti = Guid.NewGuid().ToString();
             var claims = new[]

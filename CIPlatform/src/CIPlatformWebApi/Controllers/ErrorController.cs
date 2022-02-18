@@ -38,7 +38,7 @@ namespace CIPlatformWebApi.Controllers
             {
                 var response = new
                     { Error = "An unexpected error has occured.", Status = (int) HttpStatusCode.InternalServerError };
-                _logger.LogTrace(exception, $"An unexpected error has occured @ {DateTime.Now}.");
+                _logger.LogTrace(exception, $"An unexpected error has occrred @ {DateTime.Now}.");
                 return StatusCode((int) HttpStatusCode.InternalServerError, response);
             }
         }

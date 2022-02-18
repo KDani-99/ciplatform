@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using CIPlatform.Data.Entities;
+using CIPlatformWebApi.DataTransfer.Project;
 
-namespace CIPlatformWebApi.DataTransfer
+namespace CIPlatformWebApi.DataTransfer.Team
 {
     public class TeamDataDto
     {

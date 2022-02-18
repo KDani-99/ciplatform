@@ -43,9 +43,9 @@ namespace CIPlatformManager.WebSocket.Hubs
                 if (!Enum.TryParse(jobContextString, out JobContext jobContext))
                     throw new ArgumentException($"Invalid value provided for '{HeaderKey}' header.");
 
-                await _workerConnectionService.AddWorkerConnectionOfTypeAsync(new WorkerConnectionData
+                await _workerConnectionService.AddWorkerConnectionOfTypeAsync(new WorkerConnectionDataEntity
                 {
-                    AgentState = AgentState.Offline, // must be configured first
+                    WorkerState = WorkerState.Unavailable, // must be configured first
                     ConnectionId = Context.ConnectionId,
                     JobContext = jobContext,
                     LastPing = DateTime.Now
@@ -81,14 +81,27 @@ namespace CIPlatformManager.WebSocket.Hubs
             }
         }
 
-        [HubMethodName("Configure")]
-        public async Task ConfigureWorkerAsync(AgentState agentState)
+        [HubMethodName("FinishJob")]
+        public async Task FinishJobAsync()
         {
             try
             {
-                await _workerConnectionService.UpdateWorkerConnectionAsync(new WorkerConnectionData
+                await _workerConnectionService.MarkWorkerConnectionAsAvailableAsync(Context.ConnectionId);
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError($"An unexpected error has occured. Message: {exception.Message}.");
+            }
+        }
+
+        [HubMethodName("Configure")]
+        public async Task ConfigureWorkerAsync(WorkerState workerState)
+        {
+            try
+            {
+                await _workerConnectionService.UpdateWorkerConnectionAsync(new WorkerConnectionDataEntity
                 {
-                    AgentState = agentState,
+                    WorkerState = workerState,
                     LastPing = DateTime.Now,
                     ConnectionId = Context.ConnectionId // jobcontext wont be updated
                 });
@@ -101,13 +114,13 @@ namespace CIPlatformManager.WebSocket.Hubs
         }
 
         [HubMethodName("UpdateAgentState")]
-        public Task UpdateAgentStateAsync(AgentState agentState)
+        public Task UpdateAgentStateAsync(WorkerState workerState)
         {
-            return agentState switch
+            return workerState switch
             {
-                AgentState.Available => Groups.AddToGroupAsync(Context.ConnectionId, nameof(AgentState.Available)),
-                AgentState.Working => Groups.RemoveFromGroupAsync(Context.ConnectionId, nameof(AgentState.Working)),
-                _ => throw new ArgumentOutOfRangeException(nameof(agentState))
+                WorkerState.Available => Groups.AddToGroupAsync(Context.ConnectionId, nameof(WorkerState.Available)),
+                WorkerState.Working => Groups.RemoveFromGroupAsync(Context.ConnectionId, nameof(WorkerState.Working)),
+                _ => throw new ArgumentOutOfRangeException(nameof(workerState))
             };
         }
 
@@ -133,7 +146,7 @@ namespace CIPlatformManager.WebSocket.Hubs
             }
             catch (Exception exception)
             {
-                _logger.LogError($"An unexpected error has occured. Message: {exception.Message}.");
+                _logger.LogError($"An unexpected error has occurred. Message: {exception.Message}.");
             }
 
             return Task.CompletedTask;

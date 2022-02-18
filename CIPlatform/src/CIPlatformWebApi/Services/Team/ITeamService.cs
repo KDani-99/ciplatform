@@ -4,18 +4,18 @@ using CIPlatform.Data.Entities;
 using CIPlatformWebApi.DataTransfer;
 using CIPlatformWebApi.DataTransfer.Team;
 
-namespace CIPlatformWebApi.Services
+namespace CIPlatformWebApi.Services.Team
 {
     public interface ITeamService
     {
-        public Task<IEnumerable<TeamDto>> GetTeamsAsync(User user);
-        public Task<TeamDataDto> GetTeamAsync(long id, User user);
-        public Task<TeamDto> CreateTeamAsync(TeamDto teamDto, User user);
-        public Task UpdateTeamAsync(TeamDto teamDto, User user);
-        public Task DeleteTeamAsync(long id, User user);
-        public Task KickMemberAsync(long teamId, long memberId, User user);
-        public Task AddMemberAsync(long teamId, AddMemberDto addMemberDto, User user);
-        public Task UpdateRoleAsync(long teamId, UpdateRoleDto updateRoleDto, User user);
-        public Task JoinAsync(long teamId, User user);
+        public Task<IEnumerable<TeamDto>> GetTeamsAsync(UserEntity user);
+        public Task<TeamDataDto> GetTeamAsync(long id, UserEntity user);
+        public Task<TeamDto> CreateTeamAsync(TeamDto teamDto, UserEntity user);
+        public Task UpdateTeamAsync(TeamDto teamDto, UserEntity user);
+        public Task DeleteTeamAsync(long id, UserEntity user);
+        public Task KickMemberAsync(long teamId, long memberId, UserEntity user);
+        public Task AddMemberAsync(long teamId, AddMemberDto addMemberDto, UserEntity user);
+        public Task UpdateRoleAsync(long teamId, UpdateRoleDto updateRoleDto, UserEntity user);
+        public Task JoinAsync(long teamId, UserEntity user);
     }
 }

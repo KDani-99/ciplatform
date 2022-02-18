@@ -5,19 +5,19 @@ using CIPlatformWebApi.DataTransfer;
 using CIPlatformWebApi.DataTransfer.User;
 using Microsoft.AspNetCore.Http;
 
-namespace CIPlatformWebApi.Services
+namespace CIPlatformWebApi.Services.User
 {
     public interface IUserService
     {
         public Task CreateUser(CreateUserDto createUserDto);
 
-        public Task<UserDto> GetUserAsync(long id, User user);
-        public Task<IEnumerable<UserDto>> GetUsersAsync(User user);
+        public Task<UserDto> GetUserAsync(long id, UserEntity user);
+        public Task<IEnumerable<UserDto>> GetUsersAsync(UserEntity user);
 
         public Task<AuthTokenDto> LoginAsync(LoginDto userDto, HttpContext httpContext);
         public Task<AuthTokenDto> GenerateAuthTokensAsync(string username);
-        public Task UpdateUserAsync(long id, UpdateUserDto updateUserDto, User user);
+        public Task UpdateUserAsync(long id, UpdateUserDto updateUserDto, UserEntity user);
 
-        public Task DeleteUserAsync(long id, User user);
+        public Task DeleteUserAsync(long id, UserEntity user);
     }
 }

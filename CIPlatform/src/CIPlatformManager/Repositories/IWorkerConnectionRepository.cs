@@ -11,9 +11,11 @@ namespace CIPlatformManager.Repositories
         public Task<bool> AddToPoolAsync(JobContext jobContext, string connectionId);
         public Task<bool> RemoveAsync(string connectionId); // TODO: removes from data hash
 
-        public Task<bool>
+        public Task
             RemoveFromPoolAsync(JobContext jobContext,
                                 string connectionId); // TODO: removes only from the pool = makes it unavailable
+
+        public Task<string> RemoveFromPoolAsync(JobContext jobContext);
 
         public Task<bool> UpdateAsync(string connectionId, string workerData);
         public Task<IEnumerable<string>> GetAllAsync(JobContext jobContext);

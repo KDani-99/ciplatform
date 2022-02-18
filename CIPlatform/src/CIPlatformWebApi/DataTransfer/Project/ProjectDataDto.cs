@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using CIPlatform.Data.Entities;
+using CIPlatformWebApi.DataTransfer.Run;
 
-namespace CIPlatformWebApi.DataTransfer
+namespace CIPlatformWebApi.DataTransfer.Project
 {
     public class ProjectDataDto
     {

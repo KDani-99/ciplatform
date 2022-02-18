@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace CIPlatformWebApi.DataTransfer
+namespace CIPlatformWebApi.DataTransfer.Project
 {
     public class CreateProjectDto
     {

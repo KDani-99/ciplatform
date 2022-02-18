@@ -9,13 +9,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CIPlatform.Data.Repositories
 {
-    public class ProjectRepository : BaseRepository<Project>, IProjectRepository
+    public class ProjectRepository : BaseRepository<ProjectEntity>, IProjectRepository
     {
         public ProjectRepository(CIPlatformDbContext dbContext) : base(dbContext)
         {
         }
 
-        public override Task<Project> GetAsync(long id)
+        public override Task<ProjectEntity> GetAsync(long id)
         {
             return DbContext
                    .Projects
@@ -28,7 +28,7 @@ namespace CIPlatform.Data.Repositories
                    .FirstOrDefaultAsync(x => x.Id == id);
         }
 
-        public override Task<List<Project>> GetAsync(Expression<Func<Project, bool>> expression)
+        public override Task<List<ProjectEntity>> GetAsync(Expression<Func<ProjectEntity, bool>> expression)
         {
             return DbContext
                    .Projects
@@ -40,12 +40,12 @@ namespace CIPlatform.Data.Repositories
                    .ToListAsync();
         }
 
-        public override Task<bool> ExistsAsync(Expression<Func<Project, bool>> expression)
+        public override Task<bool> ExistsAsync(Expression<Func<ProjectEntity, bool>> expression)
         {
             return DbContext.Projects.AnyAsync(expression);
         }
 
-        public override async Task<long> CreateAsync(Project entity)
+        public override async Task<long> CreateAsync(ProjectEntity entity)
         {
             await DbContext.Projects.AddAsync(entity);
             await DbContext.SaveChangesAsync();
@@ -53,7 +53,7 @@ namespace CIPlatform.Data.Repositories
             return entity.Id;
         }
 
-        public override async Task UpdateAsync(Project entity)
+        public override async Task UpdateAsync(ProjectEntity entity)
         {
             DbContext.Projects.Update(entity);
             await DbContext.SaveChangesAsync();

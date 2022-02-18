@@ -2,6 +2,7 @@
 using CIPlatform.Data.Entities;
 using CIPlatformWebApi.Configuration;
 using CIPlatformWebApi.Services;
+using CIPlatformWebApi.Services.Auth;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Configuration;
@@ -25,8 +26,8 @@ namespace CIPlatformWebApi.Database
 
             if (serviceAccountConfiguration.IsEnabled)
             {
-                modelBuilder.Entity<User>()
-                    .HasData(new User
+                modelBuilder.Entity<UserEntity>()
+                    .HasData(new UserEntity
                     {
                         Id = 1,
                         Email = "admin.site@noreply",

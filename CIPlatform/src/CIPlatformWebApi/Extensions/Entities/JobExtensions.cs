@@ -1,12 +1,13 @@
 ﻿using System.Linq;
 using CIPlatform.Data.Entities;
 using CIPlatformWebApi.DataTransfer;
+using CIPlatformWebApi.DataTransfer.Job;
 
 namespace CIPlatformWebApi.Extensions.Entities
 {
     public static class JobExtensions
     {
-        public static JobDto ToDto(this Job job) // TODO: => use extension as it is not related and the entity itself should not know about the extensions
+        public static JobDto ToDto(this JobEntity job)
         {
             return new()
             {
@@ -20,7 +21,7 @@ namespace CIPlatformWebApi.Extensions.Entities
             };
         }
 
-        public static JobDataDto ToDataDto(this Job job)
+        public static JobDataDto ToDataDto(this JobEntity job)
         {
             return new ()
             {

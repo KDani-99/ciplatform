@@ -11,9 +11,10 @@ using CIPlatformWebApi.DataTransfer.User;
 using CIPlatformWebApi.Exceptions;
 using CIPlatformWebApi.Extensions;
 using CIPlatformWebApi.Extensions.Entities;
+using CIPlatformWebApi.Services.Auth;
 using Microsoft.AspNetCore.Http;
 
-namespace CIPlatformWebApi.Services
+namespace CIPlatformWebApi.Services.User
 {
     public class UserService : IUserService
     {
@@ -43,7 +44,7 @@ namespace CIPlatformWebApi.Services
                 throw new EmailAlreadyInUseException();
             }
 
-            var user = new User
+            var user = new UserEntity
             {
                 Username = createUserDto.Username,
                 Name = createUserDto.Name,
@@ -56,7 +57,7 @@ namespace CIPlatformWebApi.Services
             await _userRepository.CreateAsync(user);
         }
 
-        public async Task<UserDto> GetUserAsync(long id, User user)
+        public async Task<UserDto> GetUserAsync(long id, UserEntity user)
         {
             if (user.Id != id && user.IsAdmin())
             {
@@ -77,7 +78,7 @@ namespace CIPlatformWebApi.Services
             };
         }
 
-        public async Task<IEnumerable<UserDto>> GetUsersAsync(User user)
+        public async Task<IEnumerable<UserDto>> GetUsersAsync(UserEntity user)
         {
             var users = await _userRepository.GetAsync(dbUser => dbUser.Id != user.Id);
 
@@ -138,7 +139,7 @@ namespace CIPlatformWebApi.Services
             };
         }
 
-        public async Task UpdateUserAsync(long id, UpdateUserDto updateUserDto, User user)
+        public async Task UpdateUserAsync(long id, UpdateUserDto updateUserDto, UserEntity user)
         {
             var userToUpdate = await _userRepository.GetAsync(id) ?? throw new UserDoesNotExistException();
 
@@ -155,7 +156,7 @@ namespace CIPlatformWebApi.Services
             await _userRepository.UpdateAsync(userToUpdate);
         }
 
-        public async Task DeleteUserAsync(long id, User user)
+        public async Task DeleteUserAsync(long id, UserEntity user)
         {
             var userToDelete = await _userRepository.GetAsync(id) ?? throw new UserDoesNotExistException();
 

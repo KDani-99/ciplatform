@@ -1,4 +1,4 @@
-﻿namespace CIPlatformWebApi.DataTransfer
+﻿namespace CIPlatformWebApi.DataTransfer.Step
 {
     public class StepLogDto
     {

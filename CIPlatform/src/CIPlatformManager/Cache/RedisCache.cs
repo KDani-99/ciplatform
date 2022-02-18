@@ -5,12 +5,12 @@ using StackExchange.Redis;
 
 namespace CIPlatformManager.Cache
 {
-    public class RedisConnectionCache : IConnectionCache
+    public class RedisCache : IRedisConnectionCache
     {
         private readonly RedisConfiguration _redisConfiguration;
         private IConnectionMultiplexer _connectionMultiplexer;
 
-        public RedisConnectionCache(IOptions<RedisConfiguration> redisConfiguration)
+        public RedisCache(IOptions<RedisConfiguration> redisConfiguration)
         {
             _redisConfiguration =
                 redisConfiguration.Value ?? throw new ArgumentNullException(nameof(redisConfiguration));
@@ -25,7 +25,7 @@ namespace CIPlatformManager.Cache
             {
                 EndPoints = {_redisConfiguration.ConnectionString},
                 Password = _redisConfiguration.Password,
-                DefaultDatabase = _redisConfiguration.Database
+                DefaultDatabase = _redisConfiguration.JobQueueCacheConfiguration.Database
             });
         }
     }

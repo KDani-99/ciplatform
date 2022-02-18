@@ -147,7 +147,10 @@ export class ProjectComponent
     if (file) {
       this.runService
         .startRun(this.projectData!.project.id, file)
-        .subscribe(() => this.toggleWindow(false));
+        .subscribe((runDto: RunDto) => {
+          this.projectData?.runs.push(runDto);
+          this.toggleWindow(false)
+        });
     }
   }
 

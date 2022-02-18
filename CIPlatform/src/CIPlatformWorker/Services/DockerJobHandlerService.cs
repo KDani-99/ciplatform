@@ -21,12 +21,12 @@ namespace CIPlatformWorker.Services
         private string _containerId;
 
         // unit of work
-        public DockerJobHandlerService(JobDetails jobDetails,
+        public DockerJobHandlerService(
                                        JobConfiguration jobConfiguration,
                                        IOptions<WorkerConfiguration> agentConfiguration,
                                        IDockerClient dockerClient,
                                        CancellationToken cancellationToken) :
-            base(jobDetails, jobConfiguration, agentConfiguration,
+            base(jobConfiguration, agentConfiguration,
                  cancellationToken)
         {
             _dockerClient = dockerClient ?? throw new ArgumentNullException(nameof(dockerClient));

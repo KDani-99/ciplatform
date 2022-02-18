@@ -2,7 +2,7 @@
 
 namespace CIPlatform.Data.Repositories
 {
-    public interface ITeamRepository : IRepository<Team>
+    public interface ITeamRepository : IRepository<TeamEntity>
     {
     }
 }

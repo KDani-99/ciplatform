@@ -7,12 +7,14 @@ namespace CIPlatformManager.Services
 {
     public interface IWorkerConnectionService
     {
-        public Task<WorkerConnectionData> GetWorkerConnectionAsync(string connectionId);
-        public Task AddWorkerConnectionOfTypeAsync(WorkerConnectionData workerConnectionData);
+        public Task<WorkerConnectionDataEntity> GetWorkerConnectionAsync(string connectionId);
+        public Task AddWorkerConnectionOfTypeAsync(WorkerConnectionDataEntity workerConnectionData);
         public Task RemoveWorkerConnectionAsync(string connectionId);
-        public Task UpdateWorkerConnectionAsync(WorkerConnectionData workerConnectionData);
+        public Task UpdateWorkerConnectionAsync(WorkerConnectionDataEntity workerConnectionData);
         public Task<IEnumerable<string>> GetAvailableWorkerConnectionIdsOfTypeAsync(JobContext jobContext);
+        public Task<string> DequeueAvailableWorkerConnectionOfTypeAsync(JobContext jobContext);
+        public Task QueueWorkerConnectionOfTypeAsync(JobContext jobContext, string connectionId);
         public Task KeepWorkerConnectionAsync(string connectionId);
-        public Task<IEnumerable<WorkerConnectionData>> GetAvailableWorkerConnectionsAsync();
+        public Task MarkWorkerConnectionAsAvailableAsync(string connectionId);
     }
 }

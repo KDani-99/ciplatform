@@ -53,13 +53,11 @@ namespace CIPlatformManager.Services
             await ProcessJobAsync(runId, job, context.StepIndex, step.State);
             await ProcessRunAsync(run.Project.Id, run, step.State);
 
-            await UpdateWorkerStateAsync(connectionId);
-
             await _runRepository.UpdateAsync(run);
             
         }
 
-        private async Task ProcessStepAsync(Run run, Job job, Step step, States state)
+        private async Task ProcessStepAsync(RunEntity run, JobEntity job, StepEntity step, States state)
         {
             step.State = state;
             
@@ -90,10 +88,11 @@ namespace CIPlatformManager.Services
             }
         }
 
-        private async Task ProcessJobAsync(long runId, Job job, int stepIndex, States state)
+        private async Task ProcessJobAsync(long runId, JobEntity job, int stepIndex, States state)
         {
-            if (job.State is States.NotRun && state is States.Running)
+            if (job.State is States.NotRun or States.Queued && state is States.Running)
             {
+                job.State = state;
                 await SendJobResultNotificationAsync(runId, job.Id, state, DateTime.Now);
             }
             
@@ -111,7 +110,7 @@ namespace CIPlatformManager.Services
             }
         }
 
-        private async Task ProcessRunAsync(long projectId, Run run, States state)
+        private async Task ProcessRunAsync(long projectId, RunEntity run, States state)
         {
             if (run.State is States.Queued && state is States.Running)
             {
@@ -138,13 +137,6 @@ namespace CIPlatformManager.Services
                 run.FinishedDateTime = DateTime.Now;
                 await SendRunResultNotificationAsync(projectId, run.Id, run.State, run.FinishedDateTime);
             }
-        }
-
-        private async Task UpdateWorkerStateAsync(string connectionId)
-        {
-            var workerConnectionData = await _workerConnectionService.GetWorkerConnectionAsync(connectionId);
-            workerConnectionData.AgentState = AgentState.Available;
-            await _workerConnectionService.UpdateWorkerConnectionAsync(workerConnectionData);
         }
 
         private Task SendStepResultNotificationAsync(long jobId, long stepId, States state, DateTime? dateTime)
@@ -183,12 +175,12 @@ namespace CIPlatformManager.Services
             return _busControl.Publish(processed);
         }
 
-        private static bool IsLastStep(Run run)
+        private static bool IsLastStep(RunEntity run)
         {
             return run.NumberOfCompletedSteps == run.NumberOfSteps;
         }
 
-        private async Task<int> MarkStepsAsSkipped(Job job, int stepIndex)
+        private async Task<int> MarkStepsAsSkipped(JobEntity job, int stepIndex)
         {
             var collection = job.Steps.Where(x => x.Index > stepIndex).ToList();
             foreach (var notRunStep in collection)

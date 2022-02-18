@@ -1,9 +1,9 @@
 ﻿namespace CIPlatform.Data.Agent
 {
-    public enum AgentState
+    public enum WorkerState
     {
         Available,
         Working,
-        Offline
+        Unavailable
     }
 }

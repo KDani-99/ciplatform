@@ -2,7 +2,7 @@
 
 namespace CIPlatform.Data.Repositories
 {
-    public interface IStepRepository : IRepository<Step>
+    public interface IStepRepository : IRepository<StepEntity>
     {
     }
 }

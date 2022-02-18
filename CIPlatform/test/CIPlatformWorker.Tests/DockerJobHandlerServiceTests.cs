@@ -36,7 +36,6 @@ namespace CIPlatformWorker.Tests
                 Environment = new List<string>(),
                 Steps = new List<StepConfiguration>()
             };
-            var jobDetails = new Mock<JobDetails>();
             var cancellationToken = CancellationToken.None;
             var imagesCreateParameters = new Mock<ImagesCreateParameters>();
             var createContainerResponse = new CreateContainerResponse
@@ -69,7 +68,7 @@ namespace CIPlatformWorker.Tests
                                                              It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(false));
             await using var dockerJobHandlerService = new DockerJobHandlerService(
-                jobDetails.Object, jobConfiguration, agentConfiguration, dockerClient.Object, cancellationToken);
+                jobConfiguration, agentConfiguration, dockerClient.Object, cancellationToken);
 
             // Act and Assert
             Assert.ThrowsAsync<StepFailedException>(

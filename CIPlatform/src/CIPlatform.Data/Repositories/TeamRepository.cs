@@ -9,13 +9,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CIPlatform.Data.Repositories
 {
-    public class TeamRepository : BaseRepository<Team>, ITeamRepository
+    public class TeamRepository : BaseRepository<TeamEntity>, ITeamRepository
     {
         public TeamRepository(CIPlatformDbContext dbContext) : base(dbContext)
         {
         }
 
-        public override Task<Team> GetAsync(long id)
+        public override Task<TeamEntity> GetAsync(long id)
         {
             return DbContext.Teams
                             .Include(team => team.Owner)
@@ -27,7 +27,7 @@ namespace CIPlatform.Data.Repositories
                             .FirstOrDefaultAsync(team => team.Id == id);
         }
 
-        public override Task<List<Team>> GetAsync(Expression<Func<Team, bool>> expression)
+        public override Task<List<TeamEntity>> GetAsync(Expression<Func<TeamEntity, bool>> expression)
         {
             return DbContext.Teams
                             .Include(team => team.Owner)
@@ -39,12 +39,12 @@ namespace CIPlatform.Data.Repositories
                             .ToListAsync();
         }
 
-        public override Task<bool> ExistsAsync(Expression<Func<Team, bool>> expression)
+        public override Task<bool> ExistsAsync(Expression<Func<TeamEntity, bool>> expression)
         {
             return DbContext.Teams.AnyAsync(expression);
         }
 
-        public override async Task<long> CreateAsync(Team entity)
+        public override async Task<long> CreateAsync(TeamEntity entity)
         {
             await DbContext.Teams.AddAsync(entity);
             await DbContext.SaveChangesAsync();
@@ -52,7 +52,7 @@ namespace CIPlatform.Data.Repositories
             return entity.Id;
         }
 
-        public override async Task UpdateAsync(Team entity)
+        public override async Task UpdateAsync(TeamEntity entity)
         {
             DbContext.Teams.Update(entity);
             await DbContext.SaveChangesAsync();

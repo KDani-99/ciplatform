@@ -7,7 +7,7 @@ using CIPlatformWebApi.Exceptions;
 using Microsoft.Extensions.Options;
 using YamlDotNet.Serialization;
 
-namespace CIPlatformWebApi.Services.File
+namespace CIPlatformWebApi.Services.FileProcessor
 {
     public class YmlFileProcessorService : IFileProcessorService<RunConfiguration>
     {

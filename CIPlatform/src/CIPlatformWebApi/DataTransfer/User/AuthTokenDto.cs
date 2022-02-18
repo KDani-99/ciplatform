@@ -1,4 +1,4 @@
-﻿namespace CIPlatformWebApi.DataTransfer
+﻿namespace CIPlatformWebApi.DataTransfer.User
 {
     public record AuthTokenDto
     {

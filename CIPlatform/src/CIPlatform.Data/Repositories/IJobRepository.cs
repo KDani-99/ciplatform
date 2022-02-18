@@ -2,7 +2,7 @@
 
 namespace CIPlatform.Data.Repositories
 {
-    public interface IRunRepository : IRepository<Run>
+    public interface IRunRepository : IRepository<RunEntity>
     {
     }
 }

@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CIPlatform.Data.Entities
 {
-    public class User : Entity
+    public class UserEntity : Entity
     {
         public string Username { get; set; }
         public string Name { get; set; }

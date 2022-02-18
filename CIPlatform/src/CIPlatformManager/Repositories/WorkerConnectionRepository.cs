@@ -11,16 +11,16 @@ namespace CIPlatformManager.Repositories
     public class WorkerConnectionRepository : IWorkerConnectionRepository
     {
         private const string ConnectionsHashKey = "connections";
-        private readonly IConnectionCache _connectionCache;
+        private readonly IRedisConnectionCache _cache;
 
-        public WorkerConnectionRepository(IConnectionCache connectionCache)
+        public WorkerConnectionRepository(IRedisConnectionCache cache)
         {
-            _connectionCache = connectionCache ?? throw new ArgumentNullException(nameof(connectionCache));
+            _cache = cache ?? throw new ArgumentNullException(nameof(cache));
         }
 
         public async Task<string> GetAsync(string connectionId)
         {
-            var result = await _connectionCache.Database.HashGetAsync(ConnectionsHashKey, connectionId);
+            var result = await _cache.Database.HashGetAsync(ConnectionsHashKey, connectionId);
             return result.ToString();
         }
 
@@ -28,23 +28,28 @@ namespace CIPlatformManager.Repositories
         {
             // associate jobContext name with connection in the database
             // TODO: below it just stores info about the worker  
-            return _connectionCache.Database.HashSetAsync(ConnectionsHashKey, connectionId, workerData);
+            return _cache.Database.HashSetAsync(ConnectionsHashKey, connectionId, workerData);
         }
 
-        public Task<bool> AddToPoolAsync(JobContext jobContext, string connectionId)
+        public async Task<bool> AddToPoolAsync(JobContext jobContext, string connectionId)
         {
-            // TODO: it allows fast lookup - > only available agents will be there
-            return _connectionCache.Database.SetAddAsync(jobContext.GetDisplayName(), connectionId);
+            return await _cache.Database.ListRightPushAsync(jobContext.GetDisplayName(), connectionId) != 0;
         }
 
         public Task<bool> RemoveAsync(string connectionId)
         {
-            return _connectionCache.Database.HashDeleteAsync(ConnectionsHashKey, connectionId);
+            return _cache.Database.HashDeleteAsync(ConnectionsHashKey, connectionId);
         }
 
-        public Task<bool> RemoveFromPoolAsync(JobContext jobContext, string connectionId)
+        public Task RemoveFromPoolAsync(JobContext jobContext, string connectionId)
         {
-            return _connectionCache.Database.SetRemoveAsync(jobContext.GetDisplayName(), connectionId);
+            return _cache.Database.ListRemoveAsync(jobContext.GetDisplayName(), connectionId);
+        }
+
+        public async Task<string> RemoveFromPoolAsync(JobContext jobContext)
+        {
+            var result = await _cache.Database.ListLeftPopAsync(jobContext.GetDisplayName());
+            return result;
         }
 
         public Task<bool> UpdateAsync(string connectionId, string workerData)
@@ -54,19 +59,9 @@ namespace CIPlatformManager.Repositories
 
         public async Task<IEnumerable<string>> GetAllAsync(JobContext jobContext)
         {
-            var workerConnections = await _connectionCache.Database.SetMembersAsync(jobContext.GetDisplayName());
+            var workerConnections = await _cache.Database.ListRangeAsync(jobContext.GetDisplayName());
 
             return workerConnections.Select(connection => connection.ToString());
         }
-
-        /*public async IAsyncEnumerable<string> GetAsync(JobContext jobContext)
-        {
-            var members = await _connectionCache.Database.SetMembersAsync(jobContext.GetDisplayName());
-
-            foreach (var member in members)
-            {
-                yield return member;
-            }
-        }*/
     }
 }

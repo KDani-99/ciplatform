@@ -15,7 +15,6 @@ namespace CIPlatformWorker.Services
     public abstract class JobHandlerService : IJobHandlerService
     {
         private readonly WorkerConfiguration _workerConfiguration;
-        private readonly JobDetails _jobDetails;
 
         protected readonly CancellationToken CancellationToken;
         protected readonly JobConfiguration JobConfiguration;
@@ -23,21 +22,23 @@ namespace CIPlatformWorker.Services
         private bool _isEnvironmentPrepared;
         private int _lineNo = 0;
 
-        protected JobHandlerService(JobDetails jobDetails,
+        protected JobHandlerService(
                                     JobConfiguration jobConfiguration,
                                     IOptions<WorkerConfiguration> agentConfiguration,
                                     CancellationToken cancellationToken)
         {
-            _jobDetails = jobDetails ?? throw new ArgumentNullException(nameof(jobDetails));
             _workerConfiguration =
                 agentConfiguration.Value ?? throw new ArgumentNullException(nameof(agentConfiguration));
             JobConfiguration = jobConfiguration ?? throw new ArgumentNullException(nameof(jobConfiguration));
             CancellationToken = cancellationToken;
         }
 
-        public abstract ValueTask DisposeAsync();
+        public virtual ValueTask DisposeAsync() => ValueTask.CompletedTask;
 
-        public abstract void Dispose();
+        public virtual void Dispose()
+        {
+            GC.SuppressFinalize(true);
+        }
 
         public virtual Task PrepareEnvironmentAsync()
         {

@@ -5,7 +5,7 @@ namespace CIPlatformWebApi.Extensions.Entities
 {
     public static class UserExtensions
     {
-        public static bool IsAdmin(this User user)
+        public static bool IsAdmin(this UserEntity user)
         {
             return user.Roles.Any(role => role == Roles.Admin);
         }

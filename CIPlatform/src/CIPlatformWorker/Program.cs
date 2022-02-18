@@ -6,6 +6,7 @@ using CIPlatformWorker.WebSocket.Consumers;
 using CIPlatform.Core.Hubs.Consumers;
 using CIPlatform.Data.Configuration;
 using CIPlatform.Data.Events;
+using CIPlatformWorker.Factories;
 using CIPlatformWorker.Services;
 using Docker.DotNet;
 using Microsoft.Extensions.Configuration;
@@ -33,13 +34,13 @@ namespace CIPlatformWorker
                            switch (agentConfiguration.Context)
                            {
                                case JobContext.Linux:
-                                   services.AddScoped<IJobHandlerService, LinuxJobHandlerService>();
+                                   services.AddScoped<IJobHandlerServiceFactory, LinuxJobHandlerServiceFactory>();
                                    break;
                                case JobContext.Windows:
-                                   services.AddScoped<IJobHandlerService, WindowsJobHandlerService>();
+                                   services.AddScoped<IJobHandlerServiceFactory, WindowsJobHandlerServiceFactory>();
                                    break;
                                case JobContext.Docker:
-                                   services.AddScoped<IJobHandlerService, DockerJobHandlerService>();
+                                   services.AddScoped<IJobHandlerServiceFactory, DockerJobHandlerServiceFactory>();
                                    break;
                                default:
                                    throw new ArgumentOutOfRangeException(

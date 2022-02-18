@@ -1,12 +1,13 @@
 ﻿using System.Linq;
 using CIPlatform.Data.Entities;
 using CIPlatformWebApi.DataTransfer;
+using CIPlatformWebApi.DataTransfer.Run;
 
 namespace CIPlatformWebApi.Extensions.Entities
 {
     public static class RunExtensions
     {
-        public static RunDto ToDto(this Run run)
+        public static RunDto ToDto(this RunEntity run)
         {
             return new()
             {
@@ -18,7 +19,7 @@ namespace CIPlatformWebApi.Extensions.Entities
             };
         }
 
-        public static RunDataDto ToDataDto(this Run run)
+        public static RunDataDto ToDataDto(this RunEntity run)
         {
             return new()
             {

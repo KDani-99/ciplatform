@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace CIPlatformWebApi.DataTransfer
+namespace CIPlatformWebApi.DataTransfer.Step
 {
     public class StepFileDto
     {

@@ -9,13 +9,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CIPlatform.Data.Repositories
 {
-    public class RunRepository : BaseRepository<Run>, IRunRepository
+    public class RunRepository : BaseRepository<RunEntity>, IRunRepository
     {
         public RunRepository(CIPlatformDbContext dbContext) : base(dbContext)
         {
         }
 
-        public override Task<Run> GetAsync(long id)
+        public override Task<RunEntity> GetAsync(long id)
         {
             return DbContext
                    .Runs
@@ -28,7 +28,7 @@ namespace CIPlatform.Data.Repositories
                    .FirstOrDefaultAsync(job => job.Id == id);
         }
 
-        public override Task<List<Run>> GetAsync(Expression<Func<Run, bool>> expression)
+        public override Task<List<RunEntity>> GetAsync(Expression<Func<RunEntity, bool>> expression)
         {
             return DbContext
                    .Runs
@@ -40,12 +40,12 @@ namespace CIPlatform.Data.Repositories
                    .Where(expression).ToListAsync();
         }
 
-        public override Task<bool> ExistsAsync(Expression<Func<Run, bool>> expression)
+        public override Task<bool> ExistsAsync(Expression<Func<RunEntity, bool>> expression)
         {
             return DbContext.Runs.AnyAsync(expression);
         }
 
-        public override async Task<long> CreateAsync(Run entity)
+        public override async Task<long> CreateAsync(RunEntity entity)
         {
             await DbContext.Runs.AddAsync(entity);
             await DbContext.SaveChangesAsync();
@@ -53,7 +53,7 @@ namespace CIPlatform.Data.Repositories
             return entity.Id;
         }
 
-        public override async Task UpdateAsync(Run entity)
+        public override async Task UpdateAsync(RunEntity entity)
         {
             DbContext.Runs.Update(entity);
             await DbContext.SaveChangesAsync();

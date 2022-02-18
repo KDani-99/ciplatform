@@ -3,10 +3,10 @@ using CIPlatform.Data.Entities;
 
 namespace CIPlatform.Data.Repositories
 {
-    public interface IUserRepository : IRepository<User>
+    public interface IUserRepository : IRepository<UserEntity>
     {
-        public Task<User> GetByUsernameAsync(string username);
+        public Task<UserEntity> GetByUsernameAsync(string username);
 
-        public Task<User> GetByEmailAsync(string email);
+        public Task<UserEntity> GetByEmailAsync(string email);
     }
 }

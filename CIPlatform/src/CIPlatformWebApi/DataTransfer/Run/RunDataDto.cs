@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
+using CIPlatformWebApi.DataTransfer.Job;
 
-namespace CIPlatformWebApi.DataTransfer
+namespace CIPlatformWebApi.DataTransfer.Run
 {
     public class RunDataDto
     {

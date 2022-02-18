@@ -1,4 +1,4 @@
-﻿namespace CIPlatformWebApi.Services
+﻿namespace CIPlatformWebApi.Services.Auth
 {
     public interface ICredentialManagerService
     {

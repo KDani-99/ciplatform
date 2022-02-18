@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ConfigService } from '../../config/config.service';
 import { BaseDataService } from '../../shared/services/base-data.service';
-import { JobDataDto, JobDto, RunDataDto, State } from './run.interface';
+import {JobDataDto, JobDto, RunDataDto, RunDto, State} from './run.interface';
 
 @Injectable({ providedIn: 'root' })
 export class RunService extends BaseDataService {
@@ -21,17 +21,17 @@ export class RunService extends BaseDataService {
     super(httpClient);
   }
 
-  startRun(id: number, instructionsFile: File): Observable<any> {
+  startRun(id: number, instructionsFile: File): Observable<RunDto> {
     const url = this.configService
       .getFullUrl('uploadRunInstructions')
       .replace('{0}', id.toString());
     const formData = new FormData();
     formData.append('instructions', instructionsFile, instructionsFile.name);
-    return this.httpClient.post(url, formData, this.formHttpOptions);
+    return this.httpClient.post<RunDto>(url, formData, this.formHttpOptions);
   }
 
   getRun(id: number): Observable<RunDataDto> {
-    const url = `${this.configService.getFullUrl('runs')}/${id}`;
+    const url = `${this.configService.getFullUrl('runs')}/${id}/data`;
     return super.get<RunDataDto>(url);
   }
 

@@ -58,10 +58,6 @@ export class SignalRService {
     );
   }
 
-  receiveLogs(logData: any) {
-    console.log('RECEIVED LOG: ', logData);
-  }
-
   registerMethod(name: string, action: any) {
     this.hubConnection?.off(name);
     this.hubConnection?.on(name, action);

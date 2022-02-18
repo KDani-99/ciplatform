@@ -24,6 +24,10 @@ export abstract class BaseRunComponent {
 
     obj.state = event.state;
 
+    if (event.state === State.QUEUED) {
+      return;
+    }
+
     if (event.state === State.RUNNING) {
       obj.startedDateTime = event.dateTime;
     } else {

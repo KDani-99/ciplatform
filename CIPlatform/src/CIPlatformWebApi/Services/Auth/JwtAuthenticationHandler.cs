@@ -13,7 +13,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Extensions;
 
-namespace CIPlatformWebApi.Services
+namespace CIPlatformWebApi.Services.Auth
 {
     public class JwtAuthenticationHandler : AuthenticationHandler<JwtAuthenticationTokenSchemeOptions>
     {

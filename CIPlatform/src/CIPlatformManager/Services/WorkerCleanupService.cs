@@ -11,12 +11,12 @@ using Newtonsoft.Json;
 
 namespace CIPlatformManager.Services
 {
-    public class WorkerManagerService : BackgroundService
+    public class WorkerCleanupService : BackgroundService
     {
         private readonly IServiceProvider _serviceProvider;
-        private readonly ILogger<WorkerManagerService> _logger;
+        private readonly ILogger<WorkerCleanupService> _logger;
         
-        public WorkerManagerService(IServiceProvider serviceProvider, ILogger<WorkerManagerService> logger)
+        public WorkerCleanupService(IServiceProvider serviceProvider, ILogger<WorkerCleanupService> logger)
         {
             _serviceProvider = serviceProvider ??
                 throw new ArgumentNullException(nameof(serviceProvider));
@@ -31,7 +31,6 @@ namespace CIPlatformManager.Services
             
             foreach (var connectionId in await service!.GetAvailableWorkerConnectionIdsOfTypeAsync(jobContext))
             {
-
                 var workerConnectionData = await service.GetWorkerConnectionAsync(connectionId);
 
                 if (!HasExpired(workerConnectionData.LastPing))
@@ -40,7 +39,7 @@ namespace CIPlatformManager.Services
                 }
 
                 await service.RemoveWorkerConnectionAsync(connectionId);
-                
+                // TODO: send disconnect event to client
                 _logger.LogInformation($"An unknown worker has been removed @ {DateTime.Now} (connection id: {connectionId}).");
             }
         }
@@ -50,10 +49,17 @@ namespace CIPlatformManager.Services
             while (!stoppingToken.IsCancellationRequested)
             {
                 _logger.LogInformation("Starting unknown worker cleanup...");
-                
-                await RemoveUnknownWorkersOfTypeAsync(JobContext.Docker);
-                await RemoveUnknownWorkersOfTypeAsync(JobContext.Linux);
-                await RemoveUnknownWorkersOfTypeAsync(JobContext.Windows);
+
+                try
+                {
+                    await RemoveUnknownWorkersOfTypeAsync(JobContext.Docker);
+                    await RemoveUnknownWorkersOfTypeAsync(JobContext.Linux);
+                    await RemoveUnknownWorkersOfTypeAsync(JobContext.Windows);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"An unexpected error has occured during worker cleanup. Message: {ex.Message}");
+                }
                 
                 _logger.LogInformation("Finished unknown worker cleanup.");
 

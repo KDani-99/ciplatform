@@ -66,7 +66,7 @@ namespace CIPlatformWorker.WebSocket
 
         public Task ConfigureAsync()
         {
-            return HubConnection.SendAsync("Configure", AgentState.Available);
+            return HubConnection.SendAsync("Configure", WorkerState.Available);
         }
 
         public Task StreamLogAsync(long runId, long jobId, long stepIndex, ChannelReader<string> stream)
@@ -85,20 +85,33 @@ namespace CIPlatformWorker.WebSocket
             return HubConnection.SendAsync("Ping");
         }
 
+        public Task FinishJobAsync()
+        {
+            return HubConnection.SendAsync("FinishJob");
+        }
+
         private void RegisterMethods()
         {
             _logger.LogInformation("Registering worker events...");
+            
 
-            var methodName = _workerConfiguration.Context switch
-            {
-                JobContext.Docker => CommonHubMethods.QueueDockerJob,
-                JobContext.Linux => CommonHubMethods.QueueLinuxJob,
-                JobContext.Windows => CommonHubMethods.QueueWindowsJob,
-                _ => throw new ArgumentOutOfRangeException()
-            };
-
-            HubConnection.On<QueueJobCommand>(methodName,
+           /* HubConnection.On<QueueJobCommand>("QueueJob",
                                               async message => await _serviceProvider.GetService<IConsumer<QueueJobCommand>>()!.ConsumeAsync(message));
+            */
+           HubConnection.On<QueueJobCommand>("QueueJob",
+               message =>
+               {
+                   try
+                   {
+                       var x = _serviceProvider.GetService<IConsumer<QueueJobCommand>>();
+                       Console.WriteLine(x.GetType());
+                       x.ConsumeAsync(message);
+                   }
+                   catch (Exception ex)
+                   {
+                       Console.WriteLine(ex);
+                   }
+               });
         }
 
 

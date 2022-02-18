@@ -16,24 +16,13 @@ namespace CIPlatformWorker.Services
     public class LinuxJobHandlerService : JobHandlerService
     {
         // unit of work
-        public LinuxJobHandlerService(JobDetails jobDetails,
+        public LinuxJobHandlerService(
                                       JobConfiguration jobConfiguration,
                                       IOptions<WorkerConfiguration> agentConfiguration,
                                       CancellationToken cancellationToken)
-            : base(jobDetails, jobConfiguration, agentConfiguration,
+            : base(jobConfiguration, agentConfiguration,
                    cancellationToken)
         {
-        }
-
-        public override ValueTask DisposeAsync()
-        {
-            // not required
-            return ValueTask.CompletedTask;
-        }
-
-        public override void Dispose()
-        {
-            // not required
         }
 
         public override async Task ExecuteStepAsync(ChannelWriter<string> channelWriter,

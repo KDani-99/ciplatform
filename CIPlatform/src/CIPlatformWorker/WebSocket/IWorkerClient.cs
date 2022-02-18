@@ -13,5 +13,6 @@ namespace CIPlatformWorker.WebSocket
         public Task StreamLogAsync(long runId, long jobId, long stepIndex, ChannelReader<string> channelReader);
         public Task SendStepResultAsync(StepResultEvent stepResultEvent);
         public Task PingAsync();
+        public Task FinishJobAsync();
     }
 }

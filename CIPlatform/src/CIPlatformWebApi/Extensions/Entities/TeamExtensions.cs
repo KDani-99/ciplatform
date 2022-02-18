@@ -1,12 +1,13 @@
 ﻿using System.Linq;
 using CIPlatform.Data.Entities;
 using CIPlatformWebApi.DataTransfer;
+using CIPlatformWebApi.DataTransfer.Team;
 
 namespace CIPlatformWebApi.Extensions.Entities
 {
     public static class TeamExtensions
     {
-        public static TeamDto ToDto(this Team team, long userId)
+        public static TeamDto ToDto(this TeamEntity team, long userId)
         {
             return new()
             {
@@ -22,7 +23,7 @@ namespace CIPlatformWebApi.Extensions.Entities
             };
         }
 
-        public static TeamDataDto ToDataDto(this Team team, Permissions memberPermission)
+        public static TeamDataDto ToDataDto(this TeamEntity team, Permissions memberPermission)
         {
             return new ()
             {

@@ -10,7 +10,7 @@ using CIPlatformWebApi.Exceptions;
 using CIPlatformWebApi.Extensions;
 using CIPlatformWebApi.Extensions.Entities;
 
-namespace CIPlatformWebApi.Services
+namespace CIPlatformWebApi.Services.Project
 {
     public class ProjectService : IProjectService
     {
@@ -23,7 +23,7 @@ namespace CIPlatformWebApi.Services
             _teamRepository = teamRepository ?? throw new ArgumentNullException(nameof(teamRepository));
         }
 
-        public async Task<ProjectDataDto> GetProjectAsync(long id, User user)
+        public async Task<ProjectDataDto> GetProjectAsync(long id, UserEntity user)
         {
             // check whether user is in the project
             var project = await _projectRepository.GetAsync(id) ?? throw new ProjectDoesNotExistException();
@@ -55,7 +55,7 @@ namespace CIPlatformWebApi.Services
             return projects.Select(project => project.ToDto());
         }
 
-        public async Task<ProjectDto> CreateProjectAsync(CreateProjectDto createProjectDto, User user)
+        public async Task<ProjectDto> CreateProjectAsync(CreateProjectDto createProjectDto, UserEntity user)
         {
             if (await _projectRepository.ExistsAsync(projectEntity =>
                                                          projectEntity.Name == createProjectDto.Name &&
@@ -74,7 +74,7 @@ namespace CIPlatformWebApi.Services
                 throw new UnauthorizedAccessWebException("You are not allowed to create projects.");
             }
 
-            var id = await _projectRepository.CreateAsync(new Project
+            var id = await _projectRepository.CreateAsync(new ProjectEntity
             {
                 Name = createProjectDto.Name,
                 RepositoryUrl = createProjectDto.RepositoryUrl,
@@ -96,7 +96,7 @@ namespace CIPlatformWebApi.Services
             };
         }
 
-        public async Task UpdateProjectAsync(long id, CreateProjectDto createProjectDto, User user)
+        public async Task UpdateProjectAsync(long id, CreateProjectDto createProjectDto, UserEntity user)
         {
             var project = await _projectRepository.GetAsync(id) ?? throw new ProjectDoesNotExistException();
 
@@ -122,7 +122,7 @@ namespace CIPlatformWebApi.Services
             await _projectRepository.UpdateAsync(project);
         }
 
-        public async Task DeleteProjectAsync(long id, User user)
+        public async Task DeleteProjectAsync(long id, UserEntity user)
         {
             var project = await _projectRepository.GetAsync(id) ?? throw new TeamDoesNotExistException();
 
@@ -136,7 +136,7 @@ namespace CIPlatformWebApi.Services
             await _projectRepository.DeleteAsync(id);
         }
 
-        public async Task<bool> IsAllowedAsync(long id, User user)
+        public async Task<bool> IsAllowedAsync(long id, UserEntity user)
         {
             var project = await _projectRepository.GetAsync(id) ?? throw new ProjectDoesNotExistException();
             return project.Team.Members.Any(teamMember => teamMember.User.Id == user.Id);

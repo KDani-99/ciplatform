@@ -2,7 +2,7 @@
 
 namespace CIPlatformManager.Cache
 {
-    public interface IConnectionCache
+    public interface ICache
     {
         public IDatabase Database { get; }
     }

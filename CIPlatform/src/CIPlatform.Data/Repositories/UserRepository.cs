@@ -9,13 +9,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CIPlatform.Data.Repositories
 {
-    public class UserRepository : BaseRepository<User>, IUserRepository
+    public class UserRepository : BaseRepository<UserEntity>, IUserRepository
     {
         public UserRepository(CIPlatformDbContext dbContext) : base(dbContext)
         {
         }
 
-        public Task<User> GetByUsernameAsync(string username)
+        public Task<UserEntity> GetByUsernameAsync(string username)
         {
             return DbContext.Users
                             .Include(user => user.Teams)
@@ -23,7 +23,7 @@ namespace CIPlatform.Data.Repositories
                             .FirstOrDefaultAsync(user => user.Username == username);
         }
 
-        public Task<User> GetByEmailAsync(string email)
+        public Task<UserEntity> GetByEmailAsync(string email)
         {
             return DbContext.Users
                             .Include(user => user.Teams)
@@ -31,7 +31,7 @@ namespace CIPlatform.Data.Repositories
                             .FirstOrDefaultAsync(user => user.Email == email);
         }
 
-        public override Task<User> GetAsync(long id)
+        public override Task<UserEntity> GetAsync(long id)
         {
             return DbContext.Users
                             .Include(user => user.Teams)
@@ -39,18 +39,18 @@ namespace CIPlatform.Data.Repositories
                             .FirstOrDefaultAsync(user => user.Id == id);
         }
 
-        public override Task<List<User>> GetAsync(Expression<Func<User, bool>> expression)
+        public override Task<List<UserEntity>> GetAsync(Expression<Func<UserEntity, bool>> expression)
         {
             return DbContext.Users
                             .Include(user => user.Teams).Where(expression).ToListAsync();
         }
 
-        public override Task<bool> ExistsAsync(Expression<Func<User, bool>> expression)
+        public override Task<bool> ExistsAsync(Expression<Func<UserEntity, bool>> expression)
         {
             return DbContext.Users.AnyAsync(expression);
         }
 
-        public override async Task<long> CreateAsync(User entity)
+        public override async Task<long> CreateAsync(UserEntity entity)
         {
             await DbContext.Users.AddAsync(entity);
             await DbContext.SaveChangesAsync();
@@ -58,7 +58,7 @@ namespace CIPlatform.Data.Repositories
             return entity.Id;
         }
 
-        public override async Task UpdateAsync(User entity)
+        public override async Task UpdateAsync(UserEntity entity)
         {
             DbContext.Users.Update(entity);
             await DbContext.SaveChangesAsync();

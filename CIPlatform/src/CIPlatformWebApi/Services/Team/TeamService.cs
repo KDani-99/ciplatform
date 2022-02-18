@@ -10,7 +10,7 @@ using CIPlatformWebApi.Exceptions;
 using CIPlatformWebApi.Extensions;
 using CIPlatformWebApi.Extensions.Entities;
 
-namespace CIPlatformWebApi.Services
+namespace CIPlatformWebApi.Services.Team
 {
     public class TeamService : ITeamService
     {
@@ -24,14 +24,14 @@ namespace CIPlatformWebApi.Services
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
         }
 
-        public async Task<IEnumerable<TeamDto>> GetTeamsAsync(User user)
+        public async Task<IEnumerable<TeamDto>> GetTeamsAsync(UserEntity user)
         {
             var teams = await _teamRepository.GetAsync(_ => true);
 
             return teams.Select(team => team.ToDto(user.Id));
         }
 
-        public async Task<TeamDataDto> GetTeamAsync(long id, User user)
+        public async Task<TeamDataDto> GetTeamAsync(long id, UserEntity user)
         {
             var team = await _teamRepository.GetAsync(id) ?? throw new TeamDoesNotExistException();
 
@@ -46,21 +46,21 @@ namespace CIPlatformWebApi.Services
             return team.ToDataDto(member.Permission);
         }
 
-        public async Task<TeamDto> CreateTeamAsync(TeamDto teamDto, User user)
+        public async Task<TeamDto> CreateTeamAsync(TeamDto teamDto, UserEntity user)
         {
             if (await _teamRepository.ExistsAsync(teamEntity => teamEntity.Name == teamDto.Name))
             {
                 throw new TeamAlreadyExistsException();
             }
 
-            var team = new Team
+            var team = new TeamEntity
             {
                 Name = teamDto.Name,
                 Image = teamDto.Image,
                 Description = teamDto.Description,
                 IsPublic = teamDto.IsPublic,
                 Owner = user,
-                Members = new List<TeamMember>
+                Members = new List<TeamMemberEntity>
                 {
                     new()
                     {
@@ -81,7 +81,7 @@ namespace CIPlatformWebApi.Services
             return teamDto;
         }
 
-        public async Task UpdateTeamAsync(TeamDto teamDto, User user)
+        public async Task UpdateTeamAsync(TeamDto teamDto, UserEntity user)
         {
             var team = await _teamRepository.GetAsync(teamDto.Id) ?? throw new TeamDoesNotExistException();
 
@@ -107,7 +107,7 @@ namespace CIPlatformWebApi.Services
             await _teamRepository.UpdateAsync(team);
         }
 
-        public async Task DeleteTeamAsync(long id, User user)
+        public async Task DeleteTeamAsync(long id, UserEntity user)
         {
             var team = await _teamRepository.GetAsync(id) ?? throw new TeamDoesNotExistException();
 
@@ -119,7 +119,7 @@ namespace CIPlatformWebApi.Services
             await _teamRepository.DeleteAsync(id);
         }
 
-        public async Task KickMemberAsync(long teamId, long memberId, User user)
+        public async Task KickMemberAsync(long teamId, long memberId, UserEntity user)
         {
             var team = await _teamRepository.GetAsync(teamId) ?? throw new TeamDoesNotExistException();
 
@@ -143,7 +143,7 @@ namespace CIPlatformWebApi.Services
             await _teamRepository.UpdateAsync(team);
         }
 
-        public async Task AddMemberAsync(long teamId, AddMemberDto addMemberDto, User user)
+        public async Task AddMemberAsync(long teamId, AddMemberDto addMemberDto, UserEntity user)
         {
             var userToAdd =
                 (await _userRepository.GetAsync(repoUser => repoUser.Username == addMemberDto.Username))
@@ -164,7 +164,7 @@ namespace CIPlatformWebApi.Services
                 throw new UnauthorizedAccessWebException("You are not allowed to add members.");
             }
 
-            team.Members.Add(new TeamMember
+            team.Members.Add(new TeamMemberEntity
             {
                 Permission = Permissions.Read,
                 JoinTime = DateTime.Now,
@@ -174,7 +174,7 @@ namespace CIPlatformWebApi.Services
             await _teamRepository.UpdateAsync(team);
         }
 
-        public async Task UpdateRoleAsync(long teamId, UpdateRoleDto updateRoleDto, User user)
+        public async Task UpdateRoleAsync(long teamId, UpdateRoleDto updateRoleDto, UserEntity user)
         {
             var team = await _teamRepository.GetAsync(teamId) ?? throw new TeamDoesNotExistException();
 
@@ -199,7 +199,7 @@ namespace CIPlatformWebApi.Services
             await _teamRepository.UpdateAsync(team);
         }
 
-        public async Task JoinAsync(long teamId, User user)
+        public async Task JoinAsync(long teamId, UserEntity user)
         {
             var team = await _teamRepository.GetAsync(teamId) ?? throw new TeamDoesNotExistException();
 
@@ -213,7 +213,7 @@ namespace CIPlatformWebApi.Services
                 throw new UnauthorizedAccessWebException("You are not allowed to join a private team.");
             }
 
-            team.Members.Add(new TeamMember
+            team.Members.Add(new TeamMemberEntity
             {
                 User = user,
                 JoinTime = DateTime.Now,

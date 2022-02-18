@@ -1,7 +1,7 @@
 ﻿using System;
 using CIPlatform.Data.Configuration;
 
-namespace CIPlatformWebApi.DataTransfer
+namespace CIPlatformWebApi.DataTransfer.Job
 {
     public class JobDto
     {

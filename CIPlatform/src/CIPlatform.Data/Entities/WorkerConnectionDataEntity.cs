@@ -4,7 +4,7 @@ using CIPlatform.Data.Configuration;
 
 namespace CIPlatform.Data.Entities
 {
-    public class WorkerConnectionData
+    public class WorkerConnectionDataEntity
     {
         public string ConnectionId { get; set; }
         public JobContext JobContext { get; set; }

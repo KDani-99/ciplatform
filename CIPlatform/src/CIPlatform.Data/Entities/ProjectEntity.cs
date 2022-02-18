@@ -3,7 +3,7 @@ using CIPlatform.Data.Entities;
 
 namespace CIPlatform.Data.Entities
 {
-    public class Project : Entity
+    public class ProjectEntity : Entity
     {
         public string Name { get; set; }
         public string Description { get; set; }
@@ -12,7 +12,7 @@ namespace CIPlatform.Data.Entities
         public bool IsPrivateRepository { get; set; }
         public bool IsPrivateProject { get; set; }
         public string SecretToken { get; set; } // Either SSH or access token
-        public Team Team { get; set; }
-        public List<Run> Runs { get; set; } = new();
+        public TeamEntity Team { get; set; }
+        public List<RunEntity> Runs { get; set; } = new();
     }
 }

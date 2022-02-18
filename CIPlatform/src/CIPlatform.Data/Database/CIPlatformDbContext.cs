@@ -22,13 +22,13 @@ namespace CIPlatform.Data.Database
         {
         }
 
-        public DbSet<User> Users { get; set; }
-        public DbSet<Team> Teams { get; set; }
-        public DbSet<TeamMember> TeamMembers { get; set; }
-        public DbSet<Project> Projects { get; set; }
-        public DbSet<Run> Runs { get; set; }
-        public DbSet<Job> Jobs { get; set; }
-        public DbSet<Step> Steps { get; set; }
+        public DbSet<UserEntity> Users { get; set; }
+        public DbSet<TeamEntity> Teams { get; set; }
+        public DbSet<TeamMemberEntity> TeamMembers { get; set; }
+        public DbSet<ProjectEntity> Projects { get; set; }
+        public DbSet<RunEntity> Runs { get; set; }
+        public DbSet<JobEntity> Jobs { get; set; }
+        public DbSet<StepEntity> Steps { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -36,26 +36,26 @@ namespace CIPlatform.Data.Database
             modelBuilder.HasPostgresEnum<JobContext>();
             modelBuilder.HasPostgresEnum<Permissions>();
 
-            modelBuilder.Entity<Project>()
+            modelBuilder.Entity<ProjectEntity>()
                         .HasMany(project => project.Runs)
                         .WithOne(run => run.Project)
                         .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<TeamMember>()
+            modelBuilder.Entity<TeamMemberEntity>()
                         .HasOne(teamMember => teamMember.Team)
                         .WithMany(team => team.Members);
 
-            modelBuilder.Entity<Team>()
+            modelBuilder.Entity<TeamEntity>()
                         .HasMany(team => team.Projects)
                         .WithOne(project => project.Team)
                         .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<Run>()
+            modelBuilder.Entity<RunEntity>()
                         .HasMany(run => run.Jobs)
                         .WithOne(job => job.Run)
                         .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<Job>()
+            modelBuilder.Entity<JobEntity>()
                         .HasMany(job => job.Steps)
                         .WithOne(step => step.Job)
                         .OnDelete(DeleteBehavior.Cascade);

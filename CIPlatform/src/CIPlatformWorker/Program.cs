@@ -7,6 +7,7 @@ using CIPlatform.Core.Hubs.Consumers;
 using CIPlatform.Data.Configuration;
 using CIPlatform.Data.Events;
 using CIPlatformWorker.Factories;
+using CIPlatformWorker.Factories.Job;
 using CIPlatformWorker.Services;
 using Docker.DotNet;
 using Microsoft.Extensions.Configuration;

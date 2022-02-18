@@ -4,9 +4,11 @@ using System.Threading.Tasks;
 using CIPlatform.Data.Entities;
 using CIPlatformWebApi.DataTransfer;
 using CIPlatformWebApi.DataTransfer.User;
+using CIPlatformWebApi.Extensions.Utils;
 using CIPlatformWebApi.Services;
 using CIPlatformWebApi.Services.User;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -31,21 +33,35 @@ namespace CIPlatformWebApi.Controllers
         [Route("{id:long}")]
         public async Task<IActionResult> GetUserByIdAsync([FromRoute] long id)
         {
-            var user = HttpContext.Items["user"] as UserEntity;
+            try
+            {
+                var user = HttpContext.Items["user"] as UserEntity;
 
-            var userDto = await _userService.GetUserAsync(id, user);
+                var userDto = await _userService.GetUserAsync(id, user);
 
-            return Ok(userDto);
+                return Ok(userDto);
+            }
+            catch (BadHttpRequestException exception)
+            {
+                return StatusCode(exception.StatusCode, exception.ToErrorResponse());
+            }
         }
 
         [Authorize(Roles = "User,Admin")]
         [HttpGet]
         public async Task<IActionResult> GetUserAsync()
         {
-            var user = HttpContext.Items["user"] as UserEntity;
-            var userDto = await _userService.GetUserAsync(user.Id, user);
+            try
+            {
+                var user = HttpContext.Items["user"] as UserEntity;
+                var userDto = await _userService.GetUserAsync(user.Id, user);
 
-            return Ok(userDto);
+                return Ok(userDto);
+            }
+            catch (BadHttpRequestException exception)
+            {
+                return StatusCode(exception.StatusCode, exception.ToErrorResponse());
+            }
         }
 
         [Authorize(Roles = "Admin")]
@@ -53,10 +69,17 @@ namespace CIPlatformWebApi.Controllers
         [Route("{id:long}")]
         public async Task<IActionResult> UpdateUserAsync([FromRoute] long id, [FromBody] UpdateUserDto updateUserDto)
         {
-            var user = HttpContext.Items["user"] as UserEntity;
-            await _userService.UpdateUserAsync(id, updateUserDto, user);
+            try
+            {
+                var user = HttpContext.Items["user"] as UserEntity;
+                await _userService.UpdateUserAsync(id, updateUserDto, user);
 
-            return NoContent();
+                return NoContent();
+            }
+            catch (BadHttpRequestException exception)
+            {
+                return StatusCode(exception.StatusCode, exception.ToErrorResponse());
+            }
         }
 
         [Authorize(Roles = "Admin")]
@@ -64,10 +87,17 @@ namespace CIPlatformWebApi.Controllers
         [Route("{id:long}")]
         public async Task<IActionResult> DeleteUserAsync([FromRoute] long id)
         {
-            var user = HttpContext.Items["user"] as UserEntity;
-            await _userService.DeleteUserAsync(id, user);
+            try
+            {
+                var user = HttpContext.Items["user"] as UserEntity;
+                await _userService.DeleteUserAsync(id, user);
 
-            return NoContent();
+                return NoContent();
+            }
+            catch (BadHttpRequestException exception)
+            {
+                return StatusCode(exception.StatusCode, exception.ToErrorResponse());
+            }
         }
 
         [Authorize(Roles = "Admin")]
@@ -75,20 +105,34 @@ namespace CIPlatformWebApi.Controllers
         [Route("/api/users")]
         public async Task<IActionResult> GetUsersAsync()
         {
-            var user = HttpContext.Items["user"] as UserEntity;
-            var usersDto = await _userService.GetUsersAsync(user);
+            try
+            {
+                var user = HttpContext.Items["user"] as UserEntity;
+                var usersDto = await _userService.GetUsersAsync(user);
 
-            return Ok(usersDto);
+                return Ok(usersDto);
+            }
+            catch (BadHttpRequestException exception)
+            {
+                return StatusCode(exception.StatusCode, exception.ToErrorResponse());
+            }
         }
 
         [HttpPost]
         [Route("register")]
         public async Task<IActionResult> RegisterAsync([FromBody] CreateUserDto createUserDto)
         {
-            await _userService.CreateUser(createUserDto);
-            _logger.LogInformation($"User `{createUserDto.Username}` has been created @ {DateTime.Now}");
+            try
+            {
+                await _userService.CreateUser(createUserDto);
+                _logger.LogInformation($"User `{createUserDto.Username}` has been created @ {DateTime.Now}");
 
-            return StatusCode((int) HttpStatusCode.Created);
+                return StatusCode((int) HttpStatusCode.Created);
+            }
+            catch (BadHttpRequestException exception)
+            {
+                return StatusCode(exception.StatusCode, exception.ToErrorResponse());
+            }
         }
     }
 }

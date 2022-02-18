@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using CIPlatform.Data.Configuration;
 using CIPlatform.Data.Events;
 
-namespace CIPlatformWorker.Services
+namespace CIPlatformWorker.Services.Job
 {
     public interface IJobHandlerService : IAsyncDisposable, IDisposable
     {

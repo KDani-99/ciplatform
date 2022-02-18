@@ -1,9 +1,6 @@
 import {
   Component,
-  ComponentRef,
-  ElementRef,
   OnInit,
-  ViewChild,
 } from '@angular/core';
 import { Select } from '@ngxs/store';
 import { AppState } from './state/app/app.state';
@@ -27,7 +24,6 @@ export class AppComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.signalrService.connect();
   }
 
   closeError(): void {

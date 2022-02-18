@@ -13,7 +13,7 @@ using Docker.DotNet;
 using Docker.DotNet.Models;
 using Microsoft.Extensions.Options;
 
-namespace CIPlatformWorker.Services
+namespace CIPlatformWorker.Services.Job
 {
     public class DockerJobHandlerService : JobHandlerService
     {
@@ -116,7 +116,7 @@ namespace CIPlatformWorker.Services
 
             // in case there is something left in the string builder
             // stream rest of the line
-            var dataToStream = TrimLog(log.ToString());
+            var dataToStream = log.ToString();
             await channelWriter.WriteAsync(dataToStream);
         }
 
@@ -139,17 +139,10 @@ namespace CIPlatformWorker.Services
                 }
 
                 await Task.Yield();
-                yield return TrimLog(sb.ToString(0, i + 1));
+                yield return sb.ToString(0, i + 1);
                 sb.Remove(0, i + 1);
                 i -= i + 1;
             }
-        }
-
-        private static string TrimLog(string line)
-        {
-            return line
-                .TrimEnd('\n')
-                .TrimEnd('\r');
         }
 
         public override void Dispose()

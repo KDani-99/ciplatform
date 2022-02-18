@@ -8,7 +8,7 @@ using CIPlatformWorker.Services.Job;
 using Docker.DotNet;
 using Microsoft.Extensions.Options;
 
-namespace CIPlatformWorker.Factories
+namespace CIPlatformWorker.Factories.Job
 {
     public class DockerJobHandlerServiceFactory : JobHandlerServiceFactory
     {

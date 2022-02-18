@@ -1,9 +1,9 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import * as signalr from '@microsoft/signalr';
-import { ConfigService } from '../../config/config.service';
-import { firstValueFrom, Observable } from 'rxjs';
-import { Select, Store } from '@ngxs/store';
-import { AppState } from '../../state/app/app.state';
+import {ConfigService} from '../../config/config.service';
+import {firstValueFrom, Observable} from 'rxjs';
+import {Select} from '@ngxs/store';
+import {HubConnectionState} from "@microsoft/signalr/dist/esm/HubConnection";
 
 export enum ResultsChannel {
   PROJECT = 'project',
@@ -21,7 +21,9 @@ export class SignalRService {
   @Select((state: any) => state.app.user.accessToken)
   accessToken!: Observable<string>;
 
-  constructor(private readonly configService: ConfigService) {}
+  constructor(private readonly configService: ConfigService) {
+    this.connect().then(() => console.log('Connected'));
+  }
 
   connect(): Promise<any> {
     const ctx = this;
@@ -39,7 +41,10 @@ export class SignalRService {
     return this.hubConnection.start();
   }
 
-  subscribeToResultsChannel(resultsChannel: ResultsChannel, entityId: number) {
+  async subscribeToResultsChannel(resultsChannel: ResultsChannel, entityId: number): Promise<void> {
+    while (this.hubConnection?.state === HubConnectionState.Connecting) {
+      await this.delayTask(2.5 * 1000)
+    }
     this.hubConnection?.send(
       'SubscribeToResultsChannel',
       resultsChannel,
@@ -47,10 +52,13 @@ export class SignalRService {
     );
   }
 
-  unSubscribeFromResultsChannel(
+  async unSubscribeFromResultsChannel(
     resultsChannel: ResultsChannel,
     entityId: number,
-  ) {
+  ): Promise<void> {
+    while (this.hubConnection?.state === HubConnectionState.Connecting) {
+      await this.delayTask(2.5 * 1000)
+    }
     this.hubConnection?.send(
       'UnSubscribeFromChannel',
       resultsChannel,
@@ -63,11 +71,16 @@ export class SignalRService {
     this.hubConnection?.on(name, action);
   }
 
-  send(name: string, ...args: any[]): Promise<void> {
+  async send(name: string, ...args: any[]): Promise<void> {
+    while (this.hubConnection?.state === HubConnectionState.Connecting) {
+      await this.delayTask(2.5 * 1000)
+    }
     return this.hubConnection!.send(name, args);
   }
 
-  disconnect() {
-    this.hubConnection?.stop();
+  private delayTask(time: number): Promise<void> {
+    return new Promise((resolve) => {
+      setTimeout(() => resolve(), time);
+    });
   }
 }

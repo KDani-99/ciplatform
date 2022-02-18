@@ -6,7 +6,7 @@ using CIPlatformWorker.Services;
 using CIPlatformWorker.Services.Job;
 using Microsoft.Extensions.Options;
 
-namespace CIPlatformWorker.Factories
+namespace CIPlatformWorker.Factories.Job
 {
     public class LinuxJobHandlerServiceFactory : JobHandlerServiceFactory
     {

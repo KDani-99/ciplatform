@@ -13,6 +13,8 @@ using CIPlatform.Data.Events;
 using CIPlatform.Data.Extensions;
 using CIPlatform.Data.JsonWebTokens;
 using CIPlatformWorker.Factories;
+using CIPlatformWorker.Factories.Job;
+using CIPlatformWorker.Services.Job;
 using Microsoft.Extensions.Logging;
 
 namespace CIPlatformWorker.WebSocket.Consumers
@@ -36,7 +38,8 @@ namespace CIPlatformWorker.WebSocket.Consumers
         public async Task ConsumeAsync(QueueJobCommand queueJobCommand, CancellationToken cancellationToken = default)
         {
             var jobDetails = GetJobDetails(queueJobCommand);
-
+            var beforeExecutionDateTime = DateTime.Now;
+            
             try
             {
                 _logger.LogInformation(
@@ -72,11 +75,14 @@ namespace CIPlatformWorker.WebSocket.Consumers
                     StepIndex = _stepIndex,
                     Token = queueJobCommand.Token
                 });
-                // rest will be marked as skipped
             }
             finally
             {
                 _logger.LogInformation($"Finished job: {jobDetails.JobId} (Run: {jobDetails.RunId}).");
+                
+                var totalTime = DateTime.Now - beforeExecutionDateTime;
+                _logger.LogInformation($"Job ran for {totalTime.TotalSeconds} second(s).");
+                
                 await _workerClient.FinishJobAsync();
             }
         }
@@ -85,8 +91,6 @@ namespace CIPlatformWorker.WebSocket.Consumers
                                            JobConfiguration jobConfiguration,
                                            CancellationToken cancellationToken = default)
         {
-            var beforeExecutionDateTime = DateTime.Now;
-
             await using var jobHandlerService = _jobHandlerServiceFactory.Create(jobConfiguration, cancellationToken);
             await jobHandlerService.PrepareEnvironmentAsync();
 
@@ -97,23 +101,21 @@ namespace CIPlatformWorker.WebSocket.Consumers
                 try
                 {
                     cancellationToken.ThrowIfCancellationRequested();
+                    
+                    // Do not await!
                     _ = _workerClient.StreamLogAsync(jobDetails.RunId, jobDetails.JobId, i,
-                                                     channel.Reader); // do not await!
+                                                     channel.Reader); 
 
                     await ProcessStepAsync(channel, i, jobHandlerService, jobConfiguration.Steps[i], jobDetails);
                 }
-                finally // try-finally to make sure the channel write gets completed
+                finally 
                 {
+                    // try-finally to make sure the channel write gets completed
                     channel.Writer.Complete();
                 }
 
                 _stepIndex++;
             }
-
-            var afterExecutionDateTime = DateTime.Now;
-            var totalTime = afterExecutionDateTime - beforeExecutionDateTime;
-
-            _logger.LogInformation($"Job ran for {totalTime.TotalSeconds} second(s).");
         }
 
         private async Task ProcessStepAsync(ChannelWriter<string> channelWriter,

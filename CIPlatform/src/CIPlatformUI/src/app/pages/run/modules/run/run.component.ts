@@ -59,7 +59,7 @@ export class RunComponent
   listen(): void {
     this.signalrService.registerMethod('ReceiveJobResultEvent', (event: any) =>
       this.onReceiveJobResultEvent(event),
-    ); // TODO <- remove
+    );
     this.signalrService.subscribeToResultsChannel(
       ResultsChannel.RUN,
       this.runData!.run.id,

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CIPlatformWebApi.DataTransfer;
 using CIPlatformWebApi.DataTransfer.User;
+using CIPlatformWebApi.Extensions.Utils;
 using CIPlatformWebApi.Services;
 using CIPlatformWebApi.Services.Auth;
 using CIPlatformWebApi.Services.User;
@@ -34,10 +35,17 @@ namespace CIPlatformWebApi.Controllers
         [Route("login")]
         public async Task<IActionResult> LoginAsync([FromBody] LoginDto loginDto)
         {
-            var authTokens = await _userService.LoginAsync(loginDto, HttpContext);
-            _logger.LogInformation($"User `{loginDto.Username}` has logged in @ {DateTime.Now}");
+            try
+            {
+                var authTokens = await _userService.LoginAsync(loginDto, HttpContext);
+                _logger.LogInformation($"User `{loginDto.Username}` has logged in @ {DateTime.Now}");
 
-            return Ok(authTokens);
+                return Ok(authTokens);
+            }
+            catch (BadHttpRequestException exception)
+            {
+                return StatusCode(exception.StatusCode, exception.ToErrorResponse());
+            }
         }
 
         [HttpPost]
@@ -57,9 +65,9 @@ namespace CIPlatformWebApi.Controllers
 
                 return NoContent();
             }
-            catch (BadHttpRequestException)
+            catch (BadHttpRequestException exception)
             {
-                throw;
+                return StatusCode(exception.StatusCode, exception.ToErrorResponse());
             }
             catch
             {
@@ -82,9 +90,9 @@ namespace CIPlatformWebApi.Controllers
 
                 return Ok(authTokens);
             }
-            catch (BadHttpRequestException)
+            catch (BadHttpRequestException exception)
             {
-                throw;
+                return StatusCode(exception.StatusCode, exception.ToErrorResponse());
             }
             catch
             {

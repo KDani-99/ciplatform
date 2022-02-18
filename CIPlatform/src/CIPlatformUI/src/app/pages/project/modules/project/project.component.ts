@@ -47,9 +47,6 @@ export class ProjectComponent
   @Select((state: any) => state.app.user.user.isAdmin)
   isAdmin?: Observable<boolean>;
 
-  elapsedExecutionTime: number = 0;
-  interval?: number = undefined;
-
   constructor(
     private readonly route: ActivatedRoute,
     private readonly router: Router,
@@ -77,15 +74,11 @@ export class ProjectComponent
         this.projectData.project!.id,
       );
     }
-    clearInterval(this.interval);
   }
 
   listen(): void {
     this.signalrService.registerMethod('ReceiveRunResultEvent', (event: any) =>
       this.onReceiveRunResultEvent(event),
-    );
-    this.signalrService.registerMethod('ReceiveRunQueuedEvent', (event: any) =>
-      this.onReceiveRunQueuedEvent(event),
     );
     this.signalrService.subscribeToResultsChannel(
       ResultsChannel.PROJECT,

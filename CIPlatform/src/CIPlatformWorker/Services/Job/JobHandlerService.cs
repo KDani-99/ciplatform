@@ -10,7 +10,7 @@ using CIPlatform.Data.Configuration;
 using CIPlatform.Data.Events;
 using Microsoft.Extensions.Options;
 
-namespace CIPlatformWorker.Services
+namespace CIPlatformWorker.Services.Job
 {
     public abstract class JobHandlerService : IJobHandlerService
     {

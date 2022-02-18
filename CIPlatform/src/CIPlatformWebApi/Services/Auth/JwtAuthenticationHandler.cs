@@ -35,11 +35,13 @@ namespace CIPlatformWebApi.Services.Auth
 
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {
-            
+            var x = Context.WebSockets.IsWebSocketRequest;
             if (!Request.Headers.ContainsKey("Authorization"))
             {
                 return AuthenticateResult.Fail("Invalid token.");
             }
+
+            
 
             try
             {

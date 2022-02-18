@@ -11,7 +11,7 @@ using CIPlatform.Data.Events;
 using CIPlatformWorker.Extensions;
 using Microsoft.Extensions.Options;
 
-namespace CIPlatformWorker.Services
+namespace CIPlatformWorker.Services.Job
 {
     public class WindowsJobHandlerService : JobHandlerService
     {

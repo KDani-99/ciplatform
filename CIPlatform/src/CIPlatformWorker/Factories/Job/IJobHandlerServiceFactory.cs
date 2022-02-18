@@ -4,7 +4,7 @@ using CIPlatformWorker.Entities;
 using CIPlatformWorker.Services;
 using CIPlatformWorker.Services.Job;
 
-namespace CIPlatformWorker.Factories
+namespace CIPlatformWorker.Factories.Job
 {
     public interface IJobHandlerServiceFactory
     {

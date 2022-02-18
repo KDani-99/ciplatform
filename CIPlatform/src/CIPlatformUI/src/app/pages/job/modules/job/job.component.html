@@ -34,7 +34,7 @@
       <td>{{runService.getTime(step.startedDateTime)}}</td>
       <td>{{runService.getTime(step.finishedDateTime)}}</td>
       <td>{{runService.getFormattedExecutionTime(step.startedDateTime, step.finishedDateTime)}}</td>
-      <td *ngIf="step.state == State.QUEUED" [className]="'running'"><i class="eva eva-clock-outline"></i></td>
+      <td *ngIf="step.state == State.QUEUED" [className]="'queued'"><i class="eva eva-clock-outline"></i></td>
       <td *ngIf="step.state == State.RUNNING" [className]="'running'"><i class="eva eva-loader-outline"></i></td>
       <td *ngIf="step.state == State.SUCCESSFUL" [className]="'successful'"><i class="eva eva-checkmark-circle-outline"></i></td>
       <td *ngIf="step.state == State.FAILED" [className]="'failed'"><i class="eva eva-alert-circle-outline"></i></td>

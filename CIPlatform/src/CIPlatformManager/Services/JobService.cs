@@ -65,7 +65,7 @@ namespace CIPlatformManager.Services
 
             await _hubContext.Clients.Client(connectionId).QueueJob(queueJobCommand);
             
-            job.State = States.Running;
+            job.State = States.Running; // TODO: -> remove it from here
             job.StartedDateTime = DateTime.Now;
 
             await SendJobNotificationAsync(run.Id, job.Id, States.Running);
@@ -76,6 +76,8 @@ namespace CIPlatformManager.Services
         {
             if (run.Jobs.FindIndex(j => j.Id == jobId) == 0)
             {
+                // If that's the first job of the given run
+                // then change it's state to Queued and send update to clients
                 run.State = States.Queued;
                 run.StartedDateTime = DateTime.Now;
                 await SendRunNotificationAsync(run.Id, States.Running);

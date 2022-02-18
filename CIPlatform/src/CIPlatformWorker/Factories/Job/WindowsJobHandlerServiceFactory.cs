@@ -3,6 +3,7 @@ using CIPlatform.Data.Configuration;
 using CIPlatformWorker.Configuration;
 using CIPlatformWorker.Entities;
 using CIPlatformWorker.Services;
+using CIPlatformWorker.Services.Job;
 using Microsoft.Extensions.Options;
 
 namespace CIPlatformWorker.Factories

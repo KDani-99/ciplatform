@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using CIPlatform.Data.Entities;
 using CIPlatform.Data.Repositories;
 using CIPlatformWebApi.DataTransfer;
+using CIPlatformWebApi.DataTransfer.Project;
 using CIPlatformWebApi.Exceptions;
 using CIPlatformWebApi.Extensions;
 using CIPlatformWebApi.Extensions.Entities;

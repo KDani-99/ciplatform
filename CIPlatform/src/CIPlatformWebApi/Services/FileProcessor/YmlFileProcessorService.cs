@@ -7,7 +7,7 @@ using CIPlatformWebApi.Exceptions;
 using Microsoft.Extensions.Options;
 using YamlDotNet.Serialization;
 
-namespace CIPlatformWebApi.Services
+namespace CIPlatformWebApi.Services.File
 {
     public class YmlFileProcessorService : IFileProcessorService<RunConfiguration>
     {
@@ -20,7 +20,7 @@ namespace CIPlatformWebApi.Services
             _ymlConfiguration = ymlConfiguration.Value ?? throw new ArgumentNullException(nameof(ymlConfiguration));
         }
 
-        public Task<RunConfiguration> ProcessAsync(string data, long projectId)
+        public Task<RunConfiguration> ProcessAsync(string data)
         {
             var result = _deserializer.Deserialize<RunConfiguration>(data);
 

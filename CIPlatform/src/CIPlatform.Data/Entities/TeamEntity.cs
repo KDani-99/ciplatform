@@ -10,6 +10,6 @@ namespace CIPlatform.Data.Entities
         public bool IsPublic { get; set; }
         public string Image { get; set; }
         public List<TeamMember> Members { get; set; } = new();
-        public List<Project> Projects { get; set; } = new();
+        public List<ProjectEntity> Projects { get; set; } = new();
     }
 }

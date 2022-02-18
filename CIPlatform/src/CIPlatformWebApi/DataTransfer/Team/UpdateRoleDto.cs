@@ -1,6 +1,6 @@
 ﻿using CIPlatform.Data.Entities;
 
-namespace CIPlatformWebApi.DataTransfer
+namespace CIPlatformWebApi.DataTransfer.User
 {
     public class UpdateRoleDto
     {

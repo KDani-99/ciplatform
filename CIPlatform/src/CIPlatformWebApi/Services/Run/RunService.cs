@@ -7,6 +7,8 @@ using CIPlatform.Data.Configuration;
 using CIPlatform.Data.Entities;
 using CIPlatform.Data.Repositories;
 using CIPlatformWebApi.DataTransfer;
+using CIPlatformWebApi.DataTransfer.Job;
+using CIPlatformWebApi.DataTransfer.Run;
 using CIPlatformWebApi.Exceptions;
 using CIPlatformWebApi.Extensions.Entities;
 using MassTransit;

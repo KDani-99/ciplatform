@@ -11,7 +11,7 @@ namespace CIPlatform.Data.Entities
         public string Email { get; set; }
         [Column(TypeName = "Roles[]")] public Roles[] Roles { get; set; }
         public string Password { get; set; }
-        public List<Team> Teams { get; set; } = new();
+        public List<TeamEntity> Teams { get; set; } = new();
         public DateTime RegistrationTimestamp { get; set; }
     }
 }

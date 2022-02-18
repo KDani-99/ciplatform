@@ -2,6 +2,8 @@
 using System.Threading.Tasks;
 using CIPlatform.Data.Entities;
 using CIPlatformWebApi.DataTransfer;
+using CIPlatformWebApi.DataTransfer.Job;
+using CIPlatformWebApi.DataTransfer.Run;
 
 namespace CIPlatformWebApi.Services
 {

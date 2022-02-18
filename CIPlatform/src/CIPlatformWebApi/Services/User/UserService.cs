@@ -7,6 +7,7 @@ using CIPlatform.Data.Entities;
 using CIPlatform.Data.Extensions;
 using CIPlatform.Data.Repositories;
 using CIPlatformWebApi.DataTransfer;
+using CIPlatformWebApi.DataTransfer.User;
 using CIPlatformWebApi.Exceptions;
 using CIPlatformWebApi.Extensions;
 using CIPlatformWebApi.Extensions.Entities;

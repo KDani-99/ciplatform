@@ -35,7 +35,7 @@ namespace CIPlatformWorker.Tests
             {
                 Image = "test:image",
                 Environment = new List<string>(),
-                Steps = new List<StepConfiguration>()
+                Steps = new List<StepConfiguration> { new() { Cmd = "[wd]", Name = "Initial step"}}
             };
             var cancellationToken = CancellationToken.None;
             var imagesCreateParameters = new Mock<ImagesCreateParameters>();
@@ -62,12 +62,12 @@ namespace CIPlatformWorker.Tests
                 .Returns(Task.FromResult(createContainerResponse));
             dockerClient
                 .Setup(x => x.Containers.CreateContainerAsync(It.IsAny<CreateContainerParameters>(),
-                                                              It.IsAny<CancellationToken>()))
+                    It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(createContainerResponse));
             dockerClient
-                .Setup(x => x.Containers.StartContainerAsync(It.IsAny<string>(), It.IsAny<ContainerStartParameters>(),
-                                                             It.IsAny<CancellationToken>()))
+                .Setup(x => x.Containers.StartContainerAsync(It.IsAny<string>(), It.IsAny<ContainerStartParameters>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(false));
+            
             await using var dockerJobHandlerService = new DockerJobHandlerService(
                 jobConfiguration, agentConfiguration, dockerClient.Object, cancellationToken);
 
@@ -86,9 +86,8 @@ namespace CIPlatformWorker.Tests
             {
                 Image = "test:image",
                 Environment = new List<string>(),
-                Steps = new List<StepConfiguration>()
+                Steps = new List<StepConfiguration> { new() { Cmd = "[wd]", Name = "Initial step"}}
             };
-            var jobDetails = new Mock<JobDetails>();
             var cancellationToken = CancellationToken.None;
             var imagesCreateParameters = new Mock<ImagesCreateParameters>();
             var createContainerResponse = new CreateContainerResponse
@@ -121,7 +120,7 @@ namespace CIPlatformWorker.Tests
                                                              It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(true));
             await using var dockerJobHandlerService = new DockerJobHandlerService(
-                jobDetails.Object, jobConfiguration, agentConfiguration, dockerClient.Object, cancellationToken);
+                jobConfiguration, agentConfiguration, dockerClient.Object, cancellationToken);
 
             // Act
             await dockerJobHandlerService.PrepareEnvironmentAsync();
@@ -152,9 +151,8 @@ namespace CIPlatformWorker.Tests
             {
                 Image = "test:image",
                 Environment = new List<string>(),
-                Steps = new List<StepConfiguration>()
+                Steps = new List<StepConfiguration> { new() { Cmd = "[wd]", Name = "Initial step"}}
             };
-            var jobDetails = new Mock<JobDetails>();
             var cancellationToken = CancellationToken.None;
             var agentConfiguration = fixture.Create<IOptions<WorkerConfiguration>>();
             
@@ -163,7 +161,7 @@ namespace CIPlatformWorker.Tests
             var stepConfiguration = new Mock<StepConfiguration>();
             var stepIndex = 0;
             await using var dockerJobHandlerService = new DockerJobHandlerService(
-                jobDetails.Object, jobConfiguration, agentConfiguration, dockerClient.Object, cancellationToken);
+                 jobConfiguration, agentConfiguration, dockerClient.Object, cancellationToken);
 
             // Act and Assert
             Assert.ThrowsAsync<EnvironmentNotPreparedException>(async () =>
@@ -182,9 +180,8 @@ namespace CIPlatformWorker.Tests
             {
                 Image = "test:image",
                 Environment = new List<string>(),
-                Steps = new List<StepConfiguration>()
+                Steps = new List<StepConfiguration> { new() { Cmd = "[wd]", Name = "Initial step"}}
             };
-            var jobDetails = new Mock<JobDetails>();
             var cancellationToken = CancellationToken.None;
             var imagesCreateParameters = new Mock<ImagesCreateParameters>();
             var createContainerResponse = new CreateContainerResponse
@@ -244,7 +241,7 @@ namespace CIPlatformWorker.Tests
                 .Setup(x => x.Exec.InspectContainerExecAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(inspectContainerResponse));
             await using var dockerJobHandlerService = new DockerJobHandlerService(
-                jobDetails.Object, jobConfiguration, agentConfiguration, dockerClient.Object, cancellationToken);
+                jobConfiguration, agentConfiguration, dockerClient.Object, cancellationToken);
 
             // Act
             await dockerJobHandlerService.PrepareEnvironmentAsync();
@@ -276,9 +273,8 @@ namespace CIPlatformWorker.Tests
             {
                 Image = "test:image",
                 Environment = new List<string>(),
-                Steps = new List<StepConfiguration>()
+                Steps = new List<StepConfiguration> { new() { Cmd = "[wd]", Name = "Initial step"}}
             };
-            var jobDetails = new Mock<JobDetails>();
             var cancellationToken = CancellationToken.None;
             var imagesCreateParameters = new Mock<ImagesCreateParameters>();
             var createContainerResponse = new CreateContainerResponse
@@ -338,7 +334,7 @@ namespace CIPlatformWorker.Tests
                 .Setup(x => x.Exec.InspectContainerExecAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(inspectContainerResponse));
             await using var dockerJobHandlerService = new DockerJobHandlerService(
-                jobDetails.Object, jobConfiguration, agentConfiguration, dockerClient.Object, cancellationToken);
+                jobConfiguration, agentConfiguration, dockerClient.Object, cancellationToken);
             await dockerJobHandlerService.PrepareEnvironmentAsync();
 
             // Act and Assert

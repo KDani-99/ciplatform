@@ -19,7 +19,7 @@ namespace CIPlatformWorker.Tests
         [Test]
         public void Create_NewDockerJobHandlerServiceFactory_ShouldThrowArgumentNullException()
         {
-            // Arrange
+            // Act and Assert
             Assert.Throws<ArgumentNullException>(() => new DockerJobHandlerServiceFactory(null, null));
         }
 
@@ -28,7 +28,6 @@ namespace CIPlatformWorker.Tests
         {
             // Arrange
             var jobConfiguration = new JobConfiguration();
-            var jobDetails = new JobDetails();
             var fixture = new Fixture().Customize(new AutoMoqCustomization());
             var agentConfiguration = fixture.Create<IOptions<WorkerConfiguration>>();
             var dockerClient = new Mock<IDockerClient>();
@@ -38,10 +37,10 @@ namespace CIPlatformWorker.Tests
 
             // Act and Assert
             Assert.DoesNotThrow(
-                () => mockDockerJobHandlerServiceFactory.Create(jobDetails, jobConfiguration, cancellationToken));
-            Assert.NotNull(mockDockerJobHandlerServiceFactory.Create(jobDetails, jobConfiguration, cancellationToken));
+                () => mockDockerJobHandlerServiceFactory.Create(jobConfiguration, cancellationToken));
+            Assert.NotNull(mockDockerJobHandlerServiceFactory.Create(jobConfiguration, cancellationToken));
             Assert.IsInstanceOf<DockerJobHandlerService>(
-                mockDockerJobHandlerServiceFactory.Create(jobDetails, jobConfiguration, cancellationToken));
+                mockDockerJobHandlerServiceFactory.Create(jobConfiguration, cancellationToken));
         }
 
         [Test]
@@ -58,7 +57,7 @@ namespace CIPlatformWorker.Tests
             // Act and Assert
             Assert.Throws<ArgumentNullException>(() =>
                                                      mockDockerJobHandlerServiceFactory.Create(
-                                                         null, null, cancellationToken));
+                                                         null, cancellationToken));
         }
     }
 }

@@ -26,7 +26,6 @@ namespace CIPlatformWorker.Tests
         {
             // Arrange
             var jobConfiguration = new JobConfiguration();
-            var jobDetails = new JobDetails();
             var fixture = new Fixture().Customize(new AutoMoqCustomization());
             var agentConfiguration = fixture.Create<IOptions<WorkerConfiguration>>();
             var cancellationToken = CancellationToken.None;
@@ -34,10 +33,10 @@ namespace CIPlatformWorker.Tests
 
             // Act and Assert
             Assert.DoesNotThrow(
-                () => mockLinuxJobHandlerServiceFactory.Create(jobDetails, jobConfiguration, cancellationToken));
-            Assert.NotNull(mockLinuxJobHandlerServiceFactory.Create(jobDetails, jobConfiguration, cancellationToken));
+                () => mockLinuxJobHandlerServiceFactory.Create(jobConfiguration, cancellationToken));
+            Assert.NotNull(mockLinuxJobHandlerServiceFactory.Create(jobConfiguration, cancellationToken));
             Assert.IsInstanceOf<LinuxJobHandlerService>(
-                mockLinuxJobHandlerServiceFactory.Create(jobDetails, jobConfiguration, cancellationToken));
+                mockLinuxJobHandlerServiceFactory.Create(jobConfiguration, cancellationToken));
         }
 
         [Test]
@@ -52,7 +51,7 @@ namespace CIPlatformWorker.Tests
             // Act and Assert
             Assert.Throws<ArgumentNullException>(() =>
                                                      mockLinuxJobHandlerServiceFactory.Create(
-                                                         null, null, cancellationToken));
+                                                         null, cancellationToken));
         }
     }
 }

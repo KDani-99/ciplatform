@@ -29,20 +29,18 @@ public class WindowsJobHandlerServiceFactoryTests
         {
             // Arrange
             var jobConfiguration = new JobConfiguration();
-            var jobDetails = new JobDetails();
             var fixture = new Fixture().Customize(new AutoMoqCustomization());
             var agentConfiguration = fixture.Create<IOptions<WorkerConfiguration>>();
-            var workerClient = new Mock<IWorkerClient>();
-            var loggerFactory = new Mock<ILoggerFactory>();
+
             var cancellationToken = CancellationToken.None;
             var mockWindowsJobHandlerServiceFactory = new WindowsJobHandlerServiceFactory(agentConfiguration);
 
             // Act and Assert
             Assert.DoesNotThrow(
-                () => mockWindowsJobHandlerServiceFactory.Create(jobDetails, jobConfiguration, cancellationToken));
-            Assert.NotNull(mockWindowsJobHandlerServiceFactory.Create(jobDetails, jobConfiguration, cancellationToken));
+                () => mockWindowsJobHandlerServiceFactory.Create(jobConfiguration, cancellationToken));
+            Assert.NotNull(mockWindowsJobHandlerServiceFactory.Create(jobConfiguration, cancellationToken));
             Assert.IsInstanceOf<WindowsJobHandlerService>(
-                mockWindowsJobHandlerServiceFactory.Create(jobDetails, jobConfiguration, cancellationToken));
+                mockWindowsJobHandlerServiceFactory.Create(jobConfiguration, cancellationToken));
         }
 
         [Test]
@@ -59,7 +57,7 @@ public class WindowsJobHandlerServiceFactoryTests
             // Act and Assert
             Assert.Throws<ArgumentNullException>(() =>
                                                      mockWindowsJobHandlerServiceFactory.Create(
-                                                         null, null, cancellationToken));
+                                                          null, cancellationToken));
         }
     }
 }

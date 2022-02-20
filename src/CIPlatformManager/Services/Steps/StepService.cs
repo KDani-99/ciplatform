@@ -52,7 +52,6 @@ namespace CIPlatformManager.Services.Steps
             await ProcessRunAsync(run.Project.Id, run, step.State);
 
             await _runRepository.UpdateAsync(run);
-            
         }
 
         private async Task ProcessStepAsync(RunEntity run, JobEntity job, StepEntity step, States state)

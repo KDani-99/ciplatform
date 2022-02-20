@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using CIPlatform.Data.Events;
 
-namespace IPlatformManager.WebSocket
+namespace CIPlatformManager.WebSocket
 {
     public interface IWorkerClient
     {

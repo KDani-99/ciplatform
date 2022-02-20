@@ -39,11 +39,9 @@ namespace CIPlatformManager.SignalR
             HubConnection.Closed -= OnConnectionClose;
             HubConnection?.DisposeAsync();
         }
-
-        // TODO: do the same with this class as I did with redis, register this class as singleton
+        
         public HubConnection HubConnection { get; }
-
-
+        
         private Task OnConnectionClose(Exception exception)
         {
             _logger.LogError("Connection lost. Error: " + exception.Message);

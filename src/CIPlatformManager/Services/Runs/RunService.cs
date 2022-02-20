@@ -17,7 +17,7 @@ using CIPlatformManager.Exceptions;
 using CIPlatformManager.Services.Jobs;
 using CIPlatformManager.SignalR.Hubs;
 using CIPlatformManager.SignalR;
-using IPlatformManager.WebSocket;
+using CIPlatformManager.WebSocket;
 using MassTransit;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.SignalR.Client;

@@ -1,4 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
+using System.IO.Abstractions;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using CIPlatform.Data.Configuration;
@@ -11,7 +12,6 @@ using CIPlatformManager.Repositories;
 using CIPlatformManager.Services;
 using CIPlatformManager.SignalR;
 using CIPlatformManager.SignalR.Hubs;
-using CIPlatformWorker.Hubs;
 using CIPlatformManager.Extensions;
 using CIPlatformManager.Repositories.Jobs;
 using CIPlatformManager.Repositories.Workers;
@@ -95,7 +95,8 @@ namespace CIPlatformManager
                 .AddScoped<IStepService<StepResultEvent>, StepService>()
                 .AddScoped<IJobService, JobService>()
                 .AddScoped<IJobQueueService, JobQueueService>()
-                .AddScoped<IJobQueueRepository, JobQueueRepository>();
+                .AddScoped<IJobQueueRepository, JobQueueRepository>()
+                .AddScoped<IFileSystem, FileSystem>();
 
             services.AddHostedService<QueueService>();
             services.AddHostedService<WorkerCleanupService>();
@@ -122,7 +123,6 @@ namespace CIPlatformManager
             {
                 endpoints.MapControllers();
                 endpoints.MapHub<WorkerHub>("/worker");
-                endpoints.MapHub<WebApiHub>("/webapi");
             });
         }
     }

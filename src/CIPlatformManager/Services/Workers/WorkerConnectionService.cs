@@ -9,7 +9,7 @@ using CIPlatform.Data.Entities;
 using CIPlatformManager.Repositories;
 using CIPlatformManager.Repositories.Workers;
 using CIPlatformManager.SignalR.Hubs;
-using IPlatformManager.WebSocket;
+using CIPlatformManager.WebSocket;
 using Microsoft.AspNetCore.SignalR;
 
 namespace CIPlatformManager.Services.Workers

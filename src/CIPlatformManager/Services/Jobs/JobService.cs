@@ -15,7 +15,7 @@ using CIPlatformManager.Exceptions;
 using CIPlatformManager.Services.Auth;
 using CIPlatformManager.Services.Workers;
 using CIPlatformManager.SignalR.Hubs;
-using IPlatformManager.WebSocket;
+using CIPlatformManager.WebSocket;
 using MassTransit;
 using Microsoft.AspNetCore.SignalR;
 
@@ -67,7 +67,7 @@ namespace CIPlatformManager.Services.Jobs
 
             await _hubContext.Clients.Client(connectionId).QueueJob(queueJobCommand);
             
-            job.State = States.Running; // TODO: -> remove it from here
+            job.State = States.Running;
             job.StartedDateTime = DateTime.Now;
 
             await SendJobNotificationAsync(run.Id, job.Id, States.Running);

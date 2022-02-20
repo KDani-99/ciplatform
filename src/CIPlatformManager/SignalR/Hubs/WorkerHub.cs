@@ -10,7 +10,7 @@ using CIPlatformManager.Services;
 using CIPlatformManager.Services.Logs;
 using CIPlatformManager.Services.Steps;
 using CIPlatformManager.Services.Workers;
-using IPlatformManager.WebSocket;
+using CIPlatformManager.WebSocket;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 

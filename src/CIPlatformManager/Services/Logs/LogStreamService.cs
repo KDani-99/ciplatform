@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.IO.Abstractions;
 using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text;
@@ -21,21 +22,25 @@ namespace CIPlatformManager.Services.Logs
         private readonly LogStreamServiceConfiguration _logStreamServiceConfiguration;
         private readonly IManagerClient _managerClient;
         private readonly IRunRepository _runRepository;
+        private readonly IFileSystem _fileSystem;
 
         public LogStreamService(IOptions<LogStreamServiceConfiguration> logStreamServiceConfiguration,
                                 IRunRepository runRepository,
-                                IManagerClient managerClient)
+                                IManagerClient managerClient, IFileSystem fileSystem)
         {
             _logStreamServiceConfiguration = logStreamServiceConfiguration.Value ??
                 throw new ArgumentNullException(nameof(logStreamServiceConfiguration));
             _runRepository = runRepository ?? throw new ArgumentNullException(nameof(runRepository));
             _managerClient = managerClient ?? throw new ArgumentNullException(nameof(managerClient));
+            _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
         }
 
         public async Task ProcessStreamAsync(ChannelReader<string> stream, long runId, long jobId, int stepIndex)
         {
-            var logPath = Path.GetFullPath(GetLogPath(runId, jobId, stepIndex));
-            Directory.CreateDirectory(Path.GetDirectoryName(logPath)!);
+            var logPath = _fileSystem.Path.GetFullPath(GetLogPath(runId, jobId, stepIndex));
+            _fileSystem.Directory.CreateDirectory(_fileSystem.Path.GetDirectoryName(logPath));
+
+           // Directory.CreateDirectory(Path.GetDirectoryName(logPath)!);
 
             var run = await _runRepository.GetAsync(runId);
             var job = run.Jobs.First(item => item.Id == jobId);
@@ -45,7 +50,7 @@ namespace CIPlatformManager.Services.Logs
             await _runRepository.UpdateAsync(run);
 
             await using var outputStream =
-                new StreamWriter(File.Open(logPath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read));
+                new StreamWriter(_fileSystem.File.Open(logPath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read));
 
             await StreamDataAsync(step.Id, logPath, outputStream, stream);
         }
@@ -91,7 +96,7 @@ namespace CIPlatformManager.Services.Logs
 
         private string GetLogPath(long runId, long jobId, int step)
         {
-            return Path.Join(_logStreamServiceConfiguration.LogPath, runId.ToString(), jobId.ToString(), $"{step}.log");
+            return _fileSystem.Path.Join(_logStreamServiceConfiguration.LogPath, runId.ToString(), jobId.ToString(), $"{step}.log");
         }
     }
 }

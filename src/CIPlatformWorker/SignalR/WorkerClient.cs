@@ -92,10 +92,6 @@ namespace CIPlatformWorker.SignalR
         {
             _logger.LogInformation("Registering worker events...");
             
-
-           /* HubConnection.On<QueueJobCommand>("QueueJob",
-                                              async message => await _serviceProvider.GetService<IConsumer<QueueJobCommand>>()!.ConsumeAsync(message));
-            */
            HubConnection.On<QueueJobCommand>("QueueJob",
                message =>
                {

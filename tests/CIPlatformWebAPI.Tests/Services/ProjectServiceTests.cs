@@ -10,7 +10,7 @@ using CIPlatformWebApi.Services.Project;
 using Moq;
 using NUnit.Framework;
 
-namespace CIPlatformWebAPI.Tests
+namespace CIPlatformWebAPI.Tests.Services
 {
     public class ProjectServiceTests
     {

@@ -14,7 +14,7 @@ using Microsoft.AspNetCore.Http;
 using Moq;
 using NUnit.Framework;
 
-namespace CIPlatformWebAPI.Tests
+namespace CIPlatformWebAPI.Tests.Services
 {
     public class UserServiceTests
     {
@@ -473,12 +473,17 @@ namespace CIPlatformWebAPI.Tests
         public void DeleteUserAsync_ValidId_ShouldDeleteUser()
         {
             // Arrange
-            var userId = 0;
+            var userIdToDelete = 1;
             var userEntity = new UserEntity();
+            var userToDelete = new UserEntity
+            {
+                Id = userIdToDelete,
+                Roles = new[] { Roles.User }
+            };
 
             var userRepository = new Mock<IUserRepository>();
             userRepository.Setup(x => x.GetAsync(It.IsAny<long>()))
-                .Returns(Task.FromResult(null as UserEntity));
+                .Returns(Task.FromResult(userToDelete));
             
             var tokenService = new Mock<ITokenService<JwtSecurityToken>>();
             var credentialManagerService = new Mock<ICredentialManagerService>();
@@ -486,7 +491,7 @@ namespace CIPlatformWebAPI.Tests
                 new UserService(userRepository.Object, tokenService.Object, credentialManagerService.Object);
 
             // Act and Assert
-            Assert.DoesNotThrowAsync(() => userService.DeleteUserAsync(userId, userEntity));
+            Assert.DoesNotThrowAsync(() => userService.DeleteUserAsync(userIdToDelete, userEntity));
             userRepository.Verify(x => x.DeleteAsync(It.IsAny<long>()), Times.Once);
         }
     }

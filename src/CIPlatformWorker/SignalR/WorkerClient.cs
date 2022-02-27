@@ -5,7 +5,6 @@ using CIPlatformWorker.Configuration;
 using CIPlatform.Core.SignalR.Consumers;
 using CIPlatform.Data.Agent;
 using CIPlatform.Data.Configuration;
-using CIPlatform.Data.Entities;
 using CIPlatform.Data.Events;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.DependencyInjection;
@@ -91,21 +90,10 @@ namespace CIPlatformWorker.SignalR
         private void RegisterMethods()
         {
             _logger.LogInformation("Registering worker events...");
-            
-           HubConnection.On<QueueJobCommand>("QueueJob",
-               message =>
-               {
-                   try
-                   {
-                       var x = _serviceProvider.GetService<IConsumer<QueueJobCommand>>();
-                       Console.WriteLine(x.GetType());
-                       x.ConsumeAsync(message);
-                   }
-                   catch (Exception ex)
-                   {
-                       Console.WriteLine(ex);
-                   }
-               });
+
+            HubConnection.On<QueueJobCommand>(
+               "QueueJob",
+               async message => await _serviceProvider.GetService<IConsumer<QueueJobCommand>>()!.ConsumeAsync(message));
         }
 
 

@@ -17,6 +17,7 @@ namespace CIPlatformWebApi.Extensions.Entities
                 Permission = teamMember.Permission
             };
         }
+
         public static bool CanUpdateProjects(this TeamMemberEntity teamMember)
         {
             return teamMember.Permission is Permissions.ReadWrite or Permissions.Admin;

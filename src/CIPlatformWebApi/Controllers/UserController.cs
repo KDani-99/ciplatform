@@ -124,7 +124,7 @@ namespace CIPlatformWebApi.Controllers
         {
             try
             {
-                await _userService.CreateUser(createUserDto);
+                await _userService.CreateUserAsync(createUserDto);
                 _logger.LogInformation($"User `{createUserDto.Username}` has been created @ {DateTime.Now}");
 
                 return StatusCode((int) HttpStatusCode.Created);

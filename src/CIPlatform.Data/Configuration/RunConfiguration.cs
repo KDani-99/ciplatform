@@ -4,7 +4,6 @@ namespace CIPlatform.Data.Configuration
 {
     public class RunConfiguration
     {
-        public string Name { get; set; }
-        public Dictionary<string, JobConfiguration> Jobs { get; set; }  // parallel execution?
+        public Dictionary<string, JobConfiguration> Jobs { get; set; }
     }
 }

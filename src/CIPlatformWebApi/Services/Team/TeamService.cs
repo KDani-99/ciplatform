@@ -128,7 +128,7 @@ namespace CIPlatformWebApi.Services.Team
             var memberToKick = team.Members.FirstOrDefault(teamMember => teamMember.User.Id == memberId) ??
                 throw new UserNotInTeamException($"Member with id {memberId} is not in this team.");
 
-            if (team.Owner.Id == memberToKick.Id)
+            if (team.Owner.Id == memberToKick.User.Id)
             {
                 throw new UnauthorizedAccessWebException("Team owners can't be kicked.");
             }
@@ -184,7 +184,7 @@ namespace CIPlatformWebApi.Services.Team
                 team.Members.FirstOrDefault(teamMember => teamMember.User.Id == updateRoleDto.UserId) ??
                 throw new UserNotInTeamException($"Member with id {updateRoleDto.UserId} is not in this team.");
 
-            if (team.Owner.Id == memberToUpdate.Id)
+            if (team.Owner.Id == memberToUpdate.User.Id)
             {
                 throw new UnauthorizedAccessWebException("Team owner's role can't be changes.");
             }

@@ -54,7 +54,7 @@ namespace CIPlatformWebApi.Services.Auth
                                                         TimeSpan.FromSeconds(_jwtConfiguration.RefreshTokenLifeTime));
 
             return GenerateToken(claims, _jwtConfiguration.RefreshTokenLifeTime,
-                                 SecurityAlgorithms.HmacSha512Signature); // should be a stronger signing algorithm
+                                 SecurityAlgorithms.HmacSha512Signature);
         }
 
         public Task InvalidateAccessTokenAsync(string username)
@@ -135,17 +135,6 @@ namespace CIPlatformWebApi.Services.Auth
 
         private JwtSecurityToken GenerateToken(IEnumerable<Claim> claims, int lifeTime, string algorithm)
         {
-            /*  var tokenHandler = new JwtSecurityTokenHandler();
-              var secretBytes = Encoding.UTF8.GetBytes(_jwtConfiguration.Secret);
-              
-              var tokenDescriptor = new SecurityTokenDescriptor
-              {
-                  Subject = new ClaimsIdentity(claims),
-                  Expires = DateTime.Now.AddSeconds(1),
-                  SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(secretBytes), algorithm),
-              };
-  
-             return tokenHandler.CreateJwtSecurityToken(tokenDescriptor);*/
             var secretBytes = Encoding.UTF8.GetBytes(_jwtConfiguration.Secret);
 
             var jwtHeader = new JwtHeader(new SigningCredentials(new SymmetricSecurityKey(secretBytes), algorithm));
@@ -153,8 +142,9 @@ namespace CIPlatformWebApi.Services.Auth
             var jwtPayload = new JwtPayload();
             jwtPayload.AddClaims(claims);
 
-            jwtPayload.Add(JwtRegisteredClaimNames.Exp,
-                           (int) (DateTime.Now.AddSeconds(lifeTime) - DateTime.UnixEpoch).TotalSeconds);
+            jwtPayload.Add(
+                JwtRegisteredClaimNames.Exp,
+                (int)(DateTime.Now.AddSeconds(lifeTime) - DateTime.UnixEpoch).TotalSeconds);
 
             return new JwtSecurityToken(jwtHeader, jwtPayload);
         }

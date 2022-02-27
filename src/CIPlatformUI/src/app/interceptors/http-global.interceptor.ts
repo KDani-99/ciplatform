@@ -79,6 +79,8 @@ export class HttpGlobalInterceptor implements HttpInterceptor {
     } else if (error?.error) {
       // single error
       this.errorService.show(error?.error);
+    } else if (error?.message) {
+      this.errorService.show(error?.message);
     }
   }
 }

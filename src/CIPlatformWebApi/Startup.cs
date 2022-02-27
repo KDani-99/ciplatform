@@ -56,7 +56,7 @@ namespace CIPlatformWebApi
             services
                 .AddCors()
                 .AddFluentValidation()
-                .AddDbContext<CIPlatformDbContext, Database.CiPlatformDbContext>(options =>
+                .AddDbContext<CIPlatformDbContext, Database.CIPlatformDbContext>(options =>
                     options.UseNpgsql(_configuration.GetValue<string>("ConnectionString"),
                                       builder => builder.UseQuerySplittingBehavior(
                                           QuerySplittingBehavior.SplitQuery)))

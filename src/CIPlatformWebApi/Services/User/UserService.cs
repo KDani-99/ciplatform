@@ -32,7 +32,7 @@ namespace CIPlatformWebApi.Services.User
                 throw new ArgumentNullException(nameof(credentialManagerService));
         }
 
-        public async Task CreateUser(CreateUserDto createUserDto)
+        public async Task CreateUserAsync(CreateUserDto createUserDto)
         {
             if (await _userRepository.GetByUsernameAsync(createUserDto.Username) is not null)
             {
@@ -59,7 +59,7 @@ namespace CIPlatformWebApi.Services.User
 
         public async Task<UserDto> GetUserAsync(long id, UserEntity user)
         {
-            if (user.Id != id && user.IsAdmin())
+            if (user.Id != id && !user.IsAdmin())
             {
                 throw new UnauthorizedAccessWebException("You are not allowed to perform this action.");
             }
@@ -146,6 +146,7 @@ namespace CIPlatformWebApi.Services.User
             userToUpdate.Email = updateUserDto.Email;
             userToUpdate.Name = updateUserDto.Name;
             userToUpdate.Username = updateUserDto.Username;
+
             if (updateUserDto.Password != null)
             {
                 userToUpdate.Password = _credentialManagerService.CreateHashedPassword(updateUserDto.Password);

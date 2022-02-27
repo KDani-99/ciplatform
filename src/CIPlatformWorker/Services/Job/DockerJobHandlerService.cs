@@ -4,11 +4,11 @@ using System.Text;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
+using CIPlatform.Data.Configuration;
+using CIPlatform.Data.Events;
 using CIPlatformWorker.Configuration;
 using CIPlatformWorker.Entities;
 using CIPlatformWorker.Exceptions;
-using CIPlatform.Data.Configuration;
-using CIPlatform.Data.Events;
 using Docker.DotNet;
 using Docker.DotNet.Models;
 using Microsoft.Extensions.Options;
@@ -167,6 +167,7 @@ namespace CIPlatformWorker.Services.Job
             {
                 await _dockerClient.Containers.StopContainerAsync(_containerId, new ContainerStopParameters())
                                    .ConfigureAwait(false);
+                await _dockerClient.Containers.RemoveContainerAsync(_containerId, new ContainerRemoveParameters()).ConfigureAwait(false);
             }
 
             Dispose(false);

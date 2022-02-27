@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.IO.Abstractions;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -23,12 +24,14 @@ namespace CIPlatformWebApi.Services.Run
         private readonly IFileProcessorService<RunConfiguration> _fileProcessorService;
         private readonly IProjectRepository _projectRepository;
         private readonly IRunRepository _runRepository;
+        private readonly IFileSystem _fileSystem;
         private readonly JsonSerializerOptions _jsonSerializerOptions;
 
         public RunService(IRunRepository runRepository,
                           IProjectRepository projectRepository,
                           IBusControl busControl,
                           IFileProcessorService<RunConfiguration> fileProcessorService,
+                          IFileSystem fileSystem,
                           JsonSerializerOptions jsonSerializerOptions)
         {
             _runRepository = runRepository ?? throw new ArgumentNullException(nameof(runRepository));
@@ -36,24 +39,9 @@ namespace CIPlatformWebApi.Services.Run
             _busControl = busControl ?? throw new ArgumentNullException(nameof(busControl));
             _fileProcessorService =
                 fileProcessorService ?? throw new ArgumentNullException(nameof(fileProcessorService));
+            _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
             _jsonSerializerOptions =
                 jsonSerializerOptions ?? throw new ArgumentNullException(nameof(jsonSerializerOptions));
-        }
-
-        public async Task<RunDto> GetRunAsync(long runId)
-        {
-            var run = await _runRepository.GetAsync(runId) ?? throw new RunDoesNotExistException();
-
-            return run.ToDto();
-        }
-
-        public async Task<RunDto> GetRunAsync(long runId, UserEntity user)
-        {
-            var run = await _runRepository.GetAsync(runId) ?? throw new RunDoesNotExistException();
-
-            VerifyMembership(run.Project, user);
-
-            return run.ToDto();
         }
 
         public async Task<RunDataDto> GetRunDataAsync(long runId, UserEntity user)
@@ -88,23 +76,22 @@ namespace CIPlatformWebApi.Services.Run
                 ?.Steps.FirstOrDefault(s => s.Id == stepId) ?? throw new StepDoesNotExistException();
 
             // Opening it for Read only with ReadWrite files hare allows concurrent access
-            return File.Open(step.LogPath, FileMode.Open, FileAccess.Read,
+            return _fileSystem.File.Open(step.LogPath, FileMode.Open, FileAccess.Read,
                 FileShare.ReadWrite);
         }
 
         public async Task<RunDto> CreateRunAsync(long projectId, string instructions, UserEntity user)
         {
             var project = await _projectRepository.GetAsync(projectId) ?? throw new ProjectDoesNotExistException();
+            
+            VerifyMembership(project, user);
 
             var runConfiguration = await _fileProcessorService.ProcessAsync(instructions);
-
-            VerifyMembership(project, user);
 
             InsertInitialSteps(runConfiguration, project);
             var runEntity = CreateRunEntity(project, runConfiguration);
 
             var runId = await _runRepository.CreateAsync(runEntity);
-            // TODO: return dto
 
             await _busControl.Publish(new QueueRunCommand
             {
@@ -151,7 +138,7 @@ namespace CIPlatformWebApi.Services.Run
         {
             if (project.Team.Members.All(member => member.User.Id != user.Id))
             {
-                throw new UnauthorizedAccessException("You are not a member of this team.");
+                throw new UnauthorizedAccessWebException("You are not a member of this team.");
             }
         }
 
@@ -183,6 +170,7 @@ namespace CIPlatformWebApi.Services.Run
                 Project = project
             };
         }
+        
         private static void InsertInitialSteps(RunConfiguration runConfiguration, ProjectEntity project)
         {
             foreach (var job in runConfiguration.Jobs)

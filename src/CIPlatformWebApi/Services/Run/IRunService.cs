@@ -9,8 +9,6 @@ namespace CIPlatformWebApi.Services.Run
 {
     public interface IRunService
     {
-        public Task<RunDto> GetRunAsync(long runId);
-        public Task<RunDto> GetRunAsync(long runId,  UserEntity user);
         public Task<RunDataDto> GetRunDataAsync(long runId, UserEntity user);
         public Task<JobDataDto> GetJobAsync(long runId, long jobId, UserEntity user);
         public Task<Stream> GetStepFileStreamAsync(long runId, long jobId, long stepId, UserEntity user);

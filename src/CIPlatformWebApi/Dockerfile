@@ -13,7 +13,7 @@ RUN dotnet restore "CIPlatformWebApi/CIPlatformWebApi.csproj"
 WORKDIR "/src/CIPlatformWebApi"
 RUN dotnet build "CIPlatformWebApi.csproj" -c Release -o /app/build
 
-FROM build AS publish
+FROM migrate AS publish
 RUN dotnet publish "CIPlatformWebApi.csproj" -c Release -o /app/publish
 
 FROM base AS final

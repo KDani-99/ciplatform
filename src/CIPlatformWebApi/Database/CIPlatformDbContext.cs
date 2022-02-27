@@ -8,9 +8,9 @@ using Microsoft.Extensions.Configuration;
 
 namespace CIPlatformWebApi.Database
 {
-    public class CiPlatformDbContext : CIPlatform.Data.Database.CIPlatformDbContext
+    public class CIPlatformDbContext : CIPlatform.Data.Database.CIPlatformDbContext
     {
-        public CiPlatformDbContext(DbContextOptions<CiPlatformDbContext> dbContextOptions) : base(dbContextOptions)
+        public CIPlatformDbContext(DbContextOptions<CIPlatformDbContext> dbContextOptions) : base(dbContextOptions)
         {
         }
 

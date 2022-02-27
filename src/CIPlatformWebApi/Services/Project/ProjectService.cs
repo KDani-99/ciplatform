@@ -124,7 +124,7 @@ namespace CIPlatformWebApi.Services.Project
 
         public async Task DeleteProjectAsync(long id, UserEntity user)
         {
-            var project = await _projectRepository.GetAsync(id) ?? throw new TeamDoesNotExistException();
+            var project = await _projectRepository.GetAsync(id) ?? throw new ProjectDoesNotExistException();
 
             var member = project.Team.Members.FirstOrDefault(teamMember => teamMember.User.Id == user.Id) ??
                 throw new UnauthorizedAccessWebException("Only team members can delete the project.");

@@ -9,7 +9,7 @@ namespace CIPlatformWebApi.Services.User
 {
     public interface IUserService
     {
-        public Task CreateUser(CreateUserDto createUserDto);
+        public Task CreateUserAsync(CreateUserDto createUserDto);
 
         public Task<UserDto> GetUserAsync(long id, UserEntity user);
         public Task<IEnumerable<UserDto>> GetUsersAsync(UserEntity user);

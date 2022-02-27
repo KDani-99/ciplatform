@@ -5,7 +5,6 @@ namespace CIPlatform.Data.Configuration
 {
     public class JobConfiguration
     {
-        // Composition over inheritance
         public string Image { get; set; }
         public AuthConfig AuthConfig { get; set; }
         public List<string> Environment { get; set; }

@@ -1,18 +1,25 @@
-﻿FROM mcr.microsoft.com/dotnet/runtime:5.0 AS base
+﻿FROM mcr.microsoft.com/dotnet/aspnet:5.0 AS base
 WORKDIR /app
 
 FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
 WORKDIR /src
-COPY ["tools/DatabaseMigrationTool/DatabaseMigrationTool.csproj", "DatabaseMigrationTool/"]
-RUN dotnet restore "tools/DatabaseMigrationTool/DatabaseMigrationTool.csproj"
-COPY . .
-WORKDIR "/src/DatabaseMigrationTool"
+COPY "src/CIPlatform.Core" "CIPlatform.Core/"
+COPY "src/CIPlatform.Data" "CIPlatform.Data/"
+COPY "src/CIPlatformWebApi" "CIPlatformWebApi/"
+COPY "src/CIPlatformWebApi" "CIPlatformWebApi/"
+WORKDIR /tools
+COPY "tools/DatabaseMigrationTool" "DatabaseMigrationTool/"
+RUN dotnet restore "DatabaseMigrationTool/DatabaseMigrationTool.csproj"
+WORKDIR /tools/DatabaseMigrationTool
 RUN dotnet build "DatabaseMigrationTool.csproj" -c Release -o /app/build
 
 FROM build AS publish
 RUN dotnet publish "DatabaseMigrationTool.csproj" -c Release -o /app/publish
+RUN dotnet tool install --global dotnet-ef
+ENV PATH="/root/.dotnet/tools:${PATH}"
+RUN dotnet ef migrations add CIPlatform -o /app/publish/Migrations
 
-FROM base AS final
+FROM publish AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "DatabaseMigrationTool.dll"]

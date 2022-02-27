@@ -6,11 +6,15 @@ services:
       - "6379:6379"
   rabbitmq:
     image: rabbitmq:3-management
+    networks:
+      - ciplatform
     ports:
       - "5672:5672"
       - "5673:5673"
   database:
     image: postgres:latest
+    networks:
+      - ciplatform
     ports:
       - "5432:5432"
     environment:
@@ -18,20 +22,31 @@ services:
       POSTGRES_USER: root
       POSTGRES_PASSWORD: root
   webapi:
-    build: src/CIPlatformWebAPI
+    build:
+      context: .
+      dockerfile: src/CIPlatformWebAPI/Dockerfile
+    networks:
+      - ciplatform
     ports:
       - "5100:5100"
   manager:
-    build: src/CIPlatformManager
+    build:
+      context: .
+      dockerfile: src/CIPlatformManager/Dockerfile
+    networks:
+      - ciplatform
     ports:
-      - ""
+      - "5200:5100"
   worker:
-    build: src/CIPlatformWorker
-    ports:
-      - ""
+    build:
+      context: .
+      dockerfile: src/CIPlatformWorker/Dockerfile
+    networks:
+      - ciplatform
     privileged: true
     volumes:
       - /var.run/docker.sock:/var/run/docker.sock
 
-volumes:
-  logvolume: {}
+networks:
+  ciplatform:
+    driver: bridge

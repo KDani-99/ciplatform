@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text.Json;
 using System.Threading;
@@ -17,8 +16,7 @@ using CIPlatformManager.Services.Auth;
 using CIPlatformManager.Services.Jobs;
 using CIPlatformManager.Services.Workers;
 using CIPlatformManager.SignalR.Hubs;
-using CIPlatformWorker.Configuration;
-using CIPlatformWorker.SignalR;
+using CIPlatformManager.WebSocket;
 using MassTransit;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Options;
@@ -44,15 +42,16 @@ namespace CIPlatformManager.Tests
             var busControl = new Mock<IBusControl>();
             var runRepository = new Mock<IRunRepository>();
             var tokenService = new Mock<ITokenService<JwtSecurityToken>>();
-            var hubContext = new Mock<IHubContext<WorkerHub, CIPlatformManager.WebSocket.IWorkerClient>>();
+            var hubContext = new Mock<IHubContext<WorkerHub, IWorkerClient>>();
             var workerConnectionService = new Mock<IWorkerConnectionService>();
             var jsonSerializerOptions = new JsonSerializerOptions();
-            var jobService = new JobService(busControl.Object, runRepository.Object, tokenService.Object, hubContext.Object, workerConnectionService.Object,jsonSerializerOptions);
-            
+            var jobService = new JobService(busControl.Object, runRepository.Object, tokenService.Object,
+                hubContext.Object, workerConnectionService.Object, jsonSerializerOptions);
+
             // Act and Assert
             Assert.ThrowsAsync<RunDoesNotExistException>(() => jobService.QueueJobAsync(jobDetails, connectionId));
         }
-        
+
         [Test]
         public async Task QueueJobAsync_NonExistentJob_ShouldThrowRunDoesNotExistException()
         {
@@ -74,15 +73,16 @@ namespace CIPlatformManager.Tests
             runRepository.Setup(x => x.GetAsync(It.IsAny<long>()))
                 .Returns(Task.FromResult(run));
             var tokenService = new Mock<ITokenService<JwtSecurityToken>>();
-            var hubContext = new Mock<IHubContext<WorkerHub, CIPlatformManager.WebSocket.IWorkerClient>>();
+            var hubContext = new Mock<IHubContext<WorkerHub, IWorkerClient>>();
             var workerConnectionService = new Mock<IWorkerConnectionService>();
             var jsonSerializerOptions = new JsonSerializerOptions();
-            var jobService = new JobService(busControl.Object, runRepository.Object, tokenService.Object, hubContext.Object, workerConnectionService.Object,jsonSerializerOptions);
-            
+            var jobService = new JobService(busControl.Object, runRepository.Object, tokenService.Object,
+                hubContext.Object, workerConnectionService.Object, jsonSerializerOptions);
+
             // Act and Assert
             Assert.ThrowsAsync<RunDoesNotExistException>(() => jobService.QueueJobAsync(jobDetails, connectionId));
         }
-        
+
         [Test]
         public async Task QueueJobAsync_ValidDetails_ShouldQueueJobProperly()
         {
@@ -106,7 +106,7 @@ namespace CIPlatformManager.Tests
                 Jobs = new List<JobEntity>
                 {
                     job.Object
-                },
+                }
             };
             var tokenServiceConfiguration = fixture.Create<IOptions<TokenServiceConfiguration>>();
             tokenServiceConfiguration.Value.JobTokenConfiguration = new TokenConfiguration
@@ -121,11 +121,11 @@ namespace CIPlatformManager.Tests
             var tokenServiceMock = new Mock<ITokenService<JwtSecurityToken>>();
             tokenServiceMock.Setup(x => x.CreateJobTokenAsync(It.IsAny<long>(), It.IsAny<long>()))
                 .Returns(tokenService.CreateJobTokenAsync(runId, jobId));
-            var client = new Mock<CIPlatformManager.WebSocket.IWorkerClient>();
-            var clients = new Mock<IHubClients<CIPlatformManager.WebSocket.IWorkerClient>>();
+            var client = new Mock<IWorkerClient>();
+            var clients = new Mock<IHubClients<IWorkerClient>>();
             clients.Setup(x => x.Client(It.IsAny<string>()))
                 .Returns(client.Object);
-            var hubContext = new Mock<IHubContext<WorkerHub, CIPlatformManager.WebSocket.IWorkerClient>>();
+            var hubContext = new Mock<IHubContext<WorkerHub, IWorkerClient>>();
             hubContext.SetupGet(x => x.Clients)
                 .Returns(clients.Object);
             var workerConnectionDataEntity = new Mock<WorkerConnectionDataEntity>();
@@ -133,18 +133,19 @@ namespace CIPlatformManager.Tests
             workerConnectionService.Setup(x => x.GetWorkerConnectionAsync(It.IsAny<string>()))
                 .Returns(Task.FromResult(workerConnectionDataEntity.Object));
             var jsonSerializerOptions = new JsonSerializerOptions();
-            var jobService = new JobService(busControl.Object, runRepository.Object, tokenServiceMock.Object, hubContext.Object, workerConnectionService.Object,jsonSerializerOptions);
-            
+            var jobService = new JobService(busControl.Object, runRepository.Object, tokenServiceMock.Object,
+                hubContext.Object, workerConnectionService.Object, jsonSerializerOptions);
+
             // Act
             await jobService.QueueJobAsync(jobDetails, connectionId);
-            
+
             // Assert
             runRepository.Verify(x => x.GetAsync(It.IsAny<long>()), Times.Once);
             runRepository.Verify(x => x.UpdateAsync(It.IsAny<RunEntity>()), Times.Once);
             Assert.AreEqual(job.Object.State, States.Running);
             Assert.AreEqual(workerConnectionDataEntity.Object.WorkerState, WorkerState.Working);
         }
-        
+
         [Test]
         public async Task QueueJobAsync_ValidDetails_ShouldSendJobRunningNotification()
         {
@@ -168,7 +169,7 @@ namespace CIPlatformManager.Tests
                 Jobs = new List<JobEntity>
                 {
                     job.Object
-                },
+                }
             };
             var tokenServiceConfiguration = fixture.Create<IOptions<TokenServiceConfiguration>>();
             tokenServiceConfiguration.Value.JobTokenConfiguration = new TokenConfiguration
@@ -183,11 +184,11 @@ namespace CIPlatformManager.Tests
             var tokenServiceMock = new Mock<ITokenService<JwtSecurityToken>>();
             tokenServiceMock.Setup(x => x.CreateJobTokenAsync(It.IsAny<long>(), It.IsAny<long>()))
                 .Returns(tokenService.CreateJobTokenAsync(runId, jobId));
-            var client = new Mock<CIPlatformManager.WebSocket.IWorkerClient>();
-            var clients = new Mock<IHubClients<CIPlatformManager.WebSocket.IWorkerClient>>();
+            var client = new Mock<IWorkerClient>();
+            var clients = new Mock<IHubClients<IWorkerClient>>();
             clients.Setup(x => x.Client(It.IsAny<string>()))
                 .Returns(client.Object);
-            var hubContext = new Mock<IHubContext<WorkerHub, CIPlatformManager.WebSocket.IWorkerClient>>();
+            var hubContext = new Mock<IHubContext<WorkerHub, IWorkerClient>>();
             hubContext.SetupGet(x => x.Clients)
                 .Returns(clients.Object);
             var workerConnectionDataEntity = new Mock<WorkerConnectionDataEntity>();
@@ -195,15 +196,16 @@ namespace CIPlatformManager.Tests
             workerConnectionService.Setup(x => x.GetWorkerConnectionAsync(It.IsAny<string>()))
                 .Returns(Task.FromResult(workerConnectionDataEntity.Object));
             var jsonSerializerOptions = new JsonSerializerOptions();
-            var jobService = new JobService(busControl.Object, runRepository.Object, tokenServiceMock.Object, hubContext.Object, workerConnectionService.Object,jsonSerializerOptions);
-            
+            var jobService = new JobService(busControl.Object, runRepository.Object, tokenServiceMock.Object,
+                hubContext.Object, workerConnectionService.Object, jsonSerializerOptions);
+
             // Act
             await jobService.QueueJobAsync(jobDetails, connectionId);
-            
+
             // Assert
             busControl.Verify(x => x.Publish(It.IsAny<ProcessedJobResultEvent>(), It.IsAny<CancellationToken>()));
         }
-        
+
         [Test]
         public async Task QueueJobAsync_ValidFirstJobDetails_ShouldSendRunRunningNotification()
         {
@@ -227,7 +229,7 @@ namespace CIPlatformManager.Tests
                 Jobs = new List<JobEntity>
                 {
                     job.Object
-                },
+                }
             };
             var tokenServiceConfiguration = fixture.Create<IOptions<TokenServiceConfiguration>>();
             tokenServiceConfiguration.Value.JobTokenConfiguration = new TokenConfiguration
@@ -242,11 +244,11 @@ namespace CIPlatformManager.Tests
             var tokenServiceMock = new Mock<ITokenService<JwtSecurityToken>>();
             tokenServiceMock.Setup(x => x.CreateJobTokenAsync(It.IsAny<long>(), It.IsAny<long>()))
                 .Returns(tokenService.CreateJobTokenAsync(runId, jobId));
-            var client = new Mock<CIPlatformManager.WebSocket.IWorkerClient>();
-            var clients = new Mock<IHubClients<CIPlatformManager.WebSocket.IWorkerClient>>();
+            var client = new Mock<IWorkerClient>();
+            var clients = new Mock<IHubClients<IWorkerClient>>();
             clients.Setup(x => x.Client(It.IsAny<string>()))
                 .Returns(client.Object);
-            var hubContext = new Mock<IHubContext<WorkerHub, CIPlatformManager.WebSocket.IWorkerClient>>();
+            var hubContext = new Mock<IHubContext<WorkerHub, IWorkerClient>>();
             hubContext.SetupGet(x => x.Clients)
                 .Returns(clients.Object);
             var workerConnectionDataEntity = new Mock<WorkerConnectionDataEntity>();
@@ -254,15 +256,18 @@ namespace CIPlatformManager.Tests
             workerConnectionService.Setup(x => x.GetWorkerConnectionAsync(It.IsAny<string>()))
                 .Returns(Task.FromResult(workerConnectionDataEntity.Object));
             var jsonSerializerOptions = new JsonSerializerOptions();
-            var jobService = new JobService(busControl.Object, runRepository.Object, tokenServiceMock.Object, hubContext.Object, workerConnectionService.Object,jsonSerializerOptions); ;
-            
+            var jobService = new JobService(busControl.Object, runRepository.Object, tokenServiceMock.Object,
+                hubContext.Object, workerConnectionService.Object, jsonSerializerOptions);
+
             // Act
             await jobService.QueueJobAsync(jobDetails, connectionId);
-            
+
             // Assert
-            busControl.Verify(x => x.Publish(It.Is<ProcessedRunResultEvent>(p => p.State == States.Running), It.IsAny<CancellationToken>()), Times.Once);
+            busControl.Verify(
+                x => x.Publish(It.Is<ProcessedRunResultEvent>(p => p.State == States.Running),
+                    It.IsAny<CancellationToken>()), Times.Once);
         }
-        
+
         [Test]
         public async Task QueueJobAsync_ValidNonFirstJobDetails_ShouldNotSendRunRunningNotification()
         {
@@ -291,7 +296,7 @@ namespace CIPlatformManager.Tests
                 {
                     job2.Object,
                     job.Object
-                },
+                }
             };
             var tokenServiceConfiguration = fixture.Create<IOptions<TokenServiceConfiguration>>();
             tokenServiceConfiguration.Value.JobTokenConfiguration = new TokenConfiguration
@@ -306,11 +311,11 @@ namespace CIPlatformManager.Tests
             var tokenServiceMock = new Mock<ITokenService<JwtSecurityToken>>();
             tokenServiceMock.Setup(x => x.CreateJobTokenAsync(It.IsAny<long>(), It.IsAny<long>()))
                 .Returns(tokenService.CreateJobTokenAsync(runId, jobId));
-            var client = new Mock<CIPlatformManager.WebSocket.IWorkerClient>();
-            var clients = new Mock<IHubClients<CIPlatformManager.WebSocket.IWorkerClient>>();
+            var client = new Mock<IWorkerClient>();
+            var clients = new Mock<IHubClients<IWorkerClient>>();
             clients.Setup(x => x.Client(It.IsAny<string>()))
                 .Returns(client.Object);
-            var hubContext = new Mock<IHubContext<WorkerHub, CIPlatformManager.WebSocket.IWorkerClient>>();
+            var hubContext = new Mock<IHubContext<WorkerHub, IWorkerClient>>();
             hubContext.SetupGet(x => x.Clients)
                 .Returns(clients.Object);
             var workerConnectionDataEntity = new Mock<WorkerConnectionDataEntity>();
@@ -318,13 +323,16 @@ namespace CIPlatformManager.Tests
             workerConnectionService.Setup(x => x.GetWorkerConnectionAsync(It.IsAny<string>()))
                 .Returns(Task.FromResult(workerConnectionDataEntity.Object));
             var jsonSerializerOptions = new JsonSerializerOptions();
-            var jobService = new JobService(busControl.Object, runRepository.Object, tokenServiceMock.Object, hubContext.Object, workerConnectionService.Object,jsonSerializerOptions); ;
+            var jobService = new JobService(busControl.Object, runRepository.Object, tokenServiceMock.Object,
+                hubContext.Object, workerConnectionService.Object, jsonSerializerOptions);
             
             // Act
             await jobService.QueueJobAsync(jobDetails, connectionId);
-            
+
             // Assert
-            busControl.Verify(x => x.Publish(It.Is<ProcessedRunResultEvent>(p => p.State == States.Running), It.IsAny<CancellationToken>()), Times.Never);
+            busControl.Verify(
+                x => x.Publish(It.Is<ProcessedRunResultEvent>(p => p.State == States.Running),
+                    It.IsAny<CancellationToken>()), Times.Never);
         }
     }
 }

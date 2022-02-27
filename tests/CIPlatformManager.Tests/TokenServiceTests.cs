@@ -36,7 +36,7 @@ namespace CIPlatformManager.Tests
             var jtiClaim = new Claim(JwtRegisteredClaimNames.Jti, string.Empty);
             var expClaim = new Claim(JwtRegisteredClaimNames.Exp, string.Empty);
             var tokenService = new TokenService(tokenServiceConfiguration);
-            
+
             // Act
             var result = await tokenService.CreateJobTokenAsync(runId, jobId);
 
@@ -46,9 +46,9 @@ namespace CIPlatformManager.Tests
             Assert.NotNull(result.Claims.FirstOrDefault(x => x.Type == jtiClaim.Type && Guid.TryParse(x.Value, out _)));
             Assert.NotNull(result.Claims.FirstOrDefault(x => x.Type == expClaim.Type));
         }
-        
+
         [Test]
-        public async Task VerifyTokenAsync_ValidToken_ShouldBeValid()
+        public async Task VerifyTokenAsync_WithValidToken_ShouldContainRequiredClaims()
         {
             // Arrange
             var fixture = new Fixture().Customize(new AutoMoqCustomization());

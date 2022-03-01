@@ -23,11 +23,13 @@ namespace CIPlatformWebApi.WebSocket.Hubs
             try
             {
                 while (await stream.WaitToReadAsync())
-                while (stream.TryRead(out var item))
                 {
-                    await _runsHubContext.Clients.Group(RunsHub.AvailableResultsChannels["step"](stepId))
-                        .SendAsync("ReceiveLogs", item);
-                    //await _runsHubContext.Clients.Group(GetGroupName(runId, jobId)).SendAsync("ReceiveLogs", item); // why send? because thats the only way to ""stream"" it to multiple clients
+                    while (stream.TryRead(out var item))
+                    {
+                        await _runsHubContext.Clients.Group(RunsHub.AvailableResultsChannels["step"](stepId))
+                            .SendAsync("ReceiveLogs", item);
+                        //await _runsHubContext.Clients.Group(GetGroupName(runId, jobId)).SendAsync("ReceiveLogs", item); // why send? because thats the only way to ""stream"" it to multiple clients
+                    }
                 }
             }
             catch (Exception exception)

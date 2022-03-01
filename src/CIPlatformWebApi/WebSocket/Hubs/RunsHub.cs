@@ -20,14 +20,12 @@ namespace CIPlatformWebApi.WebSocket.Hubs
             { "job", entityId => $"Job:{entityId}" },
             { "step", entityId => $"Step:{entityId}" }
         };
-        private readonly ILogger<RunsHub> _logger;
         private readonly IResultChannelConnectionHandlerFactory _resultChannelConnectionHandlerFactory;
 
-        public RunsHub(IResultChannelConnectionHandlerFactory resultChannelConnectionHandlerFactory, ILogger<RunsHub> logger)
+        public RunsHub(IResultChannelConnectionHandlerFactory resultChannelConnectionHandlerFactory)
         {
             _resultChannelConnectionHandlerFactory = resultChannelConnectionHandlerFactory ??
                 throw new ArgumentNullException(nameof(resultChannelConnectionHandlerFactory));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
         
         [HubMethodName("SubscribeToResultsChannel")]

@@ -118,7 +118,7 @@ namespace CIPlatformWebApi.Controllers
 
         [HttpPost]
         [Route("{id:long}/join")]
-        public async Task<IActionResult> Join([FromRoute] long id)
+        public async Task<IActionResult> JoinAsync([FromRoute] long id)
         {
             try
             {
@@ -136,7 +136,7 @@ namespace CIPlatformWebApi.Controllers
 
         [HttpPost]
         [Route("{id:long}/members/kick")]
-        public async Task<IActionResult> Kick([FromRoute] long id, [FromBody] KickMemberDto kickMemberDto)
+        public async Task<IActionResult> KickAsync([FromRoute] long id, [FromBody] KickMemberDto kickMemberDto)
         {
             try
             {
@@ -155,7 +155,7 @@ namespace CIPlatformWebApi.Controllers
 
         [HttpPost]
         [Route("{id:long}/members/role")]
-        public async Task<IActionResult> UpdateRole([FromRoute] long id, [FromBody] UpdateRoleDto updateRoleDto)
+        public async Task<IActionResult> UpdateRoleAsync([FromRoute] long id, [FromBody] UpdateRoleDto updateRoleDto)
         {
             try
             {
@@ -174,7 +174,7 @@ namespace CIPlatformWebApi.Controllers
 
         [HttpPost]
         [Route("{id:long}/members/add")]
-        public async Task<IActionResult> AddMember([FromRoute] long id, [FromBody] AddMemberDto addMemberDto)
+        public async Task<IActionResult> AddMemberAsync([FromRoute] long id, [FromBody] AddMemberDto addMemberDto)
         {
             try
             {

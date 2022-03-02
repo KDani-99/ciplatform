@@ -50,6 +50,7 @@ namespace CIPlatformWebApi.WebSocket.Hubs
             {
                 throw new ChannelDoesNotExistException(resultsChannel);
             }
+            
             return Groups.RemoveFromGroupAsync(Context.ConnectionId, AvailableResultsChannels[resultsChannel](entityId));
         }
     }

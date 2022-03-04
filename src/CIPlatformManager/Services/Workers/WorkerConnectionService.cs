@@ -85,11 +85,6 @@ namespace CIPlatformManager.Services.Workers
             return _workerConnectionRepository.RemoveFromPoolAsync(jobContext);
         }
 
-        public Task QueueWorkerConnectionOfTypeAsync(JobContext jobContext, string connectionId)
-        {
-            return _workerConnectionRepository.AddToPoolAsync(jobContext, connectionId);
-        }
-
         public Task<IEnumerable<string>> GetAvailableWorkerConnectionIdsOfTypeAsync(JobContext jobContext)
         {
             return _workerConnectionRepository.GetAllAsync(jobContext);

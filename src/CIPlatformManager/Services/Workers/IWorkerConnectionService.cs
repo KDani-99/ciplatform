@@ -13,7 +13,6 @@ namespace CIPlatformManager.Services.Workers
         public Task UpdateWorkerConnectionAsync(WorkerConnectionDataEntity workerConnectionData);
         public Task<IEnumerable<string>> GetAvailableWorkerConnectionIdsOfTypeAsync(JobContext jobContext);
         public Task<string> DequeueAvailableWorkerConnectionOfTypeAsync(JobContext jobContext);
-        public Task QueueWorkerConnectionOfTypeAsync(JobContext jobContext, string connectionId);
         public Task KeepWorkerConnectionAsync(string connectionId);
         public Task MarkWorkerConnectionAsAvailableAsync(string connectionId);
     }

@@ -26,7 +26,8 @@ namespace CIPlatformManager.Services.Logs
 
         public LogStreamService(IOptions<LogStreamServiceConfiguration> logStreamServiceConfiguration,
                                 IRunRepository runRepository,
-                                IManagerClient managerClient, IFileSystem fileSystem)
+                                IManagerClient managerClient,
+                                IFileSystem fileSystem)
         {
             _logStreamServiceConfiguration = logStreamServiceConfiguration.Value ??
                 throw new ArgumentNullException(nameof(logStreamServiceConfiguration));
@@ -64,17 +65,19 @@ namespace CIPlatformManager.Services.Logs
             await _managerClient.HubConnection.SendAsync("StreamLogToChannel", channel.Reader, stepId);
 
             while (await stream.WaitToReadAsync())
-            while (stream.TryRead(out var line))
             {
-                CheckConstraints(numberOfLines, sizeInBytes, logPath);
-                
-                await channel.Writer.WriteAsync(line);
+                while (stream.TryRead(out var line))
+                {
+                    CheckConstraints(numberOfLines, sizeInBytes, logPath);
+                    
+                    await channel.Writer.WriteAsync(line);
 
-                await outputStream.WriteAsync(line);
-                await outputStream.FlushAsync();
+                    await outputStream.WriteAsync(line);
+                    await outputStream.FlushAsync();
 
-                sizeInBytes += Encoding.UTF8.GetByteCount(line);
-                numberOfLines++;
+                    sizeInBytes += Encoding.UTF8.GetByteCount(line);
+                    numberOfLines++;
+                }
             }
 
             channel.Writer.Complete();

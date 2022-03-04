@@ -23,12 +23,12 @@ using Microsoft.Extensions.Options;
 using Moq;
 using NUnit.Framework;
 
-namespace CIPlatformManager.Tests
+namespace CIPlatformManager.Tests.Services
 {
     public class JobServiceTests
     {
         [Test]
-        public async Task QueueJobAsync_NonExistentRun_ShouldThrowRunDoesNotExistException()
+        public void QueueJobAsync_NonExistentRun_ShouldThrowRunDoesNotExistException()
         {
             // Arrange
             var connectionId = "test-connection-id";
@@ -53,7 +53,7 @@ namespace CIPlatformManager.Tests
         }
 
         [Test]
-        public async Task QueueJobAsync_NonExistentJob_ShouldThrowRunDoesNotExistException()
+        public void QueueJobAsync_NonExistentJob_ShouldThrowRunDoesNotExistException()
         {
             // Arrange
             var connectionId = "test-connection-id";

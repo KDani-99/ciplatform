@@ -17,7 +17,7 @@ using Microsoft.Extensions.Options;
 using Moq;
 using NUnit.Framework;
 
-namespace CIPlatformManager.Tests
+namespace CIPlatformManager.Tests.Services
 {
     public class StepServiceTests
     {

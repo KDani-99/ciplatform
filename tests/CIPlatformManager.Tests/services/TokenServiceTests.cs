@@ -14,7 +14,7 @@ using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using NUnit.Framework;
 
-namespace CIPlatformManager.Tests
+namespace CIPlatformManager.Tests.Services
 {
     public class TokenServiceTests
     {
@@ -66,6 +66,7 @@ namespace CIPlatformManager.Tests
             var expClaim = new Claim(JwtRegisteredClaimNames.Exp, string.Empty);
             var tokenService = new TokenService(tokenServiceConfiguration);
             var validToken = (await tokenService.CreateJobTokenAsync(runId, jobId)).ToBase64String();
+            
             // Act
             var result = await tokenService.VerifyJobTokenAsync(validToken);
 

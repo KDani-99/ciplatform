@@ -12,7 +12,7 @@ using MassTransit;
 using Moq;
 using NUnit.Framework;
 
-namespace CIPlatformManager.Tests
+namespace CIPlatformManager.Tests.Services
 {
     public class RunServiceTests
     {

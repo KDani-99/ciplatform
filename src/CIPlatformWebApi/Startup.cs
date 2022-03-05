@@ -1,5 +1,6 @@
 using System;
 using System.IdentityModel.Tokens.Jwt;
+using System.IO.Abstractions;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
@@ -117,7 +118,8 @@ namespace CIPlatformWebApi
                     }
                 })
                 .AddSingleton<ICredentialManagerService, CredentialManagerService>()
-                .AddSingleton<ITokenCache, RedisTokenCache>();
+                .AddSingleton<ITokenCache, RedisTokenCache>()
+                .AddSingleton<IFileSystem>(new FileSystem());
 
             // Services with scoped lifetime
             services

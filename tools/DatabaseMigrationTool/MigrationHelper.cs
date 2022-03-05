@@ -41,13 +41,13 @@ namespace DatabaseMigrationTool
             catch (OperationCanceledException exception)
             {
                 _logger.LogError("Failed to apply database migration. Migration timed out.");
-                //Environment.Exit(exception.HResult);
+                Environment.Exit(exception.HResult);
                 throw;
             }
             catch (Exception exception)
             {
                 _logger.LogCritical(exception, "An error has occured.");
-                //Environment.Exit(exception.HResult);
+                Environment.Exit(exception.HResult);
                 throw;
             }
 

@@ -17,7 +17,8 @@ FROM build AS publish
 RUN dotnet publish "DatabaseMigrationTool.csproj" -c Release -o /app/publish
 RUN dotnet tool install --global dotnet-ef
 ENV PATH="/root/.dotnet/tools:${PATH}"
-RUN dotnet ef migrations add CIPlatform -o /app/publish/Migrations
+WORKDIR /src/CIPlatformWebApi
+RUN dotnet ef migrations add CIPlatform -o /app/Migrations
 
 FROM publish AS final
 WORKDIR /app

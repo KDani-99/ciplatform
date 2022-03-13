@@ -6,22 +6,22 @@ services:
     networks:
       - ciplatform
     ports:
-      - "6379:6379"
+      - 6379:6379
 
   rabbitmq:
     image: rabbitmq:3-management
     networks:
       - ciplatform
     ports:
-      - "5672:5672"
-      - "5673:5673"
+      - 5672:5672
+      - 5673:5673
 
   database:
     image: postgres:latest
     networks:
       - ciplatform
     ports:
-      - "127.0.0.1:7000:5432"
+      - 127.0.0.1:7000:5432
     environment:
       POSTGRES_DB: CIPlatform
       POSTGRES_USER: root
@@ -32,12 +32,12 @@ services:
       context: .
       dockerfile: tools/DatabaseMigrationTool/Dockerfile
     depends_on:
-      - 'database'
+      - database
     environment:
-      - "ConnectionString=Host=localhost;Port=5432;Database=CIPlatform;Username=root;Password=root"
-      - "ServiceAccountConfiguration__Username=root"
-      - "ServiceAccountConfiguration__Password=omX32LkAmPUGR9qLGA6WGw=="
-      - "ServiceAccountConfiguration__IsEnabled=true"
+      ConnectionString: 'Host=database;Port=5432;Database=CIPlatform;Username=root;Password=root'
+      ServiceAccountConfiguration__Username: root
+      ServiceAccountConfiguration__Password: 'omX32LkAmPUGR9qLGA6WGw=='
+      ServiceAccountConfiguration__IsEnabled: 'true'
 
   webapi:
     build:
@@ -46,14 +46,14 @@ services:
     networks:
       - ciplatform
     depends_on:
-      - 'rabbitmq'
-      - 'db_migration'
+      - rabbitmq
+      - db_migration
     ports:
-      - "127.0.0.1:3000:80"
+      - 127.0.0.1:3000:80
     environment:
-      - "MassTransitConfiguration__Host=rabbitmq"
-      - "ConnectionString='Host=database;Port=5432;Database=CIPlatform;Username=root;Password=root'"
-      - "RedisConfiguration__ConnectionString=redis"
+        MassTransitConfiguration__Host: rabbitmq
+        ConnectionString: 'Host=database;Port=5432;Database=CIPlatform;Username=root;Password=root'
+        RedisConfiguration__ConnectionString: redis
 
   manager:
     build:
@@ -62,13 +62,14 @@ services:
     networks:
       - ciplatform
     depends_on:
-      - 'webapi'
+      - webapi
     ports:
-      - "3001:80"
+      - 3001:80
     environment:
-      - "MassTransitConfiguration__Host=rabbitmq"
-      - "SignalRConfiguration__Host=http://webapi"
-      - "RedisConfiguration__ConnectionString=redis"
+      ConnectionString: 'Host=database;Port=5432;Database=CIPlatform;Username=root;Password=root'
+      MassTransitConfiguration__Host: rabbitmq
+      SignalRConfiguration__Host: http://webapi
+      RedisConfiguration__ConnectionString: redis
 
   worker:
     build:
@@ -82,18 +83,18 @@ services:
     volumes:
       - /var.run/docker.sock:/var/run/docker.sock
     environment:
-      - "SignalRConfiguration__Host=http://manager"
+      SignalRConfiguration__Host: http://manager
 
   frontend:
     build:
       context: .
       dockerfile: src/CIPlatformUI/Dockerfile
     depends_on:
-      - 'webapi'
+      - webapi
     networks:
       - ciplatform
     ports:
-      - "4200:80"
+      - 4200:80
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
 

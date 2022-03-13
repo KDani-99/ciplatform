@@ -1,9 +1,9 @@
 {
   "hubs": {
-    "runs": "http://localhost:5100/runs"
+    "runs": "http://localhost:3000/runs"
   },
   "api": {
-    "baseUrl": "http://localhost:5100",
+    "baseUrl": "http://localhost:3000",
     "endpoints": {
       "login": {
         "url": "api/auth/login",

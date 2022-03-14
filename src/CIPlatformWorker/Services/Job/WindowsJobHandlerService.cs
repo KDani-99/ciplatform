@@ -3,11 +3,11 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
+using CIPlatform.Data.Configuration;
+using CIPlatform.Data.Events;
 using CIPlatformWorker.Configuration;
 using CIPlatformWorker.Entities;
 using CIPlatformWorker.Exceptions;
-using CIPlatform.Data.Configuration;
-using CIPlatform.Data.Events;
 using CIPlatformWorker.Extensions;
 using Microsoft.Extensions.Options;
 
@@ -25,7 +25,8 @@ namespace CIPlatformWorker.Services.Job
         {
         }
 
-        public override async Task ExecuteStepAsync(ChannelWriter<string> channelWriter,
+        public override async Task ExecuteStepAsync(
+            ChannelWriter<string> channelWriter,
                                                     StepConfiguration step,
                                                     int stepIndex)
         {

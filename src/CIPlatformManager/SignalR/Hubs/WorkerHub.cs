@@ -53,6 +53,7 @@ namespace CIPlatformManager.SignalR.Hubs
                     JobContext = jobContext,
                     LastPing = DateTime.Now
                 });
+                _logger.LogInformation($"Client '{Context.ConnectionId}' has connected.");
             }
             catch (Exception exception)
             {

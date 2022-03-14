@@ -3,11 +3,11 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
+using CIPlatform.Data.Configuration;
+using CIPlatform.Data.Events;
 using CIPlatformWorker.Configuration;
 using CIPlatformWorker.Entities;
 using CIPlatformWorker.Exceptions;
-using CIPlatform.Data.Configuration;
-using CIPlatform.Data.Events;
 using Microsoft.Extensions.Options;
 
 namespace CIPlatformWorker.Services.Job

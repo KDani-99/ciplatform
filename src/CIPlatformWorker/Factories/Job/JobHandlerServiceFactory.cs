@@ -18,7 +18,8 @@ namespace CIPlatformWorker.Factories.Job
             AgentConfiguration = agentConfiguration ?? throw new ArgumentNullException(nameof(agentConfiguration));
         }
 
-        public abstract IJobHandlerService Create(JobConfiguration jobConfiguration,
+        public abstract IJobHandlerService Create(
+            JobConfiguration jobConfiguration,
                                                   CancellationToken cancellationToken = default);
     }
 }

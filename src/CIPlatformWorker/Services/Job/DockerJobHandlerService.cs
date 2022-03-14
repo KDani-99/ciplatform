@@ -65,7 +65,8 @@ namespace CIPlatformWorker.Services.Job
             }
         }
 
-        public override async Task ExecuteStepAsync(ChannelWriter<string> channelWriter,
+        public override async Task ExecuteStepAsync(
+            ChannelWriter<string> channelWriter,
                                                     StepConfiguration step,
                                                     int stepIndex)
         {
@@ -153,7 +154,7 @@ namespace CIPlatformWorker.Services.Job
 
         private void Dispose(bool disposing)
         {
-            if (disposing)
+            if (disposing && _containerId != null)
             {
                 _dockerClient?.Containers.StopContainerAsync(_containerId, new ContainerStopParameters()).Wait();
             }
@@ -163,7 +164,7 @@ namespace CIPlatformWorker.Services.Job
 
         public override async ValueTask DisposeAsync()
         {
-            if (_dockerClient?.Containers != null)
+            if (_dockerClient?.Containers != null && _containerId != null)
             {
                 await _dockerClient.Containers.StopContainerAsync(_containerId, new ContainerStopParameters())
                                    .ConfigureAwait(false);

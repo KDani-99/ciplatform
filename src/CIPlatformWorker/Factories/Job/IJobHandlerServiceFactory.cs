@@ -8,7 +8,8 @@ namespace CIPlatformWorker.Factories.Job
 {
     public interface IJobHandlerServiceFactory
     {
-        public IJobHandlerService Create(JobConfiguration jobConfiguration,
+        public IJobHandlerService Create(
+            JobConfiguration jobConfiguration,
                                          CancellationToken cancellationToken = default);
     }
 }

@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Threading.Channels;
 using System.Threading.Tasks;
-using CIPlatformWorker.Configuration;
 using CIPlatform.Core.SignalR.Consumers;
 using CIPlatform.Data.Agent;
 using CIPlatform.Data.Configuration;
 using CIPlatform.Data.Events;
+using CIPlatformWorker.Configuration;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -19,7 +19,8 @@ namespace CIPlatformWorker.SignalR
 
         private readonly IServiceProvider _serviceProvider;
 
-        public WorkerClient(IServiceProvider serviceProvider,
+        public WorkerClient(
+            IServiceProvider serviceProvider,
                             IOptions<SignalRConfiguration> webSocketConfiguration,
                             IOptions<WorkerConfiguration> agentConfiguration,
                             ILogger<WorkerClient> logger)
@@ -32,8 +33,9 @@ namespace CIPlatformWorker.SignalR
                 throw new ArgumentNullException(nameof(webSocketConfiguration));
 
             HubConnection = new HubConnectionBuilder()
-                            .WithUrl($"{wsConfiguration.Host}/{wsConfiguration.Hub}",
-                                     options =>
+                            .WithUrl(
+                                $"{wsConfiguration.Host}/{wsConfiguration.Hub}",
+                                options =>
                                      {
                                          options.AccessTokenProvider = () => Task.FromResult(string.Empty);
                                          options.Headers.Add("W-JobContext", workerConfiguration.Context.ToString());
@@ -95,7 +97,6 @@ namespace CIPlatformWorker.SignalR
                "QueueJob",
                async message => await _serviceProvider.GetService<IConsumer<QueueJobCommand>>()!.ConsumeAsync(message));
         }
-
 
         private Task OnConnectionClose(Exception exception)
         {

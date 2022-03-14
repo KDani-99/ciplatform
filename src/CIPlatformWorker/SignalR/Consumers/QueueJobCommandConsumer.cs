@@ -3,17 +3,17 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
-using CIPlatformWorker.Entities;
-using CIPlatformWorker.Exceptions;
-using CIPlatformWorker.Services;
 using CIPlatform.Core.SignalR.Consumers;
 using CIPlatform.Data.Agent;
 using CIPlatform.Data.Configuration;
 using CIPlatform.Data.Events;
 using CIPlatform.Data.Extensions;
 using CIPlatform.Data.JsonWebTokens;
+using CIPlatformWorker.Entities;
+using CIPlatformWorker.Exceptions;
 using CIPlatformWorker.Factories;
 using CIPlatformWorker.Factories.Job;
+using CIPlatformWorker.Services;
 using CIPlatformWorker.Services.Job;
 using Microsoft.Extensions.Logging;
 
@@ -26,7 +26,8 @@ namespace CIPlatformWorker.SignalR.Consumers
         private readonly IJobHandlerServiceFactory _jobHandlerServiceFactory;
         private int _stepIndex;
 
-        public QueueJobCommandConsumer(IJobHandlerServiceFactory jobHandlerServiceFactory, ILogger<QueueJobCommandConsumer> logger,
+        public QueueJobCommandConsumer(IJobHandlerServiceFactory jobHandlerServiceFactory,
+                                       ILogger<QueueJobCommandConsumer> logger,
                                        IWorkerClient workerClient)
         {
             _jobHandlerServiceFactory = jobHandlerServiceFactory ??
@@ -39,7 +40,7 @@ namespace CIPlatformWorker.SignalR.Consumers
         {
             var jobDetails = GetJobDetails(queueJobCommand);
             var beforeExecutionDateTime = DateTime.Now;
-            
+
             try
             {
                 _logger.LogInformation(
@@ -68,7 +69,7 @@ namespace CIPlatformWorker.SignalR.Consumers
             }
             catch (Exception exception)
             {
-                _logger.LogError($"An unexpected error has occured. Error: {exception.Message}");
+                _logger.LogError(exception, $"An unexpected error has occured. Error: {exception.Message}");
                 await _workerClient.SendStepResultAsync(new StepResultEvent
                 {
                     State = States.Failed,
@@ -79,10 +80,10 @@ namespace CIPlatformWorker.SignalR.Consumers
             finally
             {
                 _logger.LogInformation($"Finished job: {jobDetails.JobId} (Run: {jobDetails.RunId}).");
-                
+
                 var totalTime = DateTime.Now - beforeExecutionDateTime;
                 _logger.LogInformation($"Job ran for {totalTime.TotalSeconds} second(s).");
-                
+
                 await _workerClient.FinishJobAsync();
             }
         }
@@ -101,14 +102,14 @@ namespace CIPlatformWorker.SignalR.Consumers
                 try
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    
+
                     // Do not await!
                     _ = _workerClient.StreamLogAsync(jobDetails.RunId, jobDetails.JobId, i,
-                                                     channel.Reader); 
+                        channel.Reader);
 
                     await ProcessStepAsync(channel, i, jobHandlerService, jobConfiguration.Steps[i], jobDetails);
                 }
-                finally 
+                finally
                 {
                     // try-finally to make sure the channel write gets completed
                     channel.Writer.Complete();
@@ -148,11 +149,11 @@ namespace CIPlatformWorker.SignalR.Consumers
         {
             var decodedToken = queueJobCommand.Token.DecodeJwtToken();
             var runId = long.Parse(decodedToken.Claims
-                                               .FirstOrDefault(
-                                                   claim => claim.Type == CustomJwtRegisteredClaimNames.RunId)?.Value!);
+                .FirstOrDefault(
+                    claim => claim.Type == CustomJwtRegisteredClaimNames.RunId)?.Value!);
             var jobId = long.Parse(decodedToken.Claims
-                                               .FirstOrDefault(
-                                                   claim => claim.Type == CustomJwtRegisteredClaimNames.JobId)?.Value!);
+                .FirstOrDefault(
+                    claim => claim.Type == CustomJwtRegisteredClaimNames.JobId)?.Value!);
 
             return new JobDetails
             {

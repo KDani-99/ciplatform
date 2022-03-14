@@ -14,14 +14,16 @@ namespace CIPlatformWorker.Factories.Job
     {
         private readonly IDockerClient _dockerClient;
 
-        public DockerJobHandlerServiceFactory(IDockerClient dockerClient,
+        public DockerJobHandlerServiceFactory(
+            IDockerClient dockerClient,
                                               IOptions<WorkerConfiguration> agentConfiguration)
             : base(agentConfiguration)
         {
             _dockerClient = dockerClient ?? throw new ArgumentNullException(nameof(dockerClient));
         }
 
-        public override IJobHandlerService Create(JobConfiguration jobConfiguration,
+        public override IJobHandlerService Create(
+            JobConfiguration jobConfiguration,
                                                   CancellationToken cancellationToken = default)
         {
 

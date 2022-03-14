@@ -1,14 +1,14 @@
 using System;
 using System.Runtime.InteropServices;
-using CIPlatformWorker.Configuration;
-using CIPlatformWorker.SignalR;
-using CIPlatformWorker.SignalR.Consumers;
 using CIPlatform.Core.SignalR.Consumers;
 using CIPlatform.Data.Configuration;
 using CIPlatform.Data.Events;
+using CIPlatformWorker.Configuration;
 using CIPlatformWorker.Factories;
 using CIPlatformWorker.Factories.Job;
 using CIPlatformWorker.Services;
+using CIPlatformWorker.SignalR;
+using CIPlatformWorker.SignalR.Consumers;
 using Docker.DotNet;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -53,7 +53,6 @@ namespace CIPlatformWorker
                                hostContext.Configuration.GetSection("SignalRConfiguration"))
                                .Configure<WorkerConfiguration>(
                                hostContext.Configuration.GetSection("WorkerConfiguration"));
-                           
                            services.AddSingleton<IWorkerClient, WorkerClient>();
                            services.AddScoped<IDockerClient>(_ => new DockerClientConfiguration().CreateClient());
                            services.AddTransient<IConsumer<QueueJobCommand>, QueueJobCommandConsumer>();

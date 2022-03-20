@@ -1,0 +1,74 @@
+{
+  "hubs": {
+    "runs": "http://localhost:5100/runs"
+  },
+  "api": {
+    "baseUrl": "http://localhost:5100",
+    "endpoints": {
+      "login": {
+        "url": "api/auth/login",
+        "authRequired": false
+      },
+      "logout": {
+        "url": "api/auth/logout",
+        "authRequired": false
+      },
+      "register": {
+        "url": "api/user/register",
+        "authRequired": false
+      },
+      "teams": {
+        "url": "api/teams",
+        "authRequired": true
+      },
+      "joinTeam": {
+        "url": "api/teams/{0}/join",
+        "authRequired": true
+      },
+      "kickMember": {
+        "url": "api/teams/{0}/members/kick",
+        "authRequired": true
+      },
+      "addMember": {
+        "url": "api/teams/{0}/members/add",
+        "authRequired": true
+      },
+      "updateUser": {
+        "url": "api/user",
+        "authRequired": true
+      },
+      "updateRole": {
+        "url": "api/teams/{0}/members/role",
+        "authRequired": true
+      },
+      "projects": {
+        "url": "api/projects",
+        "authRequired": true
+      },
+      "getUser": {
+        "url": "api/user",
+        "authRequired": true
+      },
+      "getUsers": {
+        "url": "api/users",
+        "authRequired": true
+      },
+      "deleteUser": {
+        "url": "api/user",
+        "authRequired": true
+      },
+      "refreshToken": {
+        "url": "api/auth/refresh",
+        "authRequired": false
+      },
+      "uploadRunInstructions": {
+        "url": "api/runs/{0}/create",
+        "authRequired": true
+      },
+      "runs": {
+        "url": "api/runs",
+        "authRequired": true
+      }
+    }
+  }
+}

@@ -1,0 +1,7 @@
+<div class="container">
+  <p>Are you sure that you want to delete run <span>{{runId ?? 'N/A'}}</span>?</p>
+  <div [className]="'wrapper'">
+    <shared-button [text]="'Delete'" theme="dark" (onClick)="delete()"></shared-button>
+    <shared-button [text]="'Cancel'" theme="error" (onClick)="cancel()"></shared-button>
+  </div>
+</div>

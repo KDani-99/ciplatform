@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+    <PropertyGroup>
+        <TargetFramework>net5.0</TargetFramework>
+        <UserSecretsId>dotnet-CIPlatformWorker-0F91E274-1726-4BDF-AFC7-A4095C1D4B03</UserSecretsId>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+        <RootNamespace>CIPlatformWorker</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Docker.DotNet" Version="3.125.5" />
+        <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
+        <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="6.0.1" />
+        <PackageReference Include="Microsoft.AspNetCore.SignalR.Client.Core" Version="6.0.1" />
+        <PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.1.0" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
+        <PackageReference Include="Serilog.Extensions.Logging.File" Version="2.0.0" />
+        <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.15.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\CIPlatform.Core\CIPlatform.Core.csproj" />
+      <ProjectReference Include="..\CIPlatform.Data\CIPlatform.Data.csproj" />
+    </ItemGroup>
+</Project>

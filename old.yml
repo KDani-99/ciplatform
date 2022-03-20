@@ -1,0 +1,60 @@
+version: "3.9" 
+services:
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+  rabbitmq:
+    image: rabbitmq:3-management
+    networks:
+      - ciplatform
+    ports:
+      - "5672:5672"
+      - "5673:5673"
+  database:
+    image: postgres:latest
+    networks:
+      - ciplatform
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: CIPlatform
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+  webapi:
+    build:
+      context: .
+      dockerfile: src/CIPlatformWebAPI/Dockerfile
+    networks:
+      - ciplatform
+    ports:
+      - "5100:5100"
+  manager:
+    build:
+      context: .
+      dockerfile: src/CIPlatformManager/Dockerfile
+    networks:
+      - ciplatform
+    ports:
+      - "5200:5100"
+  worker:
+    build:
+      context: .
+      dockerfile: src/CIPlatformWorker/Dockerfile
+    networks:
+      - ciplatform
+    privileged: true
+    volumes:
+      - /var.run/docker.sock:/var/run/docker.sock
+  frontend:
+    build:
+      context: .
+      dockerfile: src/CIPlatformUI/Dockerfile
+    networks:
+      - ciplatform
+    ports:
+      - "4200:80"
+      
+networks:
+  ciplatform:
+    driver: bridge
